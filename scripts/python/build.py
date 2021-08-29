@@ -39,7 +39,7 @@ import argparse
 import zipfile
 import hashlib
 import ssl
-import urllib.request
+import requests
 import subprocess
 import multiprocessing
 
@@ -185,7 +185,9 @@ def check_md5_hash(path, md5_hash):
 
 def download_zipfile(url, archive_path, unzip_path, md5_hash):
     if not os.path.exists(archive_path):
-        urllib.request.urlretrieve(url, archive_path)
+        r = requests.get(url)
+        with open(archive_path, 'wb') as outfile:
+            outfile.write(r.content)
     check_md5_hash(archive_path, md5_hash)
     with zipfile.ZipFile(archive_path, "r") as fid:
         fid.extractall(unzip_path)
@@ -221,10 +223,10 @@ def build_eigen(args):
     if os.path.exists(path):
         return
 
-    url = "https://bitbucket.org/eigen/eigen/get/3.3.7.zip"
+    url = "http://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip"
     archive_path = os.path.join(args.download_path, "eigen-3.3.7.zip")
     download_zipfile(url, archive_path, args.build_path,
-                     "0d9c8496922d5c07609b9f3585f00e49")
+                     "888aab45512cc0c734b3e8f60280daba")
     shutil.move(glob.glob(os.path.join(args.build_path, "eigen-*"))[0], path)
 
     build_cmake_project(args, os.path.join(path, "__build__"))

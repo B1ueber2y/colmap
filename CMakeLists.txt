@@ -33,8 +33,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(COLMAP)
 
-set(COLMAP_VERSION "3.6")
-set(COLMAP_VERSION_NUMBER "3600")
+set(COLMAP_VERSION "3.7")
+set(COLMAP_VERSION_NUMBER "3700")
 
 
 ################################################################################
@@ -58,6 +58,7 @@ option(SIMD_ENABLED "Whether to enable SIMD optimizations" ON)
 option(OPENMP_ENABLED "Whether to enable OpenMP parallelization" ON)
 option(IPO_ENABLED "Whether to enable interprocedural optimization" ON)
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
+option(GUI_ENABLED "Whether to enable the graphical UI" ON)
 option(OPENGL_ENABLED "Whether to enable OpenGL, if available" ON)
 option(TESTS_ENABLED "Whether to build test binaries" OFF)
 option(PROFILING_ENABLED "Whether to enable google-perftools linker flags" OFF)
@@ -90,7 +91,6 @@ find_package(Boost REQUIRED COMPONENTS
              program_options
              filesystem
              graph
-             regex
              system
              unit_test_framework)
 
@@ -100,6 +100,7 @@ find_package(FreeImage REQUIRED)
 
 find_package(Glog REQUIRED)
 
+set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(Glew REQUIRED)
 find_package(Git)
@@ -114,13 +115,21 @@ if(CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
 endif()
 
-find_package(Qt5 5.4 REQUIRED COMPONENTS Core OpenGL Widgets)
+if(GUI_ENABLED)
+    find_package(Qt5 5.4 COMPONENTS Core OpenGL Widgets)
+    if(Qt5_FOUND)
+        message(STATUS "Found Qt")
+        message(STATUS "  Module : ${Qt5Core_DIR}")
+        message(STATUS "  Module : ${Qt5OpenGL_DIR}")
+        message(STATUS "  Module : ${Qt5Widgets_DIR}")
+    else()
+        set(GUI_ENABLED OFF)
+    endif()
+endif()
 
-if(Qt5_FOUND)
-    message(STATUS "Found Qt")
-    message(STATUS "  Module : ${Qt5Core_DIR}")
-    message(STATUS "  Module : ${Qt5OpenGL_DIR}")
-    message(STATUS "  Module : ${Qt5Widgets_DIR}")
+if(OPENGL_ENABLED AND NOT GUI_ENABLED)
+    message(STATUS "Disabling GUI will also disable OpenGL")
+    set(OPENGL_ENABLED OFF)
 endif()
 
 if(CGAL_FOUND)
@@ -154,6 +163,10 @@ if(IS_MSVC)
 endif()
 
 if(IS_GNU)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+        message(FATAL_ERROR "GCC version 4.8 or older not supported")
+    endif()
+
     # Hide incorrect warnings for uninitialized Eigen variables under GCC.
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-maybe-uninitialized")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-maybe-uninitialized")
@@ -216,6 +229,13 @@ else()
     endif()
 endif()
 
+if(GUI_ENABLED AND Qt5_FOUND)
+    add_definitions("-DGUI_ENABLED")
+    message(STATUS "Enabling GUI support")
+else()
+    message(STATUS "Disabling GUI support")
+endif()
+
 if(OPENGL_ENABLED)
     add_definitions("-DOPENGL_ENABLED")
     message(STATUS "Enabling OpenGL support")
@@ -239,17 +259,18 @@ else()
     set(CGAL_ENABLED OFF)
 endif()
 
-# Qt5 was built with -reduce-relocations.
-if(Qt5_POSITION_INDEPENDENT_CODE)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    if(CUDA_ENABLED AND NOT IS_MSVC)
-        set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --compiler-options -fPIC")
+if(Qt5_FOUND)
+    # Qt5 was built with -reduce-relocations.
+    if(Qt5_POSITION_INDEPENDENT_CODE)
+        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+        if(CUDA_ENABLED AND NOT IS_MSVC)
+            set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --compiler-options -fPIC")
+        endif()
     endif()
+
+    # Enable automatic compilation of Qt resource files.
+    set(CMAKE_AUTORCC ON)
 endif()
-
-# Enable automatic compilation of Qt resource files.
-set(CMAKE_AUTORCC ON)
-
 
 ################################################################################
 # Add sources
@@ -265,9 +286,6 @@ set(COLMAP_INCLUDE_DIRS
     ${FREEIMAGE_INCLUDE_DIRS}
     ${CERES_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
-    ${Qt5Core_INCLUDE_DIRS}
-    ${Qt5OpenGL_INCLUDE_DIRS}
-    ${Qt5Widgets_INCLUDE_DIRS}
 )
 
 set(COLMAP_LINK_DIRS
@@ -278,20 +296,20 @@ set(COLMAP_EXTERNAL_LIBRARIES
     ${CMAKE_DL_LIBS}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_REGEX_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${GLOG_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
     ${CERES_LIBRARIES}
-    ${OPENGL_gl_LIBRARY}
-    ${OPENGL_glu_LIBRARY}
-    ${Qt5Core_LIBRARIES}
-    ${Qt5OpenGL_LIBRARIES}
-    ${Qt5Widgets_LIBRARIES}
+    ${OPENGL_LIBRARIES}
 )
 
 if(OPENMP_FOUND)
     list(APPEND COLMAP_EXTERNAL_LIBRARIES ${OpenMP_libomp_LIBRARY})
+endif()
+
+if(Qt5_FOUND)
+    list(APPEND COLMAP_INCLUDE_DIRS ${Qt5Core_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
+    list(APPEND COLMAP_EXTERNAL_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5OpenGL_LIBRARIES} ${Qt5Widgets_LIBRARIES})
 endif()
 
 if(CGAL_FOUND)

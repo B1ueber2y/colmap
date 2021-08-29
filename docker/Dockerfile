@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     libboost-program-options-dev \
     libboost-filesystem-dev \
     libboost-graph-dev \
-    libboost-regex-dev \
     libboost-system-dev \
     libboost-test-dev \
     libeigen3-dev \
@@ -37,12 +36,12 @@ RUN cd ceres-solver && \
 
 # Build and install COLMAP
 
-# Note: This Dockerfile has been tested using COLMAP pre-release 3.6-dev.3.
+# Note: This Dockerfile has been tested using COLMAP pre-release 3.6.
 # Later versions of COLMAP (which will be automatically cloned as default) may
 # have problems using the environment described thus far. If you encounter
 # problems and want to install the tested release, then uncomment the branch
 # specification in the line below
-RUN git clone https://github.com/colmap/colmap.git #--branch 3.6-dev.3
+RUN git clone https://github.com/colmap/colmap.git #--branch 3.6
 
 RUN cd colmap && \
 	git checkout dev && \

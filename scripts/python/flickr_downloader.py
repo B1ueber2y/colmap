@@ -34,11 +34,11 @@ import time
 import datetime
 import urllib
 import urllib2
+import urlparse
 import socket
 import argparse
 import multiprocessing
 import xml.etree.ElementTree as ElementTree
-
 
 PER_PAGE = 500
 SORT = "date-posted-desc"
@@ -105,17 +105,26 @@ class PhotoDownloader(object):
         self.image_path = image_path
 
     def __call__(self, photo):
-        image_name = "%s_%s.jpg" % (photo["id"], photo["secret"])
-        path = os.path.join(self.image_path, image_name)
-        if not os.path.exists(path):
-            url = None
-            for url_suffix in ("o", "l", "k", "h", "b", "c", "z"):
-                url_attr = "url_%s" % url_suffix
-                if photo.get(url_attr) is not None:
-                    url = photo.get(url_attr)
-                    break
-            if url is not None:
-                print url
+        # Find the URL corresponding to the highest image resolution. We will
+        # need this URL here to determine the image extension (typically .jpg,
+        # but could be .png, .gif, etc).
+        url = None
+        for url_suffix in ("o", "l", "k", "h", "b", "c", "z"):
+            url_attr = "url_%s" % url_suffix
+            if photo.get(url_attr) is not None:
+                url = photo.get(url_attr)
+                break
+
+        if url is not None:
+            # Note that the following statement may fail in Python 3. urlparse
+            # may need to be replaced with urllib.parse.
+            url_filename = urlparse.urlparse(url).path
+            image_ext = os.path.splitext(url_filename)[1]
+
+            image_name = "%s_%s%s" % (photo["id"], photo["secret"], image_ext)
+            path = os.path.join(self.image_path, image_name)
+            if not os.path.exists(path):
+                print(url)
                 for _ in range(MAX_IMAGE_REQUESTS):
                     try:
                         urllib.urlretrieve(url, path)
@@ -149,12 +158,12 @@ def main():
 
         num_pages = int(metadata["pages"])
 
-        print 78 * "="
-        print "Page:\t\t", page, "of", num_pages
-        print "Min-Date:\t", datetime.datetime.fromtimestamp(min_date)
-        print "Max-Date:\t", datetime.datetime.fromtimestamp(max_date)
-        print "Num-Photos:\t", len(photos)
-        print 78 * "="
+        print(78 * "=")
+        print("Page:\t\t", page, "of", num_pages)
+        print("Min-Date:\t", datetime.datetime.fromtimestamp(min_date))
+        print("Max-Date:\t", datetime.datetime.fromtimestamp(max_date))
+        print("Num-Photos:\t", len(photos))
+        print(78 * "=")
 
         try:
             pool.map_async(downloader, photos).get(1e10)
@@ -171,7 +180,7 @@ def main():
             days_in_row = days_in_row + 1
             num_pages = float("inf")
 
-            print "    No images in", days_in_row, "days in a row"
+            print("    No images in", days_in_row, "days in a row")
 
             if days_in_row == args.max_days_without_image:
                 break

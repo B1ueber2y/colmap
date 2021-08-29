@@ -76,7 +76,6 @@ Dependencies from the default Ubuntu repositories::
         libboost-program-options-dev \
         libboost-filesystem-dev \
         libboost-graph-dev \
-        libboost-regex-dev \
         libboost-system-dev \
         libboost-test-dev \
         libeigen3-dev \
@@ -117,11 +116,6 @@ Configure and compile COLMAP::
     make -j
     sudo make install
 
-Under newer Ubuntu versions it might be necessary to explicitly select the used
-GCC version due to compatiblity issues with CUDA, which can be done as::
-
-    CC=/usr/bin/gcc-6 CXX=/usr/bin/g++-6 cmake ..
-
 Run COLMAP::
 
     colmap -h
@@ -135,7 +129,6 @@ Mac
 
 Dependencies from `Homebrew <http://brew.sh/>`_::
 
-    brew tap homebrew/science
     brew install \
         git \
         cmake \
@@ -170,26 +163,72 @@ Run COLMAP::
 Windows
 -------
 
-*Recommended dependencies:* CUDA (at least version 7.X), CGAL
+*Recommended dependencies:* CUDA (at least version 7.X), Visual Studio 2019
 
-On Windows it is recommended to use the Python build script. Please follow the
-instructions in the next section.
+On Windows, the recommended way is to build COLMAP using vcpkg::
 
-Alternatively, you can install the dependencies manually. Microsoft Visual
-Studio 2013 and newer are confirmed to compile COLMAP without any issues.
+    git clone https://github.com/microsoft/vcpkg
+    cd vcpkg
+    .\bootstrap-vcpkg.bat
+    .\vcpkg install colmap[cuda,tests]:x64-windows
+
+To compile CUDA for multiple compute architectures, please use::
+
+    .\vcpkg install colmap[cuda-redist]:x64-windows
+
+Please refer to the next section for more details.
+
+
+VCPKG
+-----
+
+COLMAP ships as part of the vcpkg distribution. This enables to conveniently
+build COLMAP and all of its dependencies from scratch under different platforms.
+Note that VCPKG requires you to install CUDA manually in the standard way on
+your platform. To compile COLMAP using VCPKG, you run::
+
+    git clone https://github.com/microsoft/vcpkg
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg install colmap:x64-linux
+
+VCPKG ships with support for various other platforms (e.g., x64-osx,
+x64-windows, etc.). To compile with CUDA support and to build all tests::
+
+    ./vcpkg install colmap[cuda,tests]:x64-linux
+
+The above commands will build the latest release version of COLMAP. To compile
+the latest commit in the dev branch, you can use the following options::
+
+    ./vcpkg install colmap:x64-linux --head
+
+To modify the source code, you can further add ``--editable --no-downloads``.
+Or, if you want to build from another folder and use the dependencies from
+vcpkg, first run `./vcpkg integrate install` and then configure COLMAP as::
+
+    cd path/to/colmap
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+    cmake --build . --config release --target colmap_exe --parallel 24
+
+Alternatively, you can also use the Python build script. Please follow the
+instructions in the next section, but VCPKG is now the recommended approach.
 
 
 Build Script
 ------------
 
-COLMAP ships with an automated Python build script. The build script installs
-COLMAP and its dependencies locally under Windows, Mac, and Linux. Note that
-under Mac and Linux, it is usually easier and faster to use the available
-package managers for the dependencies (see above). However, if you are on a
-(cluster) system without root access, this script might be useful. This script
-downloads the necessary dependencies automatically from the Internet. It assumes
-that CMake, Boost, Qt5, CUDA (optional), and CGAL (optional) are already
-installed on the system. E.g., under Windows you must specify the location of
+Alternative to the above solutions, COLMAP also ships with an automated Python
+build script. Note that VCPKG is the preferred way to achieve the same now.
+The build script installs COLMAP and its dependencies locally
+under Windows, Mac, and Linux. Note that under Mac and Linux, it is usually
+easier and faster to use the available package managers for the dependencies
+(see above). However, if you are on a (cluster) system without root access,
+this script might be useful. This script downloads the necessary dependencies
+automatically from the Internet. It assumes that CMake, Boost, Qt5, CUDA
+(optional), and CGAL (optional) are already installed on the system.
+E.g., under Windows you must specify the location of
 these libraries similar to this::
 
     python scripts/python/build.py \
