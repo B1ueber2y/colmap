@@ -105,6 +105,12 @@ struct StereoFusionOptions {
   void Print() const;
 };
 
+struct PointVisibility {
+  int image_idx;
+  int u;
+  int v;
+};
+
 class StereoFusion : public Thread {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -116,7 +122,7 @@ class StereoFusion : public Thread {
                const std::string& input_type);
 
   const std::vector<PlyPoint>& GetFusedPoints() const;
-  const std::vector<std::vector<int>>& GetFusedPointsVisibility() const;
+  const std::vector<std::vector<PointVisibility>>& GetFusedPointsVisibility() const;
 
  private:
   void Run();
@@ -162,10 +168,10 @@ class StereoFusion : public Thread {
 
   // Already fused points.
   std::vector<PlyPoint> fused_points_;
-  std::vector<std::vector<int>> fused_points_visibility_;
+  std::vector<std::vector<PointVisibility>> fused_points_visibility_;
 
   std::vector<std::vector<PlyPoint>> task_fused_points_;
-  std::vector<std::vector<std::vector<int>>> task_fused_points_visibility_;
+  std::vector<std::vector<std::vector<PointVisibility>>> task_fused_points_visibility_;
 };
 
 // Write the visiblity information into a binary file of the following format:
@@ -182,7 +188,7 @@ class StereoFusion : public Thread {
 // the mvs::Model, which is the location of the image in the images.bin/.txt.
 void WritePointsVisibility(
     const std::string& path,
-    const std::vector<std::vector<int>>& points_visibility);
+    const std::vector<std::vector<PointVisibility>>& points_visibility);
 
 }  // namespace mvs
 }  // namespace colmap

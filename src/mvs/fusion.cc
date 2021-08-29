@@ -133,7 +133,7 @@ const std::vector<PlyPoint>& StereoFusion::GetFusedPoints() const {
   return fused_points_;
 }
 
-const std::vector<std::vector<int>>& StereoFusion::GetFusedPointsVisibility()
+const std::vector<std::vector<PointVisibility>>& StereoFusion::GetFusedPointsVisibility()
     const {
   return fused_points_visibility_;
 }
@@ -381,7 +381,7 @@ void StereoFusion::Fuse(const int thread_id, const int image_idx, const int row,
   std::vector<uint8_t> fused_point_r;
   std::vector<uint8_t> fused_point_g;
   std::vector<uint8_t> fused_point_b;
-  std::unordered_set<int> fused_point_visibility;
+  std::unordered_map<int, PointVisibility> fused_point_visibility;
 
   while (!fusion_queue.empty()) {
     const auto data = fusion_queue.back();
@@ -477,7 +477,7 @@ void StereoFusion::Fuse(const int thread_id, const int image_idx, const int row,
     fused_point_r.push_back(color.r);
     fused_point_g.push_back(color.g);
     fused_point_b.push_back(color.b);
-    fused_point_visibility.insert(image_idx);
+    fused_point_visibility[image_idx] = {image_idx, col, row};
 
     // Remember the first pixel as the reference.
     if (traversal_depth == 0) {
@@ -545,14 +545,20 @@ void StereoFusion::Fuse(const int thread_id, const int image_idx, const int row,
         std::round(internal::Median(&fused_point_b)));
 
     task_fused_points_[thread_id].push_back(fused_point);
-    task_fused_points_visibility_[thread_id].emplace_back(
-        fused_point_visibility.begin(), fused_point_visibility.end());
+    task_fused_points_visibility_[thread_id].push_back(
+            std::vector<PointVisibility>(fused_point_visibility.size()));
+    std::transform(fused_point_visibility.begin(),
+                   fused_point_visibility.end(),
+                   task_fused_points_visibility_[thread_id].back().begin(),
+                   [](const std::pair<const int, PointVisibility>& p) {
+                     return p.second;
+                   });
   }
 }
 
 void WritePointsVisibility(
     const std::string& path,
-    const std::vector<std::vector<int>>& points_visibility) {
+    const std::vector<std::vector<PointVisibility>>& points_visibility) {
   std::fstream file(path, std::ios::out | std::ios::binary);
   CHECK(file.is_open()) << path;
 
@@ -560,8 +566,10 @@ void WritePointsVisibility(
 
   for (const auto& visibility : points_visibility) {
     WriteBinaryLittleEndian<uint32_t>(&file, visibility.size());
-    for (const auto& image_idx : visibility) {
-      WriteBinaryLittleEndian<uint32_t>(&file, image_idx);
+    for (const auto& pv : visibility) {
+      WriteBinaryLittleEndian<uint32_t>(&file, pv.image_idx);
+      WriteBinaryLittleEndian<uint32_t>(&file, pv.u);
+      WriteBinaryLittleEndian<uint32_t>(&file, pv.v);
     }
   }
 }
