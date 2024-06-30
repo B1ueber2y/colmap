@@ -266,6 +266,8 @@ void PreintegratedImuMeasurement::Finish() {
   // Enforce symmetry and stability
   covs_ = (covs_ + covs_.transpose()) / 2.0;
   covs_ += Eigen::Matrix<double, 9, 9>::Identity() * 1e-12;
+  covs_bias_ = (covs_bias_ + covs_bias_.transpose()) / 2.0;
+  covs_bias_ += Eigen::Matrix<double, 6, 6>::Identity() * 1e-12;
 
   // Factorize
   sqrt_information_ = colmap::SqrtInformation(covs_);
