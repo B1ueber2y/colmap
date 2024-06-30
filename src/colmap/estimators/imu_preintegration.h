@@ -107,11 +107,11 @@ class PreintegratedImuMeasurement {
   bool has_finished_ = false;
 
   // Preintegrated measurements (imu to gravity-aligned metric world)
+  double delta_t_ = 0;                                    // accumulated time
   Eigen::Quaterniond delta_R_ij_ =
       Eigen::Quaterniond::Identity();                     // relative rotation
   Eigen::Vector3d delta_p_ij_ = Eigen::Vector3d::Zero();  // position changes
   Eigen::Vector3d delta_v_ij_ = Eigen::Vector3d::Zero();  // velocity changes
-  double delta_t_ = 0;                                    // accumulated time
 
   // Accounting for bias changes
   Eigen::Matrix<double, 9, 6> jacobian_biases_ =
@@ -122,13 +122,12 @@ class PreintegratedImuMeasurement {
   Eigen::Matrix<double, 9, 9> covs_ =
       Eigen::Matrix<double, 9, 9>::Zero();  // covariances (rotation +
                                             // translation + velocity)
+  Eigen::Matrix<double, 9, 9> sqrt_information_ =
+      Eigen::Matrix<double, 9, 9>::Zero();
+
   Eigen::Matrix<double, 6, 6> covs_bias_ =
       Eigen::Matrix<double, 6, 6>::Zero();  // covariances (acc bias + gyro
                                             // bias)
-
-  // LLT decomposition of the information matrix for least squares optimization
-  Eigen::Matrix<double, 9, 9> sqrt_information_ =
-      Eigen::Matrix<double, 9, 9>::Zero();
   Eigen::Matrix<double, 6, 6> sqrt_information_bias_ =
       Eigen::Matrix<double, 6, 6>::Zero();
 
