@@ -160,7 +160,7 @@ void PreintegratedImuMeasurement::integrate(const Eigen::Vector3d& acc_true,
   B.block<3, 3>(6, 0) = Rs * dt;
   // Eq. (61) from [A]
   B.block<3, 3>(3, 0) = 0.5 * Rs * dt * dt;
-  
+
   // propagate
   covs_.block<9, 9>(0, 0) += B * Sigma * B.transpose();
 
