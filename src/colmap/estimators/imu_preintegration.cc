@@ -128,7 +128,7 @@ void PreintegratedImuMeasurement::integrate(const Eigen::Vector3d& acc_true,
   // Covariance propagation
   // Eq. (63) from [A]
   // Step 1: jacobian-based propagation
-  Eigen::Matrix<double, 15, 15> A = Eigen::Matrix<double, 15, 15>::Identity();
+  Eigen::Matrix<double, 9, 9> A = Eigen::Matrix<double, 9, 9>::Identity();
 
   // rotation: Eq. (59) from [A]
   A.block<3, 3>(0, 0) = dq.inverse().toRotationMatrix();
@@ -140,22 +140,31 @@ void PreintegratedImuMeasurement::integrate(const Eigen::Vector3d& acc_true,
   // velocity: Eq. (60) from [A]
   A.block<3, 3>(6, 0) = -Rs * skew_acc * dt;
 
-  // fill in the bias-related jacobians
-  A.block<9, 6>(0, 9) = jacobian_biases_;
-
   // propagate
-  covs_ = A * covs_ * A.transpose();
+  covs_.block<9, 9>(0, 0) = A * covs_.block<9, 9>(0, 0) * A.transpose();
 
   // Step 2: add noise
-  double vars_v = pow(acc_noise_density, 2) * dt;
+  double vars_acc = pow(acc_noise_density, 2) * dt;
   double vars_omega = pow(gyro_noise_density, 2) * dt;
-  double vars_p = 0.5 * vars_v * dt * dt;
   double vars_ba = pow(calib_.acc_bias_random_walk_sigma, 2) * dt;
   double vars_bg = pow(calib_.gyro_bias_random_walk_sigma, 2) * dt;
+  Eigen::Matrix<double, 6, 6> Sigma = Eigen::Matrix<double, 6, 6>::Identity();
+  Sigma.block<3, 3>(0, 0) *= (vars_acc + vars_ba);
+  Sigma.block<3, 3>(3, 3) *= (vars_omega + vars_bg);
 
-  covs_.block<3, 3>(0, 0) += Eigen::Matrix3d::Identity() * vars_omega;
-  covs_.block<3, 3>(3, 3) += Eigen::Matrix3d::Identity() * vars_p;
-  covs_.block<3, 3>(6, 6) += Eigen::Matrix3d::Identity() * vars_v;
+  // construct matrix B
+  Eigen::Matrix<double, 9, 6> B = Eigen::Matrix<double, 9, 6>::Zero();
+  // Eq. (59) from [A]
+  B.block<3, 3>(0, 3) = Jr * dt;
+  // Eq. (60) from [A]
+  B.block<3, 3>(6, 0) = Rs * dt;
+  // Eq. (61) from [A]
+  B.block<3, 3>(3, 0) = 0.5 * Rs * dt * dt;
+  
+  // propagate
+  covs_.block<9, 9>(0, 0) += B * Sigma * B.transpose();
+
+  // update bias covariance with random walk
   covs_.block<3, 3>(9, 9) += Eigen::Matrix3d::Identity() * vars_ba;
   covs_.block<3, 3>(12, 12) += Eigen::Matrix3d::Identity() * vars_bg;
 }
