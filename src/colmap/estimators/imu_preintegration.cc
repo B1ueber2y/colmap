@@ -148,25 +148,17 @@ void PreintegratedImuMeasurement::integrate(const Eigen::Vector3d& acc_true,
   covs_ = A * covs_ * A.transpose();
 
   // Step 2: add noise
-  double vars_acc = pow(acc_noise_density, 2) * dt;
+  double vars_v = pow(acc_noise_density, 2) * dt;
   double vars_omega = pow(gyro_noise_density, 2) * dt;
   double vars_ba = pow(calib_.acc_bias_random_walk_sigma, 2) * dt;
   double vars_bg = pow(calib_.gyro_bias_random_walk_sigma, 2) * dt;
-  Eigen::Matrix<double, 6, 6> Sigma = Eigen::Matrix<double, 6, 6>::Identity();
-  Sigma.block<3, 3>(0, 0) *= (vars_acc + vars_ba);
-  Sigma.block<3, 3>(3, 3) *= (vars_omega + vars_bg);
+  Eigen::Matrix<double, 9, 9> Sigma = Eigen::Matrix<double, 9, 9>::Identity();
+  Sigma.block<3, 3>(0, 0) *= (vars_omega + vars_bg);
+  Sigma.block<3, 3>(6, 6) *= (vars_v + vars_ba);
+  Sigma.block<3, 3>(3, 3) *= 0.5 * Sigma.block<3, 3>(6, 6) * dt * dt;
 
-  // construct matrix B
-  Eigen::Matrix<double, 9, 6> B = Eigen::Matrix<double, 9, 6>::Zero();
-  // Eq. (59) from [A]
-  B.block<3, 3>(0, 3) = Jr * dt;
-  // Eq. (60) from [A]
-  B.block<3, 3>(6, 0) = Rs * dt;
-  // Eq. (61) from [A]
-  B.block<3, 3>(3, 0) = 0.5 * Rs * dt * dt;
-
-  // propagate
-  covs_ += B * Sigma * B.transpose();
+  covs_.block<3, 3>(0, 0) += Jr * Sigma.block<3, 3>(0, 0) * Jr.transpose();
+  covs_.block<6, 6>(3, 3) += Sigma.block<6, 6>(3, 3);
 
   // update bias covariance with random walk
   covs_bias_.block<3, 3>(0, 0) += Eigen::Matrix3d::Identity() * vars_ba;
