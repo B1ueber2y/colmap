@@ -88,8 +88,10 @@ class PreintegratedImuMeasurement {
   const Eigen::Matrix3d dv_dba() const;
   const Eigen::Matrix3d dv_dbg() const;
   const Eigen::Vector6d& Biases() const;
-  const Eigen::Matrix<double, 15, 15> Covariance() const;
-  const Eigen::Matrix<double, 15, 15> LMatrix() const;
+  const Eigen::Matrix<double, 9, 9> Covariance() const;
+  const Eigen::Matrix<double, 6, 6> BiasCovariance() const;
+  const Eigen::Matrix<double, 9, 9> SqrtInformation() const;
+  const Eigen::Matrix<double, 6, 6> BiasSqrtInformation() const;
   const double GravityMagnitude() const;
   const ImuMeasurements Measurements() const;
 
@@ -129,14 +131,18 @@ class PreintegratedImuMeasurement {
                                             // translation, velocity over biases
 
   // Covariance propagation
-  Eigen::Matrix<double, 15, 15> covs_ =
-      Eigen::Matrix<double, 15, 15>::Zero();  // covariances (rotation +
-                                              // translation + velocity + acc
-                                              // bias + gyro bias)
+  Eigen::Matrix<double, 9, 9> covs_ =
+      Eigen::Matrix<double, 9, 9>::Zero();  // covariances (rotation +
+                                            // translation + velocity)
+  Eigen::Matrix<double, 6, 6> covs_bias_ =
+      Eigen::Matrix<double, 6, 6>::Zero();  // covariances (acc bias + gyro
+                                            // bias)
 
   // LLT decomposition of the information matrix for least squares optimization
-  Eigen::Matrix<double, 15, 15> L_matrix_ =
-      Eigen::Matrix<double, 15, 15>::Zero();
+  Eigen::Matrix<double, 9, 9> sqrt_information_ =
+      Eigen::Matrix<double, 9, 9>::Zero();
+  Eigen::Matrix<double, 6, 6> sqrt_information_bias_ =
+      Eigen::Matrix<double, 6, 6>::Zero();
 
   // Measurements
   ImuMeasurements measurements_;
@@ -276,8 +282,11 @@ class PreintegratedImuMeasurementCostFunction {
     }
 
     // Weight by the covariance inverse
-    Eigen::Map<Eigen::Matrix<T, 15, 1>> residuals_data(residuals);
-    residuals_data.applyOnTheLeft(measurement_.LMatrix().transpose().cast<T>());
+    Eigen::Map<Eigen::Matrix<T, 9, 1>> residuals_data(residuals);
+    residuals_data.applyOnTheLeft(measurement_.SqrtInformation().cast<T>());
+    Eigen::Map<Eigen::Matrix<T, 6, 1>> bias_residuals_data(residuals + 9);
+    bias_residuals_data.applyOnTheLeft(
+        measurement_.BiasSqrtInformation().cast<T>());
     return true;
   }
 

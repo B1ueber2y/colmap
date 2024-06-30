@@ -29,6 +29,7 @@
 
 #include "colmap/estimators/imu_preintegration.h"
 
+#include "colmap/estimators/cost_functions.h"
 #include "colmap/geometry/pose.h"
 #include "colmap/util/logging.h"
 
@@ -57,7 +58,10 @@ void PreintegratedImuMeasurement::Reset() {
   delta_v_ij_ = Eigen::Vector3d::Zero();
   delta_t_ = 0;
   jacobian_biases_ = Eigen::Matrix<double, 9, 6>::Zero();
-  covs_ = Eigen::Matrix<double, 15, 15>::Zero();
+  covs_ = Eigen::Matrix<double, 9, 9>::Zero();
+  covs_bias_ = Eigen::Matrix<double, 6, 6>::Zero();
+  sqrt_information_ = Eigen::Matrix<double, 9, 9>::Zero();
+  sqrt_information_bias_ = Eigen::Matrix<double, 6, 6>::Zero();
 
   has_started_ = false;
   has_finished_ = false;
@@ -141,7 +145,7 @@ void PreintegratedImuMeasurement::integrate(const Eigen::Vector3d& acc_true,
   A.block<3, 3>(6, 0) = -Rs * skew_acc * dt;
 
   // propagate
-  covs_.block<9, 9>(0, 0) = A * covs_.block<9, 9>(0, 0) * A.transpose();
+  covs_ = A * covs_ * A.transpose();
 
   // Step 2: add noise
   double vars_acc = pow(acc_noise_density, 2) * dt;
@@ -162,11 +166,11 @@ void PreintegratedImuMeasurement::integrate(const Eigen::Vector3d& acc_true,
   B.block<3, 3>(3, 0) = 0.5 * Rs * dt * dt;
 
   // propagate
-  covs_.block<9, 9>(0, 0) += B * Sigma * B.transpose();
+  covs_ += B * Sigma * B.transpose();
 
   // update bias covariance with random walk
-  covs_.block<3, 3>(9, 9) += Eigen::Matrix3d::Identity() * vars_ba;
-  covs_.block<3, 3>(12, 12) += Eigen::Matrix3d::Identity() * vars_bg;
+  covs_bias_.block<3, 3>(0, 0) += Eigen::Matrix3d::Identity() * vars_ba;
+  covs_bias_.block<3, 3>(3, 3) += Eigen::Matrix3d::Identity() * vars_bg;
 }
 
 void PreintegratedImuMeasurement::AddMeasurement(const ImuMeasurement& m) {
@@ -259,13 +263,8 @@ void PreintegratedImuMeasurement::AddMeasurements(const ImuMeasurements& ms) {
 }
 
 void PreintegratedImuMeasurement::Finish() {
-  // Enforce symmetry
-  covs_ = (covs_ + covs_.transpose()) / 2.0;
-
-  // LLT decomposition of Fisher information
-  Eigen::MatrixXd information =
-      (covs_ + Eigen::Matrix<double, 15, 15>::Identity() * 1e-12).inverse();
-  L_matrix_ = information.llt().matrixL();
+  sqrt_information_ = colmap::SqrtInformation(covs_);
+  sqrt_information_bias_ = colmap::SqrtInformation(covs_bias_);
 
   // Set flag
   has_finished_ = true;
@@ -394,14 +393,24 @@ const Eigen::Vector6d& PreintegratedImuMeasurement::Biases() const {
   return biases_;
 }
 
-const Eigen::Matrix<double, 15, 15> PreintegratedImuMeasurement::Covariance()
+const Eigen::Matrix<double, 9, 9> PreintegratedImuMeasurement::Covariance()
     const {
   return covs_;
 }
 
-const Eigen::Matrix<double, 15, 15> PreintegratedImuMeasurement::LMatrix()
+const Eigen::Matrix<double, 6, 6> PreintegratedImuMeasurement::BiasCovariance()
     const {
-  return L_matrix_;
+  return covs_bias_;
+}
+
+const Eigen::Matrix<double, 9, 9> PreintegratedImuMeasurement::SqrtInformation()
+    const {
+  return sqrt_information_;
+}
+
+const Eigen::Matrix<double, 6, 6>
+PreintegratedImuMeasurement::BiasSqrtInformation() const {
+  return sqrt_information_bias_;
 }
 
 const double PreintegratedImuMeasurement::GravityMagnitude() const {
