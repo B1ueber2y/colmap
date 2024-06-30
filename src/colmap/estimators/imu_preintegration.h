@@ -107,7 +107,7 @@ class PreintegratedImuMeasurement {
   bool has_finished_ = false;
 
   // Preintegrated measurements (imu to gravity-aligned metric world)
-  double delta_t_ = 0;                                    // accumulated time
+  double delta_t_ = 0;  // accumulated time
   Eigen::Quaterniond delta_R_ij_ =
       Eigen::Quaterniond::Identity();                     // relative rotation
   Eigen::Vector3d delta_p_ij_ = Eigen::Vector3d::Zero();  // position changes
