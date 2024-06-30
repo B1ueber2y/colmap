@@ -106,18 +106,6 @@ class PreintegratedImuMeasurement {
   // Flag to check if LLT is performed
   bool has_finished_ = false;
 
-  // Options
-  ImuPreintegrationOptions options_;
-
-  // IMU Calibration.
-  ImuCalibration calib_;
-  // TODO: the rectification matrix and bias should go into calibration
-  // m = M(m_true + b), i.e. m_true = M^{-1}(m - b)
-  Eigen::Matrix3d acc_rect_mat_inv_ = Eigen::Matrix3d::Identity();
-  Eigen::Matrix3d gyro_rect_mat_inv_ = Eigen::Matrix3d::Identity();
-  Eigen::Vector6d biases_ =
-      Eigen::Vector6d::Zero();  // bias on acc (3-DoF) + gyro (3-DoF)
-
   // Preintegrated measurements (imu to gravity-aligned metric world)
   Eigen::Quaterniond delta_R_ij_ =
       Eigen::Quaterniond::Identity();                     // relative rotation
@@ -146,6 +134,18 @@ class PreintegratedImuMeasurement {
 
   // Measurements
   ImuMeasurements measurements_;
+
+  // Options
+  ImuPreintegrationOptions options_;
+
+  // IMU Calibration.
+  ImuCalibration calib_;
+  // TODO: the rectification matrix and bias should go into calibration
+  // m = M(m_true + b), i.e. m_true = M^{-1}(m - b)
+  Eigen::Matrix3d acc_rect_mat_inv_ = Eigen::Matrix3d::Identity();
+  Eigen::Matrix3d gyro_rect_mat_inv_ = Eigen::Matrix3d::Identity();
+  Eigen::Vector6d biases_ =
+      Eigen::Vector6d::Zero();  // bias on acc (3-DoF) + gyro (3-DoF)
 
   // Methods
   void integrate(const Eigen::Vector3d& acc_true,
