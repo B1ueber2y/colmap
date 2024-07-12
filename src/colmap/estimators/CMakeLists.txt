@@ -40,6 +40,7 @@ COLMAP_ADD_LIBRARY(
         coordinate_frame.h coordinate_frame.cc
         cost_functions.h
         covariance.h covariance.cc
+        block_covariance.h block_covariance.cc
         essential_matrix.h essential_matrix.cc
         euclidean_transform.h
         fundamental_matrix.h fundamental_matrix.cc
