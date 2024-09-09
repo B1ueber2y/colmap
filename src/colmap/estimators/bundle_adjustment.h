@@ -86,6 +86,9 @@ struct BundleAdjustmentOptions {
   int max_num_images_direct_dense_gpu_solver = 200;
   int max_num_images_direct_sparse_gpu_solver = 4000;
 
+  // whether to use manual ordering
+  bool use_manual_ordering = false;
+
   // Ceres-Solver options.
   ceres::Solver::Options solver_options;
 
@@ -195,6 +198,7 @@ class BundleAdjuster {
   ceres::Solver::Options SetUpSolverOptions(
       const ceres::Problem& problem,
       const ceres::Solver::Options& input_solver_options) const;
+  std::shared_ptr<ceres::ParameterBlockOrdering> GetParameterBlockOrdering(Reconstruction* reconstruction) const;
 
   // Getter functions below
   const BundleAdjustmentOptions& Options() const;

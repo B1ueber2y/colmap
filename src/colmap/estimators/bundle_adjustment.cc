@@ -271,6 +271,29 @@ BundleAdjuster::BundleAdjuster(const BundleAdjustmentOptions& options,
   THROW_CHECK(options_.Check());
 }
 
+std::shared_ptr<ceres::ParameterBlockOrdering> BundleAdjuster::GetParameterBlockOrdering(Reconstruction* reconstruction) const {
+  std::shared_ptr<ceres::ParameterBlockOrdering> ordering = std::make_shared<ceres::ParameterBlockOrdering>();
+  // points
+  for (auto& point3D: reconstruction->Points3D()) {
+    if (problem_->HasParameterBlock(point3D.second.xyz.data()))
+      ordering->AddElementToGroup(const_cast<double*>(point3D.second.xyz.data()), 0);
+  }
+  // images
+  for (const image_t image_id: config_.Images()) {
+    Image& image = reconstruction->Image(image_id);
+    if (problem_->HasParameterBlock(image.CamFromWorld().rotation.coeffs().data()))
+      ordering->AddElementToGroup(image.CamFromWorld().rotation.coeffs().data(), 1);
+    if (problem_->HasParameterBlock(image.CamFromWorld().translation.data()))
+      ordering->AddElementToGroup(image.CamFromWorld().translation.data(), 1);
+  }
+  // cameras
+  for (auto& camera: reconstruction->Cameras()) {
+    if (problem_->HasParameterBlock(camera.second.params.data()))
+      ordering->AddElementToGroup(const_cast<double*>(camera.second.params.data()), 2);
+  }
+  return ordering;
+}
+
 bool BundleAdjuster::Solve(Reconstruction* reconstruction) {
   loss_function_ =
       std::unique_ptr<ceres::LossFunction>(options_.CreateLossFunction());
@@ -282,6 +305,8 @@ bool BundleAdjuster::Solve(Reconstruction* reconstruction) {
 
   ceres::Solver::Options solver_options =
       SetUpSolverOptions(*problem_, options_.solver_options);
+  if (options_.use_manual_ordering)
+    solver_options.linear_solver_ordering = GetParameterBlockOrdering(reconstruction);
 
   ceres::Solve(solver_options, problem_.get(), &summary_);
 

@@ -83,6 +83,7 @@ void BindBundleAdjuster(py::module& m) {
                          &BAOpts::max_num_images_direct_sparse_gpu_solver,
                          "Threshold to switch between direct, sparse, and "
                          "iterative solvers.")
+          .def_readwrite("use_manual_ordering", &BAOpts::use_manual_ordering, "Whether to use manual ordering")
           .def_readwrite(
               "solver_options",
               &BAOpts::solver_options,
