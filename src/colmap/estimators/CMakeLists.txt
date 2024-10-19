@@ -39,6 +39,7 @@ COLMAP_ADD_LIBRARY(
         bundle_adjustment.h bundle_adjustment.cc
         coordinate_frame.h coordinate_frame.cc
         cost_functions.h
+        manifold.h
         covariance.h covariance.cc
         block_covariance.h block_covariance.cc
         essential_matrix.h essential_matrix.cc
@@ -66,7 +67,13 @@ COLMAP_ADD_LIBRARY(
         colmap_optim
         Eigen3::Eigen
         Ceres::ceres
+    PRIVATE_LINK_LIBS
+        PoseLib::PoseLib
 )
+
+if(CUDA_ENABLED)
+    target_link_libraries(colmap_estimators PUBLIC colmap_util_cuda)
+endif()
 
 COLMAP_ADD_TEST(
     NAME absolute_pose_test

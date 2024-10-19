@@ -37,6 +37,7 @@
 #include "colmap/optim/ransac.h"
 #include "colmap/scene/reconstruction_io.h"
 #include "colmap/sfm/observation_manager.h"
+#include "colmap/util/file.h"
 #include "colmap/util/misc.h"
 #include "colmap/util/threading.h"
 
@@ -262,10 +263,7 @@ void PrintComparisonSummary(std::ostream& out,
 // the estimate an alignment
 // - estimate_scale: if true apply the computed scale when aligning the
 // reconstruction
-// - robust_alignment: if true use a ransac-based estimation for robust
-// alignment
-// - robust_alignment_max_error: ransac error to use if robust alignment is
-// enabled
+// - alignment_max_error: ransac error to use
 int RunModelAligner(int argc, char** argv) {
   std::string input_path;
   std::string output_path;
