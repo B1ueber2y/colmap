@@ -28,6 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "colmap/estimators/block_covariance.h"
+
 #include "colmap/estimators/covariance.h"
 
 namespace colmap {
@@ -57,12 +58,15 @@ ProblemPartitioner::ProblemPartitioner(
 }
 
 void ProblemPartitioner::BuildBipartiteGraph() {
-  for (const auto& residual_block : problem_->residual_blocks()) {
+  std::vector<ceres::ResidualBlockId> residual_block_ids;
+  problem_->GetResidualBlocks(&residual_block_ids);
+  for (const auto& residual_block_id : residual_block_ids) {
     std::vector<double*> param_blocks;
-    residual_block->GetParameterBlocks(&param_blocks);
+    problem_->GetParameterBlocksForResidualBlock(residual_block_id,
+                                                 &param_blocks);
 
     for (auto& param_block : param_blocks) {
-      graph_.AddEdge(param_block, residual_block->id());
+      graph_.AddEdge(param_block, residual_block_id);
     }
   }
 }
@@ -70,18 +74,20 @@ void ProblemPartitioner::BuildBipartiteGraph() {
 void ProblemPartitioner::GetSubproblem(
     ceres::Problem* subproblem,
     const std::vector<double*>& subproblem_pose_blocks) const {
-  THROW_CHECK_EQ(subproblem->num_residuals(), 0);
+  THROW_CHECK_EQ(subproblem->NumResiduals(), 0);
   // construct irrelevant pose blocks
   std::unordered_set<double*> irrelevant_pose_blocks;
   for (auto it = pose_blocks_.begin(); it != pose_blocks_.end(); ++it) {
-    if (subproblem_pose_blocks.find(*it) != subproblem_pose_blocks.end())
+    if (std::find(subproblem_pose_blocks.begin(),
+                  subproblem_pose_blocks.end(),
+                  *it) != subproblem_pose_blocks.end())
       continue;
     irrelevant_pose_blocks.insert(*it);
   }
 
   // customizd bfs to collect relevant residuals
   std::unordered_set<const double*> param_visited;
-  std::unordered_set<ceres::Problem::ResidualBlockId> residual_block_ids;
+  std::unordered_set<ceres::ResidualBlockId> residual_block_ids;
   for (const auto& param : subproblem_pose_blocks) {
     THROW_CHECK(problem_->HasParameterBlock(param));
     if (param_visited.find(param) != param_visited.end()) continue;
@@ -93,8 +99,8 @@ void ProblemPartitioner::GetSubproblem(
       bfs_queue.pop();
       for (auto& residual_block_id : graph_.GetResidualBlocks(current_param)) {
         // check if the residual block exists
-        if (reisual_block_ids.find(residual_block_id) !=
-            residual_block_ids.end(residual_block_id))
+        if (residual_block_ids.find(residual_block_id) !=
+            residual_block_ids.end())
           continue;
         // skip if the residual block links to irrelevant poses
         bool flag = true;
@@ -124,7 +130,7 @@ void ProblemPartitioner::GetSubproblem(
   }
 }
 
-LocationPartitioner::LocationPartioner(
+LocationPartitioner::LocationPartitioner(
     const std::map<image_t, Eigen::Vector2d>& locations)
     : locations_(locations) {
   std::vector<BGPointWithIndex> points;
@@ -134,13 +140,12 @@ LocationPartitioner::LocationPartioner(
   rtree_.insert(points.begin(), points.end());
 }
 
-LocationPartitioner::LocationPartioner(Reconstruction* reconstruction) {
+LocationPartitioner::LocationPartitioner(Reconstruction* reconstruction) {
   std::vector<BGPointWithIndex> points;
   for (const auto& image : reconstruction->Images()) {
     Eigen::Vector3d center = image.second.ProjectionCenter();
-    locations_
-        .emplace_back(image.first, Eigen::Vector2d(center(0), center(1)))
-            points.emplace_back(BGPoint(center(0), center(1)), image.first);
+    locations_.emplace(image.first, Eigen::Vector2d(center(0), center(1)));
+    points.emplace_back(BGPoint(center(0), center(1)), image.first);
   }
   rtree_.insert(points.begin(), points.end());
 }
@@ -170,7 +175,7 @@ std::vector<double> LocationPartitioner::GetCoords(
     const std::vector<double>& inputs,
     double block_size,
     double robust_percentile,
-    double kStretchRatio) {
+    double kStretchRatio) const {
   // sort list
   std::vector<double> xs;
   xs.insert(xs.end(), inputs.begin(), inputs.end());
@@ -189,78 +194,80 @@ std::vector<double> LocationPartitioner::GetCoords(
   // construct coords
   std::vector<double> coords;
   if (xs[0] < x_start) coords.push_back(xs[0]);
-  for (size_t i = 0; i < n_coords; ++i) {
+  for (int i = 0; i < n_coords; ++i) {
     coords.push_back(x_start + block_size * i);
   }
   if (xs[n_images - 1] > x_end) coords.push_back(xs[n_images - 1]);
   return coords;
 }
 
-std::pair<std::vector<double>, std::vector<double>>
-LocationPartitioner::GetPartitions(double block_size,
-                                   double robust_percentile,
-                                   double kStretchRatio) const {
+std::vector<LocationPartitioner::Box2d> LocationPartitioner::GetPartitions(
+    double block_size, double robust_percentile, double kStretchRatio) const {
   std::vector<double> xs, ys;
   for (auto it = locations_.begin(); it != locations_.end(); ++it) {
-    xs.push_back(it->first);
-    ys.push_back(it->second);
+    xs.push_back(it->second(0));
+    ys.push_back(it->second(1));
   }
   std::vector<double> coords_x =
       GetCoords(xs, block_size, robust_percentile, kStretchRatio);
   std::vector<double> coords_y =
       GetCoords(ys, block_size, robust_percentile, kStretchRatio);
-  return std::make_pair(coords_x, coords_y);
+  std::vector<Box2d> boxes;
+  for (size_t i = 0; i < coords_x.size() - 1; ++i) {
+    for (size_t j = 0; j < coords_y.size() - 1; ++j) {
+      Eigen::Vector2d top_left(coords_x[i], coords_y[j]);
+      Eigen::Vector2d bottom_right(coords_x[i + 1], coords_y[j + 1]);
+      boxes.push_back(std::make_pair(top_left, bottom_right));
+    }
+  }
+  return boxes;
 }
 
 bool BlockwiseCovarianceEstimator::Estimate(
-    std::map<image_t, Eigen::MatrixXd>& image_id_to_covar,
-    double lambda = 1e-8) {
+    std::map<image_t, Eigen::MatrixXd>& image_id_to_covar) {
   ProblemPartitioner problem_partitioner(problem_, reconstruction_);
   LocationPartitioner location_partitioner(reconstruction_);
 
-  std::pair<std::vector<double>, std::vector<double>> xy_coords =
+  std::vector<LocationPartitioner::Box2d> boxes =
       location_partitioner.GetPartitions(options_.block_size,
                                          options_.robust_percentile,
                                          options_.kStretchRatio);
 
   double margin = (options_.window_size - options_.block_size) / 2.0;
-  for (size_t i = 0; i < xy_coords.first.size() - 1; ++i) {
-    for (size_t j = 0; j < xy_coords.second.size() - 1; ++j) {
-      Eigen::Vector2d top_left(xy_coords.first[i], xy_coords.second[j]);
-      Eigen::Vector2d bottom_right(xy_coords.first[i + 1],
-                                   xy_coords.second[j + 1]);
-      std::vector<image_t> image_ids =
-          location_partitioner.GetImageIdsInsideRange(top_left, bottom_right);
-      // stretch with margin
-      Eigen::Vector2d window_top_left =
-          top_left - Eigen::Vector2d(margin, margin);
-      Eigen::Vector2d window_bottom_right =
-          bottom_right + Eigen::Vector2d(margin, margin);
-      std::vector<image_t> window_image_ids =
-          location_partitioner.GetImageIdsInsideRange(top_left, bottom_right);
-      // get subproblem
-      std::vector<double*> subproblem_pose_blocks;
-      for (const auto& image : reconstruction->Images()) {
-        const double* qvec =
-            image.second.CamFromWorld().rotation.coeffs().data();
-        if (problem_->HasParameterBlock(qvec))
-          subproblem_pose_blocks_.insert(const_cast<double*>(qvec));
-        const double* tvec = image.second.CamFromWorld().translation.data();
-        if (problem_->HasParameterBlock(tvec))
-          subproblem_pose_blocks_.insert(const_cast<double*>(tvec));
-      }
-      ceres::Problem* subproblem = new ceres::Problem();
-      problem_partitioner.GetSubproblem(subproblem, subproblem_pose_blocks);
-      std::map<image_t, Eigen::MatrixXd> tmp_image_id_to_covar;
-      EstimatePoseCovariance(subproblem, reconstruction, tmp_image_id_to_covar);
-      for (const image_t& image_id : image_ids) {
-        if (image_id_to_covar.find(image_id) != image_id_to_covar.end())
-          continue;
-        image_id_to_covar.emplace(image_id, tmp_image_id_to_covar.at(image_id));
-      }
+  for (const auto& box2d : boxes) {
+    Eigen::Vector2d top_left = box2d.first;
+    Eigen::Vector2d bottom_right = box2d.second;
+    std::vector<image_t> image_ids =
+        location_partitioner.GetImageIdsInsideRange(top_left, bottom_right);
+    // stretch with margin
+    Eigen::Vector2d window_top_left =
+        top_left - Eigen::Vector2d(margin, margin);
+    Eigen::Vector2d window_bottom_right =
+        bottom_right + Eigen::Vector2d(margin, margin);
+    std::vector<image_t> window_image_ids =
+        location_partitioner.GetImageIdsInsideRange(top_left, bottom_right);
+    // get subproblem
+    std::vector<double*> subproblem_pose_blocks;
+    for (const auto& image : reconstruction_->Images()) {
+      const double* qvec = image.second.CamFromWorld().rotation.coeffs().data();
+      if (problem_->HasParameterBlock(qvec))
+        subproblem_pose_blocks.push_back(const_cast<double*>(qvec));
+      const double* tvec = image.second.CamFromWorld().translation.data();
+      if (problem_->HasParameterBlock(tvec))
+        subproblem_pose_blocks.push_back(const_cast<double*>(tvec));
+    }
+    ceres::Problem* subproblem = new ceres::Problem();
+    problem_partitioner.GetSubproblem(subproblem, subproblem_pose_blocks);
+    std::map<image_t, Eigen::MatrixXd> tmp_image_id_to_covar;
+    if (!EstimatePoseCovariance(
+            subproblem, reconstruction_, tmp_image_id_to_covar))
+      return false;
+    for (const image_t& image_id : image_ids) {
+      if (image_id_to_covar.find(image_id) != image_id_to_covar.end()) continue;
+      image_id_to_covar.emplace(image_id, tmp_image_id_to_covar.at(image_id));
     }
   }
-  return image_id_to_covar;
+  return true;
 }
 
-}  // namespace
+}  // namespace colmap

@@ -43,9 +43,8 @@ class ProblemPartitioner {
   ProblemPartitioner(ceres::Problem* problem,
                      const std::vector<const double*>& pose_blocks);
 
-  static void GetSubproblem(
-      ceres::Problem* subproblem,
-      const std::vector<double*>& subproblem_pose_blocks) const;
+  void GetSubproblem(ceres::Problem* subproblem,
+                     const std::vector<double*>& subproblem_pose_blocks) const;
 
  private:
   struct BipartiteGraph {
@@ -56,12 +55,13 @@ class ProblemPartitioner {
       param_to_residual[param_block].push_back(residual_block_id);
       residual_to_param[residual_block_id].push_back(param_block);
     }
-    std::vector<double*>& GetResidualBlocks(double* param_block) {
-      return param_to_residual[param_block];
+    std::vector<ceres::ResidualBlockId> GetResidualBlocks(
+        double* param_block) const {
+      return param_to_residual.at(param_block);
     }
-    std::vector<double*>& GetParameterBlocks(
-        ceres::ResidualBlockId residual_block_id) {
-      return residual_to_param[residual_block_id];
+    std::vector<double*> GetParameterBlocks(
+        ceres::ResidualBlockId residual_block_id) const {
+      return residual_to_param.at(residual_block_id);
     }
     std::unordered_map<double*, std::vector<ceres::ResidualBlockId>>
         param_to_residual;
@@ -82,11 +82,11 @@ class LocationPartitioner {
   LocationPartitioner(const std::map<image_t, Eigen::Vector2d>& locations);
   LocationPartitioner(Reconstruction* reconstruction);
 
-  static std::vector<image_t> GetImageIdsInsideRange(
+  std::vector<image_t> GetImageIdsInsideRange(
       const Eigen::Vector2d& top_left,
       const Eigen::Vector2d& bottom_right) const;
 
-  typedef Box2d =
+  using Box2d =
       std::pair<Eigen::Vector2d, Eigen::Vector2d>;  // (top_left, bottom_right)
   std::vector<Box2d> GetPartitions(double block_size,
                                    double robust_percentile = 0.01,
@@ -109,8 +109,8 @@ class LocationPartitioner {
   std::vector<double> GetCoords(const std::vector<double>& inputs,
                                 double block_size,
                                 double robust_percentile = 0.01,
-                                double kStretchRatio = 0.1);
-}
+                                double kStretchRatio = 0.1) const;
+};
 
 struct BlockwiseCovarianceEstimatorOptions {
   // The 2D window size for each subproblem
@@ -137,20 +137,20 @@ class BlockwiseCovarianceEstimator {
         lambda_(lambda) {}
 
   // Run blockwise estimation
-  static bool Estimate(std::map<image_t, Eigen::MatrixXd>& image_id_to_covar);
+  bool Estimate(std::map<image_t, Eigen::MatrixXd>& image_id_to_covar);
 
  private:
   // Options
   const BlockwiseCovarianceEstimatorOptions options_;
 
-  // The damping factor to avoid rank deficiency
-  const double lambda_ = 1e-8;
-
   // ceres problem
   ceres::Problem* problem_;
 
   // reconstruction
-  Reconstruction* reconstruction_ = nullptr;
+  Reconstruction* reconstruction_;
+
+  // The damping factor to avoid rank deficiency
+  const double lambda_ = 1e-8;
 };
 
 }  // namespace colmap
