@@ -146,7 +146,7 @@ void ControlPointSegmentGraph::ImportCrossSequenceMatching(
   // TODO: impl later
 }
 
-std::map<int, std::pair<time_t, time_t>>
+std::map<int, std::pair<timestamp_t, timestamp_t>>
 ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
                                                int maxDepth) const {
   // BFS
@@ -176,7 +176,7 @@ ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
   }
 
   // Get result
-  std::map<int, std::pair<time_t, time_t>> res;
+  std::map<int, std::pair<timestamp_t, timestamp_t>> res;
   for (auto& node : visited) {
     if (res.find(node.sequence_id) == res.end()) {
       res.emplace(node.sequence_id, node.timestamps);
@@ -192,7 +192,7 @@ ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
   return res;
 }
 
-std::map<int, std::pair<time_t, time_t>>
+std::map<int, std::pair<timestamp_t, timestamp_t>>
 ControlPointSegmentGraph::GetNeighboringRanges(Segment base_segment,
                                                int maxDepth) const {
   // BFS
@@ -226,7 +226,7 @@ ControlPointSegmentGraph::GetNeighboringRanges(Segment base_segment,
   }
 
   // Get result
-  std::map<int, std::pair<time_t, time_t>> res;
+  std::map<int, std::pair<timestamp_t, timestamp_t>> res;
   for (auto& node : visited) {
     if (res.find(node.sequence_id) == res.end()) {
       res.emplace(node.sequence_id, node.timestamps);

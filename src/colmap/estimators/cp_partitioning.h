@@ -38,14 +38,14 @@
 
 namespace colmap {
 
-typedef int32_t time_t;
+typedef double timestamp_t;
 
 struct ControlPoint {
   ControlPoint() {}
   ControlPoint(int sequence_id,
                int cp_id,
                std::string name,
-               std::pair<time_t, time_t> timestamps)
+               std::pair<timestamp_t, timestamp_t> timestamps)
       : sequence_id(sequence_id),
         cp_id(cp_id),
         name(name),
@@ -61,7 +61,7 @@ struct ControlPoint {
   int sequence_id;
   int cp_id;
   std::string name;
-  std::pair<time_t, time_t> timestamps;  // (low, high)
+  std::pair<timestamp_t, timestamp_t> timestamps;  // (low, high)
 };
 
 struct Segment {
@@ -121,9 +121,9 @@ class ControlPointSegmentGraph {
   void ImportSequence(ControlPointSequence* sequence);
   void ImportCrossSequenceMatching(const CrossSequenceMatching& matches);
 
-  std::map<int, std::pair<time_t, time_t>> GetNeighboringRanges(
+  std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       ControlPoint base_cp, int maxDepth = 3) const;
-  std::map<int, std::pair<time_t, time_t>> GetNeighboringRanges(
+  std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       Segment base_segment, int maxDepth = 3) const;
 
  private:
