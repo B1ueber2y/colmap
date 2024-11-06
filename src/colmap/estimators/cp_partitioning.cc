@@ -76,7 +76,10 @@ timestamp_t ControlPointSequence::GetSegmentEndTime(
 }
 
 void ControlPointSequence::ImportImages(
-    const std::map<image_t, timestamp_t>& images) {
+    const std::map<image_t, timestamp_t>& image_timestamps) {
+  // set variables
+  image_timestamps_ = image_timestamps;
+
   // generate indexing list
   std::map<timestamp_t, std::pair<NodeType, int>> start_times;
   for (auto& cp : control_points) {
@@ -90,7 +93,7 @@ void ControlPointSequence::ImportImages(
   }
 
   // map images to cp / segment
-  for (auto [image_id, timestamp] : images) {
+  for (auto [image_id, timestamp] : image_timestamps) {
     THROW_CHECK_LE(time_ranges.first, timestamp);
     THROW_CHECK_GE(time_ranges.second, timestamp);
     auto it = start_times.upper_bound(timestamp);
@@ -102,6 +105,16 @@ std::pair<NodeType, int> ControlPointSequence::GetIndex(
     const image_t image_id) const {
   THROW_CHECK(images_.find(image_id) != images_.end());
   return images_.at(image_id);
+}
+
+std::vector<image_t> ControlPointSequence::GetImageIdsInsideTimeRanges(
+    const std::pair<timestamp_t, timestamp_t>& time_ranges) {
+  std::vector<image_t> image_ids;
+  for (auto [image_id, timestamp] : image_timestamps_) {
+    if (timestamp >= time_ranges.first && timestamp <= time_ranges.second)
+      image_ids.push_back(image_id);
+  }
+  return image_ids;
 }
 
 void ControlPointSegmentGraph::AddNode(const Node& node) {

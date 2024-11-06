@@ -90,10 +90,13 @@ class ControlPointSequence {
   timestamp_t GetSegmentStartTime(const int segment_id) const;
   timestamp_t GetSegmentEndTime(const int segment_id) const;
 
-  void ImportImages(const std::map<image_t, timestamp_t>& images);
+  void ImportImages(const std::map<image_t, timestamp_t>& images_timestamps);
   std::pair<NodeType, int> GetIndex(const image_t image_id) const;
+  std::vector<image_t> GetImageIdsInsideTimeRanges(
+      const std::pair<timestamp_t, timestamp_t>& time_ranges);
 
  private:
+  std::map<image_t, timestamp_t> image_timestamps_;
   std::map<image_t, std::pair<NodeType, int>>
       images_;  // image_id -> cp / segment
 };
