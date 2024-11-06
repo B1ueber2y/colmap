@@ -124,12 +124,26 @@ void ControlPointSegmentGraph::GetNeighboringNodes(
 
 void ControlPointSegmentGraph::ImportSequence(ControlPointSequence* sequence) {
   sequences_.emplace(sequence->sequence_id, sequence);
+  // add control points
   for (auto& cp : sequence->control_points) {
     AddControlPoint(cp);
+    Node node_cp = GetNode(cp);
+    if (cp_name_to_nodes_.find(cp.name) != cp_name_to_nodes_.end()) {
+      // connect control points with the same name.
+      for (Node& node_existing_cp: cp_name_to_nodes_.at(cp.name)) {
+        AddEdge(node_cp, node_existing_cp);
+      }
+    }
+    else {
+      cp_name_to_nodes_.emplace(cp.name, std::vector<Node>());
+    }
+    cp_name_to_nodes_.at(cp.name).push_back(node_cp);
   }
+  // add segments
   for (auto& segment : sequence->segments) {
     AddSegment(segment);
   }
+  // connect adjacent cp - segment
   for (size_t i = 0; i < sequence->control_points.size() - 1; ++i) {
     AddEdge(sequence->control_points[i], sequence->segments[i]);
     AddEdge(sequence->control_points[i + 1], sequence->segments[i]);

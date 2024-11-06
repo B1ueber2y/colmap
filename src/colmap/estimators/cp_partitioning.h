@@ -109,7 +109,6 @@ class ControlPointSegmentGraph {
  public:
   ControlPointSegmentGraph() {}
   // interfaces
-  // TODO: match cps by name when importing sequences
   void ImportSequence(ControlPointSequence* sequence);
   void ImportSequenceMatching(const SequenceMatching& matches);
 
@@ -145,6 +144,9 @@ class ControlPointSegmentGraph {
 
   std::map<Node, std::set<Node>> g_nodes_;
   std::map<int, ControlPointSequence*> sequences_;
+
+  // To help match cp with the same names
+  std::map<std::string, std::vector<Node>> cp_name_to_nodes_;
 };
 
 }  // namespace cp_partitioning
