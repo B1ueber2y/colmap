@@ -35,6 +35,8 @@
 
 namespace colmap {
 
+namespace cp_partitioning {
+
 ControlPointSequence::ControlPointSequence(
     const std::vector<ControlPoint>& control_points)
     : control_points(control_points) {
@@ -54,133 +56,69 @@ void ControlPointSequence::ImportImages(
   // TODO: impl
 }
 
-ControlPointIndex ControlPointSegmentGraph::GetControlPointIndex(
-    const ControlPoint& cp) const {
-  return ControlPointIndex(cp.sequence_id, cp.cp_id);
+void ControlPointSegmentGraph::AddNode(const Node& node) {
+  if (!HasNode(node)) {
+    g_nodes_.emplace(node, std::set<Node>());
+  }
 }
 
-ControlPoint ControlPointSegmentGraph::GetControlPoint(
-    const ControlPointIndex& cp_index) const {
-  int sequence_id = cp_index.first;
-  int cp_id = cp_index.second;
-  THROW_CHECK(sequences_.find(sequence_id) != sequences_.end());
-  return sequences_.at(sequence_id)->control_points[cp_id];
+bool ControlPointSegmentGraph::HasNode(const Node& node) const {
+  return g_nodes_.find(node) != g_nodes_.end();
 }
 
-SegmentIndex ControlPointSegmentGraph::GetSegmentIndex(
-    const Segment& segment) const {
-  return SegmentIndex(segment.sequence_id, segment.segment_id);
+Node ControlPointSegmentGraph::GetNode(const ControlPoint& cp) const {
+  return Node(NodeType::CP, std::make_pair(cp.sequence_id, cp.cp_id));
 }
 
-Segment ControlPointSegmentGraph::GetSegment(
-    const SegmentIndex& segment_index) const {
-  int sequence_id = segment_index.first;
-  int segment_id = segment_index.second;
-  THROW_CHECK(sequences_.find(sequence_id) != sequences_.end());
-  return sequences_.at(sequence_id)->segments[segment_id];
+Node ControlPointSegmentGraph::GetNode(const Segment& segment) const {
+  return Node(NodeType::SEGMENT,
+              std::make_pair(segment.sequence_id, segment.segment_id));
 }
 
 void ControlPointSegmentGraph::AddControlPoint(const ControlPoint& cp) {
-  auto cp_index = GetControlPointIndex(cp);
-  m_cp_to_cp.emplace(cp_index, std::set<ControlPointIndex>());
-  m_cp_to_segment.emplace(cp_index, std::set<ControlPointIndex>());
+  AddNode(GetNode(cp));
 }
 
 bool ControlPointSegmentGraph::HasControlPoint(const ControlPoint& cp) const {
-  auto cp_index = GetControlPointIndex(cp);
-  return HasControlPoint(cp_index);
-}
-
-bool ControlPointSegmentGraph::HasControlPoint(
-    const ControlPointIndex& cp_index) const {
-  return m_cp_to_cp.find(cp_index) != m_cp_to_cp.end();
+  return HasNode(GetNode(cp));
 }
 
 void ControlPointSegmentGraph::AddSegment(const Segment& segment) {
-  auto segment_index = GetSegmentIndex(segment);
-  m_segment_to_cp.emplace(segment_index, std::set<ControlPointIndex>());
-  m_segment_to_segment.emplace(segment_index, std::set<SegmentIndex>());
+  AddNode(GetNode(segment));
 }
 
 bool ControlPointSegmentGraph::HasSegment(const Segment& segment) const {
-  auto segment_index = GetSegmentIndex(segment);
-  return HasSegment(segment_index);
+  return HasNode(GetNode(segment));
 }
 
-bool ControlPointSegmentGraph::HasSegment(
-    const SegmentIndex& segment_index) const {
-  return m_segment_to_segment.find(segment_index) != m_segment_to_segment.end();
+void ControlPointSegmentGraph::AddEdge(const Node& node1, const Node& node2) {
+  THROW_CHECK(HasNode(node1));
+  THROW_CHECK(HasNode(node2));
+  g_nodes_.at(node1).insert(node2);
+  g_nodes_.at(node2).insert(node1);
 }
 
 void ControlPointSegmentGraph::AddEdge(const ControlPoint& cp,
                                        const Segment& segment) {
-  THROW_CHECK(HasControlPoint(cp));
-  auto cp_index = GetControlPointIndex(cp);
-  THROW_CHECK(HasSegment(segment));
-  auto segment_index = GetSegmentIndex(segment);
-  m_cp_to_segment.at(cp_index).insert(segment_index);
-  m_segment_to_cp.at(segment_index).insert(cp_index);
+  AddEdge(GetNode(cp), GetNode(segment));
 }
 
 void ControlPointSegmentGraph::AddEdge(const ControlPoint& cp1,
                                        const ControlPoint& cp2) {
-  THROW_CHECK(HasControlPoint(cp1));
-  auto cp1_index = GetControlPointIndex(cp1);
-  THROW_CHECK(HasControlPoint(cp2));
-  auto cp2_index = GetControlPointIndex(cp2);
-  THROW_CHECK(cp1_index != cp2_index);
-  m_cp_to_cp.at(cp1_index).insert(cp2_index);
-  m_cp_to_cp.at(cp2_index).insert(cp1_index);
+  AddEdge(GetNode(cp1), GetNode(cp2));
 }
 
 void ControlPointSegmentGraph::AddEdge(const Segment& segment1,
                                        const Segment& segment2) {
-  THROW_CHECK(HasSegment(segment1));
-  auto segment1_index = GetSegmentIndex(segment1);
-  THROW_CHECK(HasSegment(segment2));
-  auto segment2_index = GetSegmentIndex(segment2);
-  THROW_CHECK(segment1_index != segment2_index);
-  m_segment_to_segment.at(segment1_index).insert(segment2_index);
-  m_segment_to_segment.at(segment2_index).insert(segment1_index);
+  AddEdge(GetNode(segment1), GetNode(segment2));
 }
 
-void ControlPointSegmentGraph::GetNeighboringSegmentsFromCP(
-    const ControlPointIndex& cp_index,
-    std::vector<SegmentIndex>* neighboring_segments) const {
-  THROW_CHECK(HasControlPoint(cp_index));
-  neighboring_segments->clear();
-  for (auto neighbor : m_cp_to_segment.at(cp_index)) {
-    neighboring_segments->push_back(neighbor);
-  }
-}
-
-void ControlPointSegmentGraph::GetNeighboringSegmentsFromSegment(
-    const SegmentIndex& segment_index,
-    std::vector<SegmentIndex>* neighboring_segments) const {
-  THROW_CHECK(HasSegment(segment_index));
-  neighboring_segments->clear();
-  for (auto neighbor : m_segment_to_segment.at(segment_index)) {
-    neighboring_segments->push_back(neighbor);
-  }
-}
-
-void ControlPointSegmentGraph::GetNeighboringControlPointsFromCP(
-    const ControlPointIndex& cp_index,
-    std::vector<ControlPointIndex>* neighboring_cps) const {
-  THROW_CHECK(HasControlPoint(cp_index));
-  neighboring_cps->clear();
-  for (auto neighbor : m_cp_to_cp.at(cp_index)) {
-    neighboring_cps->push_back(neighbor);
-  }
-}
-
-void ControlPointSegmentGraph::GetNeighboringControlPointsFromSegment(
-    const SegmentIndex& segment_index,
-    std::vector<ControlPointIndex>* neighboring_cps) const {
-  THROW_CHECK(HasSegment(segment_index));
-  neighboring_cps->clear();
-  for (auto neighbor : m_segment_to_cp.at(segment_index)) {
-    neighboring_cps->push_back(neighbor);
+void ControlPointSegmentGraph::GetNeighboringNodes(
+    const Node& node, std::vector<Node>* neighbors) const {
+  THROW_CHECK(HasNode(node));
+  neighbors->clear();
+  for (Node neighbor : g_nodes_.at(node)) {
+    neighbors->push_back(neighbor);
   }
 }
 
@@ -204,15 +142,11 @@ void ControlPointSegmentGraph::ImportSequenceMatching(
 }
 
 std::map<int, std::pair<timestamp_t, timestamp_t>>
-ControlPointSegmentGraph::GetNeighboringRanges(const ControlPoint& base_cp,
-                                               int maxDepth) const {
-  // BFS
-  auto base_cp_index = GetControlPointIndex(base_cp);
-  std::queue<std::pair<ControlPointIndex, int>> q;
-  std::set<ControlPointIndex> visited;
-  visited.insert(base_cp_index);
-  q.push({base_cp_index, 0});
-
+ControlPointSegmentGraph::GetNeighboringRanges(
+    std::queue<std::pair<Node, int>>& q,
+    std::set<Node>& visited,
+    int maxDepth) const {
+  // customized bfs
   while (!q.empty()) {
     auto [node, depth] = q.front();
     q.pop();
@@ -220,15 +154,18 @@ ControlPointSegmentGraph::GetNeighboringRanges(const ControlPoint& base_cp,
       continue;
     }
     // traverse
-    std::vector<SegmentIndex> segments;
-    GetNeighboringSegmentsFromCP(node, &segments);
-    for (SegmentIndex segment_index : segments) {
-      std::vector<ControlPointIndex> neighbors;
-      GetNeighboringControlPointsFromSegment(segment_index, &neighbors);
-      for (ControlPointIndex neighbor : neighbors) {
-        if (visited.find(neighbor) != visited.end()) continue;
-        visited.insert(neighbor);
+    std::vector<Node> neighbors;
+    GetNeighboringNodes(node, &neighbors);
+    for (Node neighbor : neighbors) {
+      if (visited.find(neighbor) != visited.end()) continue;
+      visited.insert(neighbor);
+      // increment depth only for segment - cp edge
+      if (node.first == NodeType::SEGMENT && neighbor.first == NodeType::CP) {
         q.push({neighbor, depth + 1});
+      }
+      // otherwise keep the depth unchanged
+      else {
+        q.push({neighbor, depth});
       }
     }
   }
@@ -236,7 +173,10 @@ ControlPointSegmentGraph::GetNeighboringRanges(const ControlPoint& base_cp,
   // Get result
   std::map<int, std::pair<timestamp_t, timestamp_t>> res;
   for (auto& node : visited) {
-    auto cp = GetControlPoint(node);
+    if (node.first != NodeType::CP) continue;
+    int sequence_id = node.second.first;
+    int cp_id = node.second.second;
+    ControlPoint cp = sequences_.at(sequence_id)->control_points[cp_id];
     if (res.find(cp.sequence_id) == res.end()) {
       res.emplace(cp.sequence_id, cp.timestamps);
     } else {
@@ -252,54 +192,27 @@ ControlPointSegmentGraph::GetNeighboringRanges(const ControlPoint& base_cp,
 }
 
 std::map<int, std::pair<timestamp_t, timestamp_t>>
+ControlPointSegmentGraph::GetNeighboringRanges(const ControlPoint& base_cp,
+                                               int maxDepth) const {
+  Node node = GetNode(base_cp);
+  std::queue<std::pair<Node, int>> q;
+  std::set<Node> visited;
+  visited.insert(node);
+  q.push({node, 0});
+  return GetNeighboringRanges(q, visited, maxDepth);
+}
+
+std::map<int, std::pair<timestamp_t, timestamp_t>>
 ControlPointSegmentGraph::GetNeighboringRanges(const Segment& base_segment,
                                                int maxDepth) const {
-  // BFS
-  std::queue<std::pair<ControlPointIndex, int>> q;
-  std::set<ControlPointIndex> visited;
-  std::vector<ControlPointIndex> cps;
-  GetNeighboringControlPointsFromSegment(GetSegmentIndex(base_segment), &cps);
-  for (ControlPointIndex cp_index : cps) {
-    visited.insert(cp_index);
-    q.push({cp_index, 0});
-  }
-
-  while (!q.empty()) {
-    auto [node, depth] = q.front();
-    q.pop();
-    if (depth >= maxDepth) {
-      continue;
-    }
-    // traverse
-    std::vector<SegmentIndex> segments;
-    GetNeighboringSegmentsFromCP(node, &segments);
-    for (SegmentIndex segment_index : segments) {
-      std::vector<ControlPointIndex> neighbors;
-      GetNeighboringControlPointsFromSegment(segment_index, &neighbors);
-      for (ControlPointIndex neighbor : neighbors) {
-        if (visited.find(neighbor) != visited.end()) continue;
-        visited.insert(neighbor);
-        q.push({neighbor, depth + 1});
-      }
-    }
-  }
-
-  // Get result
-  std::map<int, std::pair<timestamp_t, timestamp_t>> res;
-  for (auto& node : visited) {
-    auto cp = GetControlPoint(node);
-    if (res.find(cp.sequence_id) == res.end()) {
-      res.emplace(cp.sequence_id, cp.timestamps);
-    } else {
-      if (res[cp.sequence_id].first > cp.timestamps.first) {
-        res[cp.sequence_id].first = cp.timestamps.first;
-      }
-      if (res[cp.sequence_id].first < cp.timestamps.first) {
-        res[cp.sequence_id].second = cp.timestamps.second;
-      }
-    }
-  }
-  return res;
+  std::queue<std::pair<Node, int>> q;
+  std::set<Node> visited;
+  Node node = GetNode(base_segment);
+  visited.insert(node);
+  q.push({node, 0});
+  return GetNeighboringRanges(q, visited, maxDepth);
 }
+
+}  // namespace cp_partitioning
 
 }  // namespace colmap

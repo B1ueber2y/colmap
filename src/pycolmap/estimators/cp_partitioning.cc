@@ -14,6 +14,7 @@ using namespace pybind11::literals;
 namespace py = pybind11;
 
 void BindCPPartitioning(py::module& m) {
+  using namespace colmap::cp_partitioning;
   py::class_<ControlPoint> PyControlPoint(m, "ControlPoint");
   PyControlPoint.def(py::init<>())
       .def(py::init<int,

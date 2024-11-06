@@ -32,10 +32,13 @@
 #include "colmap/util/types.h"
 
 #include <map>
+#include <queue>
 #include <set>
 #include <vector>
 
 namespace colmap {
+
+namespace cp_partitioning {
 
 typedef double timestamp_t;
 
@@ -49,13 +52,6 @@ struct ControlPoint {
         cp_id(cp_id),
         name(name),
         timestamps(timestamps) {}
-  bool operator<(const ControlPoint& other) const {
-    if (sequence_id < other.sequence_id)
-      return true;
-    else if (sequence_id == other.sequence_id && cp_id < other.cp_id)
-      return true;
-    return false;
-  };
 
   int sequence_id;
   int cp_id;
@@ -70,13 +66,6 @@ struct Segment {
         segment_id(segment_id),
         cp_id_low(cp_id_low),
         cp_id_high(cp_id_high) {}
-  bool operator<(const Segment& other) const {
-    if (sequence_id < other.sequence_id)
-      return true;
-    else if (sequence_id == other.sequence_id && segment_id < other.segment_id)
-      return true;
-    return false;
-  }
 
   int sequence_id;
   int segment_id;
@@ -84,10 +73,9 @@ struct Segment {
   int cp_id_high;
 };
 
+enum NodeType { CP = 0, SEGMENT = 1 };
 class ControlPointSequence {
  public:
-  enum NodeType { CP = 0, SEGMENT = 1 };
-
   ControlPointSequence() {}
   ControlPointSequence(const std::vector<ControlPoint>& control_points);
   bool operator<(const ControlPointSequence& other) const {
@@ -115,11 +103,12 @@ class SequenceMatching {
   std::vector<std::pair<image_t, image_t>> matches;
 };
 
-using ControlPointIndex = std::pair<int, int>;
-using SegmentIndex = std::pair<int, int>;
+using NodeIndex = std::pair<int, int>;
+using Node = std::pair<NodeType, NodeIndex>;
 class ControlPointSegmentGraph {
  public:
   ControlPointSegmentGraph() {}
+  // interfaces
   // TODO: match cps by name when importing sequences
   void ImportSequence(ControlPointSequence* sequence);
   void ImportSequenceMatching(const SequenceMatching& matches);
@@ -129,42 +118,35 @@ class ControlPointSegmentGraph {
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const Segment& base_segment, int maxDepth = 3) const;
 
- private:
+  // utilities
   void AddControlPoint(const ControlPoint& cp);
-  bool HasControlPoint(const ControlPointIndex& cp_index) const;
   bool HasControlPoint(const ControlPoint& cp) const;
   void AddSegment(const Segment& segment);
-  bool HasSegment(const SegmentIndex& segment_index) const;
   bool HasSegment(const Segment& segment) const;
-
-  ControlPointIndex GetControlPointIndex(const ControlPoint& cp) const;
-  ControlPoint GetControlPoint(const ControlPointIndex& cp_index) const;
-  SegmentIndex GetSegmentIndex(const Segment& segment) const;
-  Segment GetSegment(const SegmentIndex& segment_index) const;
 
   void AddEdge(const ControlPoint& cp, const Segment& segment);
   void AddEdge(const ControlPoint& cp1, const ControlPoint& cp2);
   void AddEdge(const Segment& segment1, const Segment& segment2);
 
-  void GetNeighboringSegmentsFromCP(
-      const ControlPointIndex& cp_index,
-      std::vector<SegmentIndex>* neighboring_segments) const;
-  void GetNeighboringSegmentsFromSegment(
-      const SegmentIndex& segment_index,
-      std::vector<SegmentIndex>* neighboring_segments) const;
-  void GetNeighboringControlPointsFromCP(
-      const ControlPointIndex& cp_index,
-      std::vector<ControlPointIndex>* neighboring_cps) const;
-  void GetNeighboringControlPointsFromSegment(
-      const SegmentIndex& segment_index,
-      std::vector<ControlPointIndex>* neighboring_cps) const;
+ private:
+  Node GetNode(const ControlPoint& cp) const;
+  Node GetNode(const Segment& segment) const;
+  void AddNode(const Node& node);
+  bool HasNode(const Node& node) const;
+  void AddEdge(const Node& node1, const Node& node2);
+  void GetNeighboringNodes(const Node& node,
+                           std::vector<Node>* neighbors) const;
+  // customized bfs. max_depth limits the maximum control points that can be
+  // traversed
+  std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
+      std::queue<std::pair<Node, int>>& q,
+      std::set<Node>& visited,
+      int maxDepth = 3) const;
 
-  std::map<ControlPointIndex, std::set<ControlPointIndex>> m_cp_to_cp;
-  std::map<ControlPointIndex, std::set<SegmentIndex>> m_cp_to_segment;
-  std::map<SegmentIndex, std::set<ControlPointIndex>> m_segment_to_cp;
-  std::map<SegmentIndex, std::set<SegmentIndex>> m_segment_to_segment;
-
+  std::map<Node, std::set<Node>> g_nodes_;
   std::map<int, ControlPointSequence*> sequences_;
 };
+
+}  // namespace cp_partitioning
 
 }  // namespace colmap
