@@ -96,6 +96,11 @@ class ControlPointSequence {
   std::vector<image_t> GetImageIdsInsideTimeRange(
       const std::pair<timestamp_t, timestamp_t>& time_range) const;
 
+  std::vector<image_t> GetImageIdsFromCP(const ControlPoint& cp) const;
+  std::vector<image_t> GetImageIdsFromSegment(const Segment& segment) const;
+  std::vector<image_t> GetImageIdsFromNodeCollection(
+      const std::vector<std::pair<NodeType, int>>& indexes) const;
+
  private:
   std::map<image_t, timestamp_t> image_timestamps_;
   std::map<image_t, std::pair<NodeType, int>>
@@ -127,10 +132,16 @@ class ControlPointSegmentGraph {
       const ControlPoint& base_cp, int maxDepth = 3) const;
   std::vector<image_t> GetNeighboringImageIds(const ControlPoint& base_cp,
                                               int maxDepth = 3) const;
+
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const Segment& base_segment, int maxDepth = 3) const;
   std::vector<image_t> GetNeighboringImageIds(const Segment& base_segment,
                                               int maxDepth = 3) const;
+
+  std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
+      const std::vector<Node>& base_nodes, int maxDepth = 3) const;
+  std::vector<image_t> GetNeighboringImageIds(
+      const std::vector<Node>& base_nodes, int maxDepth = 3) const;
 
   // utilities
   void AddControlPoint(const ControlPoint& cp);
@@ -142,11 +153,13 @@ class ControlPointSegmentGraph {
   void AddEdge(const ControlPoint& cp1, const ControlPoint& cp2);
   void AddEdge(const Segment& segment1, const Segment& segment2);
 
+  // tmp for pybind
+  Node GetNode(const ControlPoint& cp) const;
+  Node GetNode(const Segment& segment) const;
+
   std::map<int, ControlPointSequence> sequences;
 
  private:
-  Node GetNode(const ControlPoint& cp) const;
-  Node GetNode(const Segment& segment) const;
   void AddNode(const Node& node);
   bool HasNode(const Node& node) const;
   void AddEdge(const Node& node1, const Node& node2);

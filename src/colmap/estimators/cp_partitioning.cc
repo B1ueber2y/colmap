@@ -117,6 +117,58 @@ std::vector<image_t> ControlPointSequence::GetImageIdsInsideTimeRange(
   return image_ids;
 }
 
+std::vector<image_t> ControlPointSequence::GetImageIdsFromCP(
+    const ControlPoint& cp) const {
+  std::vector<image_t> image_ids;
+  for (auto [image_id, timestamp] : image_timestamps_) {
+    if (timestamp >= cp.timestamps.first && timestamp <= cp.timestamps.second) {
+      image_ids.push_back(image_id);
+    }
+  }
+  return image_ids;
+}
+
+std::vector<image_t> ControlPointSequence::GetImageIdsFromSegment(
+    const Segment& segment) const {
+  std::vector<image_t> image_ids;
+  for (auto [image_id, timestamp] : image_timestamps_) {
+    timestamp_t t_low = GetSegmentStartTime(segment.segment_id);
+    timestamp_t t_high = GetSegmentEndTime(segment.segment_id);
+    if (timestamp >= t_low && timestamp <= t_high) {
+      image_ids.push_back(image_id);
+    }
+  }
+  return image_ids;
+}
+
+std::vector<image_t> ControlPointSequence::GetImageIdsFromNodeCollection(
+    const std::vector<std::pair<NodeType, int>>& indexes) const {
+  // get time range
+  double t_low = -1;
+  double t_high = -1;
+  for (auto& index : indexes) {
+    std::vector<image_t> image_ids_index;
+    double t_low_index, t_high_index;
+    if (index.first == NodeType::CP) {
+      t_low_index = control_points[index.second].timestamps.first;
+      t_high_index = control_points[index.second].timestamps.second;
+    } else {
+      t_low_index = GetSegmentStartTime(index.second);
+      t_high_index = GetSegmentEndTime(index.second);
+    }
+    if (t_low_index < t_low) t_low = t_low_index;
+    if (t_high_index > t_high) t_high = t_high_index;
+  }
+  // get image ids
+  std::vector<image_t> image_ids;
+  for (auto [image_id, timestamp] : image_timestamps_) {
+    if (timestamp >= t_low && timestamp <= t_high) {
+      image_ids.push_back(image_id);
+    }
+  }
+  return image_ids;
+}
+
 void ControlPointSegmentGraph::AddNode(const Node& node) {
   if (!HasNode(node)) {
     g_nodes_.emplace(node, std::set<Node>());
@@ -312,6 +364,18 @@ ControlPointSegmentGraph::GetNeighboringRanges(const Segment& base_segment,
   return GetNeighboringRanges(q, visited, maxDepth);
 }
 
+std::map<int, std::pair<timestamp_t, timestamp_t>>
+ControlPointSegmentGraph::GetNeighboringRanges(
+    const std::vector<Node>& base_nodes, int maxDepth) const {
+  std::queue<std::pair<Node, int>> q;
+  std::set<Node> visited;
+  for (auto& node : base_nodes) {
+    visited.insert(node);
+    q.push({node, 0});
+  }
+  return GetNeighboringRanges(q, visited, maxDepth);
+}
+
 std::vector<image_t> ControlPointSegmentGraph::GetNeighboringImageIds(
     const ControlPoint& base_cp, int maxDepth) const {
   std::vector<image_t> image_ids;
@@ -331,6 +395,20 @@ std::vector<image_t> ControlPointSegmentGraph::GetNeighboringImageIds(
   std::vector<image_t> image_ids;
   std::map<int, std::pair<timestamp_t, timestamp_t>> time_ranges =
       GetNeighboringRanges(base_segment, maxDepth);
+  for (auto& [seq_id, time_range] : time_ranges) {
+    std::vector<image_t> image_ids_in_seq =
+        sequences.at(seq_id).GetImageIdsInsideTimeRange(time_range);
+    image_ids.insert(
+        image_ids.end(), image_ids_in_seq.begin(), image_ids_in_seq.end());
+  }
+  return image_ids;
+}
+
+std::vector<image_t> ControlPointSegmentGraph::GetNeighboringImageIds(
+    const std::vector<Node>& base_nodes, int maxDepth) const {
+  std::vector<image_t> image_ids;
+  std::map<int, std::pair<timestamp_t, timestamp_t>> time_ranges =
+      GetNeighboringRanges(base_nodes, maxDepth);
   for (auto& [seq_id, time_range] : time_ranges) {
     std::vector<image_t> image_ids_in_seq =
         sequences.at(seq_id).GetImageIdsInsideTimeRange(time_range);
