@@ -108,7 +108,7 @@ void BindCPPartitioning(py::module& m) {
               if (py::isinstance<ControlPoint>(item)) {
                 nodes.push_back(self.GetNode(item.cast<ControlPoint>()));
               } else if (py::isinstance<Segment>(item)) {
-                nodes.push_back(self.GetNode(item.cast<ControlPoint>()));
+                nodes.push_back(self.GetNode(item.cast<Segment>()));
               } else {
                 throw py::type_error("Error! Unsupported type");
               }
@@ -137,7 +137,7 @@ void BindCPPartitioning(py::module& m) {
               if (py::isinstance<ControlPoint>(item)) {
                 nodes.push_back(self.GetNode(item.cast<ControlPoint>()));
               } else if (py::isinstance<Segment>(item)) {
-                nodes.push_back(self.GetNode(item.cast<ControlPoint>()));
+                nodes.push_back(self.GetNode(item.cast<Segment>()));
               } else {
                 throw py::type_error("Error! Unsupported type");
               }
