@@ -50,7 +50,7 @@ void BindCPPartitioning(py::module& m) {
       .def("get_image_ids_from_cp", &ControlPointSequence::GetImageIdsFromCP)
       .def("get_image_ids_from_segment",
            &ControlPointSequence::GetImageIdsFromSegment)
-      .def("get_image_ids_from_list",
+      .def("get_image_ids_from_elements",
            [](ControlPointSequence& self, const py::list& items) {
              std::vector<std::pair<NodeType, int>> nodes;
              for (auto& item : items) {
