@@ -61,34 +61,38 @@ struct ControlPoint {
 
 struct Segment {
   Segment() {}
-  Segment(int sequence_id, int segment_id, int cp_id_low, int cp_id_high)
+  Segment(int sequence_id, int segment_id, int cp_id_left, int cp_id_right)
       : sequence_id(sequence_id),
         segment_id(segment_id),
-        cp_id_low(cp_id_low),
-        cp_id_high(cp_id_high) {}
+        cp_id_left(cp_id_left),
+        cp_id_right(cp_id_right) {}
 
   int sequence_id;
   int segment_id;
-  int cp_id_low;
-  int cp_id_high;
+  int cp_id_left; // -1 means the segment is at thes tart of the session
+  int cp_id_right; // -1 means the segment is at the end of the session
 };
 
 enum NodeType { CP = 0, SEGMENT = 1 };
 class ControlPointSequence {
  public:
   ControlPointSequence() {}
-  ControlPointSequence(const std::vector<ControlPoint>& control_points);
+  ControlPointSequence(const std::vector<ControlPoint>& control_points, const std::pair<timestamp_t, timestamp_t>& time_ranges);
   bool operator<(const ControlPointSequence& other) const {
     return sequence_id < other.sequence_id;
   }
   int sequence_id;
   std::vector<ControlPoint> control_points;
   std::vector<Segment> segments;
+  std::pair<timestamp_t, timestamp_t> time_ranges;
+
+  timestamp_t GetSegmentStartTime(const int segment_id) const;
+  timestamp_t GetSegmentEndTime(const int segment_id) const;
 
   void ImportImages(const std::map<image_t, timestamp_t>& images);
 
  private:
-  std::map<image_t, std::pair<NodeType, int>> images;  // image_id -> Node
+  std::map<image_t, std::pair<NodeType, int>> images_;  // image_id -> Node
 };
 
 class SequenceMatching {

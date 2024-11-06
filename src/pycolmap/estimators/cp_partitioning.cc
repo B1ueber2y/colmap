@@ -34,8 +34,8 @@ void BindCPPartitioning(py::module& m) {
   PySegment.def(py::init<>())
       .def_readwrite("sequence_id", &Segment::sequence_id)
       .def_readwrite("segment_id", &Segment::segment_id)
-      .def_readwrite("cp_id_low", &Segment::cp_id_low)
-      .def_readwrite("cp_id_high", &Segment::cp_id_high);
+      .def_readwrite("cp_id_left", &Segment::cp_id_low)
+      .def_readwrite("cp_id_right", &Segment::cp_id_right);
 
   py::class_<ControlPointSequence> PyControlPointSequence(
       m, "ControlPointSequence");
