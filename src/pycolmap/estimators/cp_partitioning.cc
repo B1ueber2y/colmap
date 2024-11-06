@@ -65,6 +65,7 @@ void BindCPPartitioning(py::module& m) {
 
   py::class_<ControlPointSegmentGraph>(m, "ControlPointSegmentGraph")
       .def(py::init<>())
+      .def_readonly("sequences", &ControlPointSegmentGraph::sequences)
       .def("import_sequence", &ControlPointSegmentGraph::ImportSequence)
       .def("import_sequence_matching",
            &ControlPointSegmentGraph::ImportSequenceMatching)
@@ -76,6 +77,16 @@ void BindCPPartitioning(py::module& m) {
       .def("get_neighboring_ranges",
            py::overload_cast<const Segment&, int>(
                &ControlPointSegmentGraph::GetNeighboringRanges, py::const_),
+           py::arg("base_segment"),
+           py::arg("max_depth") = 3)
+      .def("get_neighboring_image_ids",
+           py::overload_cast<const ControlPoint&, int>(
+               &ControlPointSegmentGraph::GetNeighboringImageIds, py::const_),
+           py::arg("base_cp"),
+           py::arg("max_depth") = 3)
+      .def("get_neighboring_image_ids",
+           py::overload_cast<const Segment&, int>(
+               &ControlPointSegmentGraph::GetNeighboringImageIds, py::const_),
            py::arg("base_segment"),
            py::arg("max_depth") = 3);
 }

@@ -94,7 +94,7 @@ class ControlPointSequence {
       const std::map<image_t, timestamp_t>& images_timestamps);
   std::pair<NodeType, int> GetIndex(const image_t image_id) const;
   std::vector<image_t> GetImageIdsInsideTimeRange(
-      const std::pair<timestamp_t, timestamp_t>& time_range);
+      const std::pair<timestamp_t, timestamp_t>& time_range) const;
 
  private:
   std::map<image_t, timestamp_t> image_timestamps_;
@@ -120,13 +120,17 @@ class ControlPointSegmentGraph {
  public:
   ControlPointSegmentGraph() {}
   // interfaces
-  void ImportSequence(ControlPointSequence* sequence);
+  void ImportSequence(const ControlPointSequence& sequence);
   void ImportSequenceMatching(const SequenceMatching& matches);
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const ControlPoint& base_cp, int maxDepth = 3) const;
+  std::vector<image_t> GetNeighboringImageIds(const ControlPoint& base_cp,
+                                              int maxDepth = 3) const;
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const Segment& base_segment, int maxDepth = 3) const;
+  std::vector<image_t> GetNeighboringImageIds(const Segment& base_segment,
+                                              int maxDepth = 3) const;
 
   // utilities
   void AddControlPoint(const ControlPoint& cp);
@@ -137,6 +141,8 @@ class ControlPointSegmentGraph {
   void AddEdge(const ControlPoint& cp, const Segment& segment);
   void AddEdge(const ControlPoint& cp1, const ControlPoint& cp2);
   void AddEdge(const Segment& segment1, const Segment& segment2);
+
+  std::map<int, ControlPointSequence> sequences;
 
  private:
   Node GetNode(const ControlPoint& cp) const;
@@ -154,7 +160,6 @@ class ControlPointSegmentGraph {
       int maxDepth = 3) const;
 
   std::map<Node, std::set<Node>> g_nodes_;
-  std::map<int, ControlPointSequence*> sequences_;
 
   // To help match cp with the same names
   std::map<std::string, std::vector<Node>> cp_name_to_nodes_;
