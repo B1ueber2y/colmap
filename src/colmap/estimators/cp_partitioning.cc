@@ -44,86 +44,143 @@ ControlPointSequence::ControlPointSequence(
     THROW_CHECK_EQ(control_points[i].sequence_id, sequence_id);
   }
   for (int i = 0; i < int(control_points.size()) - 1; ++i) {
-    Segment segment(sequence_id, i, i + 1);
+    Segment segment(sequence_id, i, i, i + 1);
     segments.push_back(segment);
   }
 }
 
-void ControlPointSegmentGraph::AddControlPoint(ControlPoint cp) {
-  m_cp_to_cp.emplace(cp, std::vector<ControlPoint*>());
-  m_cp_to_segment.emplace(cp, std::vector<Segment*>());
+void ControlPointSequence::ImportImages(
+    const std::map<image_t, timestamp_t>& images) {
+  // TODO: impl
 }
 
-bool ControlPointSegmentGraph::HasControlPoint(ControlPoint cp) const {
-  return m_cp_to_cp.find(cp) != m_cp_to_cp.end();
+ControlPointIndex ControlPointSegmentGraph::GetControlPointIndex(
+    const ControlPoint& cp) const {
+  return ControlPointIndex(cp.sequence_id, cp.cp_id);
 }
 
-void ControlPointSegmentGraph::AddSegment(Segment segment) {
-  m_segment_to_cp.emplace(segment, std::vector<ControlPoint*>());
-  m_segment_to_segment.emplace(segment, std::vector<Segment*>());
+ControlPoint ControlPointSegmentGraph::GetControlPoint(
+    const ControlPointIndex& cp_index) const {
+  int sequence_id = cp_index.first;
+  int cp_id = cp_index.second;
+  THROW_CHECK(sequences_.find(sequence_id) != sequences_.end());
+  return sequences_.at(sequence_id)->control_points[cp_id];
 }
 
-bool ControlPointSegmentGraph::HasSegment(Segment segment) const {
-  return m_segment_to_segment.find(segment) != m_segment_to_segment.end();
+SegmentIndex ControlPointSegmentGraph::GetSegmentIndex(
+    const Segment& segment) const {
+  return SegmentIndex(segment.sequence_id, segment.segment_id);
 }
 
-void ControlPointSegmentGraph::AddEdge(ControlPoint* cp, Segment* segment) {
-  THROW_CHECK(HasControlPoint(*cp));
-  THROW_CHECK(HasSegment(*segment));
-  m_cp_to_segment.at(*cp).push_back(segment);
-  m_segment_to_cp.at(*segment).push_back(cp);
-  // TODO: handle repetitive edges
+Segment ControlPointSegmentGraph::GetSegment(
+    const SegmentIndex& segment_index) const {
+  int sequence_id = segment_index.first;
+  int segment_id = segment_index.second;
+  THROW_CHECK(sequences_.find(sequence_id) != sequences_.end());
+  return sequences_.at(sequence_id)->segments[segment_id];
 }
 
-void ControlPointSegmentGraph::AddEdge(ControlPoint* cp1, ControlPoint* cp2) {
-  THROW_CHECK(HasControlPoint(*cp1));
-  THROW_CHECK(HasControlPoint(*cp2));
-  THROW_CHECK(cp1 != cp2);
-  m_cp_to_cp.at(*cp1).push_back(cp2);
-  m_cp_to_cp.at(*cp2).push_back(cp1);
+void ControlPointSegmentGraph::AddControlPoint(const ControlPoint& cp) {
+  auto cp_index = GetControlPointIndex(cp);
+  m_cp_to_cp.emplace(cp_index, std::set<ControlPointIndex>());
+  m_cp_to_segment.emplace(cp_index, std::set<ControlPointIndex>());
 }
 
-void ControlPointSegmentGraph::AddEdge(Segment* segment1, Segment* segment2) {
-  THROW_CHECK(HasSegment(*segment1));
-  THROW_CHECK(HasSegment(*segment2));
-  THROW_CHECK(segment1 != segment2);
-  m_segment_to_segment.at(*segment1).push_back(segment2);
-  m_segment_to_segment.at(*segment2).push_back(segment1);
+bool ControlPointSegmentGraph::HasControlPoint(const ControlPoint& cp) const {
+  auto cp_index = GetControlPointIndex(cp);
+  return HasControlPoint(cp_index);
 }
 
-void ControlPointSegmentGraph::GetNeighboringSegments(
-    ControlPoint cp, std::vector<Segment*>* neighboring_segments) const {
+bool ControlPointSegmentGraph::HasControlPoint(
+    const ControlPointIndex& cp_index) const {
+  return m_cp_to_cp.find(cp_index) != m_cp_to_cp.end();
+}
+
+void ControlPointSegmentGraph::AddSegment(const Segment& segment) {
+  auto segment_index = GetSegmentIndex(segment);
+  m_segment_to_cp.emplace(segment_index, std::set<ControlPointIndex>());
+  m_segment_to_segment.emplace(segment_index, std::set<SegmentIndex>());
+}
+
+bool ControlPointSegmentGraph::HasSegment(const Segment& segment) const {
+  auto segment_index = GetSegmentIndex(segment);
+  return HasSegment(segment_index);
+}
+
+bool ControlPointSegmentGraph::HasSegment(
+    const SegmentIndex& segment_index) const {
+  return m_segment_to_segment.find(segment_index) != m_segment_to_segment.end();
+}
+
+void ControlPointSegmentGraph::AddEdge(const ControlPoint& cp,
+                                       const Segment& segment) {
   THROW_CHECK(HasControlPoint(cp));
-  neighboring_segments->clear();
-  for (Segment* seg : m_cp_to_segment.at(cp)) {
-    neighboring_segments->push_back(seg);
-  }
-}
-
-void ControlPointSegmentGraph::GetNeighboringSegments(
-    Segment segment, std::vector<Segment*>* neighboring_segments) const {
+  auto cp_index = GetControlPointIndex(cp);
   THROW_CHECK(HasSegment(segment));
+  auto segment_index = GetSegmentIndex(segment);
+  m_cp_to_segment.at(cp_index).insert(segment_index);
+  m_segment_to_cp.at(segment_index).insert(cp_index);
+}
+
+void ControlPointSegmentGraph::AddEdge(const ControlPoint& cp1,
+                                       const ControlPoint& cp2) {
+  THROW_CHECK(HasControlPoint(cp1));
+  auto cp1_index = GetControlPointIndex(cp1);
+  THROW_CHECK(HasControlPoint(cp2));
+  auto cp2_index = GetControlPointIndex(cp2);
+  THROW_CHECK(cp1_index != cp2_index);
+  m_cp_to_cp.at(cp1_index).insert(cp2_index);
+  m_cp_to_cp.at(cp2_index).insert(cp1_index);
+}
+
+void ControlPointSegmentGraph::AddEdge(const Segment& segment1,
+                                       const Segment& segment2) {
+  THROW_CHECK(HasSegment(segment1));
+  auto segment1_index = GetSegmentIndex(segment1);
+  THROW_CHECK(HasSegment(segment2));
+  auto segment2_index = GetSegmentIndex(segment2);
+  THROW_CHECK(segment1_index != segment2_index);
+  m_segment_to_segment.at(segment1_index).insert(segment2_index);
+  m_segment_to_segment.at(segment2_index).insert(segment1_index);
+}
+
+void ControlPointSegmentGraph::GetNeighboringSegmentsFromCP(
+    const ControlPointIndex& cp_index,
+    std::vector<SegmentIndex>* neighboring_segments) const {
+  THROW_CHECK(HasControlPoint(cp_index));
   neighboring_segments->clear();
-  for (Segment* seg : m_segment_to_segment.at(segment)) {
-    neighboring_segments->push_back(seg);
+  for (auto neighbor : m_cp_to_segment.at(cp_index)) {
+    neighboring_segments->push_back(neighbor);
   }
 }
 
-void ControlPointSegmentGraph::GetNeighboringControlPoints(
-    ControlPoint cp, std::vector<ControlPoint*>* neighboring_cps) const {
-  THROW_CHECK(HasControlPoint(cp));
-  neighboring_cps->clear();
-  for (ControlPoint* node : m_cp_to_cp.at(cp)) {
-    neighboring_cps->push_back(node);
+void ControlPointSegmentGraph::GetNeighboringSegmentsFromSegment(
+    const SegmentIndex& segment_index,
+    std::vector<SegmentIndex>* neighboring_segments) const {
+  THROW_CHECK(HasSegment(segment_index));
+  neighboring_segments->clear();
+  for (auto neighbor : m_segment_to_segment.at(segment_index)) {
+    neighboring_segments->push_back(neighbor);
   }
 }
 
-void ControlPointSegmentGraph::GetNeighboringControlPoints(
-    Segment segment, std::vector<ControlPoint*>* neighboring_cps) const {
-  THROW_CHECK(HasSegment(segment));
+void ControlPointSegmentGraph::GetNeighboringControlPointsFromCP(
+    const ControlPointIndex& cp_index,
+    std::vector<ControlPointIndex>* neighboring_cps) const {
+  THROW_CHECK(HasControlPoint(cp_index));
   neighboring_cps->clear();
-  for (ControlPoint* node : m_segment_to_cp.at(segment)) {
-    neighboring_cps->push_back(node);
+  for (auto neighbor : m_cp_to_cp.at(cp_index)) {
+    neighboring_cps->push_back(neighbor);
+  }
+}
+
+void ControlPointSegmentGraph::GetNeighboringControlPointsFromSegment(
+    const SegmentIndex& segment_index,
+    std::vector<ControlPointIndex>* neighboring_cps) const {
+  THROW_CHECK(HasSegment(segment_index));
+  neighboring_cps->clear();
+  for (auto neighbor : m_segment_to_cp.at(segment_index)) {
+    neighboring_cps->push_back(neighbor);
   }
 }
 
@@ -136,24 +193,25 @@ void ControlPointSegmentGraph::ImportSequence(ControlPointSequence* sequence) {
     AddSegment(segment);
   }
   for (size_t i = 0; i < sequence->control_points.size() - 1; ++i) {
-    AddEdge(&sequence->control_points[i], &sequence->segments[i]);
-    AddEdge(&sequence->control_points[i + 1], &sequence->segments[i]);
+    AddEdge(sequence->control_points[i], sequence->segments[i]);
+    AddEdge(sequence->control_points[i + 1], sequence->segments[i]);
   }
 }
 
-void ControlPointSegmentGraph::ImportCrossSequenceMatching(
-    const CrossSequenceMatching& matches) {
+void ControlPointSegmentGraph::ImportSequenceMatching(
+    const SequenceMatching& matches) {
   // TODO: impl later
 }
 
 std::map<int, std::pair<timestamp_t, timestamp_t>>
-ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
+ControlPointSegmentGraph::GetNeighboringRanges(const ControlPoint& base_cp,
                                                int maxDepth) const {
   // BFS
-  std::queue<std::pair<ControlPoint, int>> q;
-  std::set<ControlPoint> visited;
-  visited.insert(base_cp);
-  q.push({base_cp, 0});
+  auto base_cp_index = GetControlPointIndex(base_cp);
+  std::queue<std::pair<ControlPointIndex, int>> q;
+  std::set<ControlPointIndex> visited;
+  visited.insert(base_cp_index);
+  q.push({base_cp_index, 0});
 
   while (!q.empty()) {
     auto [node, depth] = q.front();
@@ -162,15 +220,15 @@ ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
       continue;
     }
     // traverse
-    std::vector<Segment*> segments;
-    GetNeighboringSegments(node, &segments);
-    for (Segment* segment : segments) {
-      std::vector<ControlPoint*> neighbors;
-      GetNeighboringControlPoints(*segment, &neighbors);
-      for (ControlPoint* neighbor : neighbors) {
-        if (visited.find(*neighbor) != visited.end()) continue;
-        visited.insert(*neighbor);
-        q.push({*neighbor, depth + 1});
+    std::vector<SegmentIndex> segments;
+    GetNeighboringSegmentsFromCP(node, &segments);
+    for (SegmentIndex segment_index : segments) {
+      std::vector<ControlPointIndex> neighbors;
+      GetNeighboringControlPointsFromSegment(segment_index, &neighbors);
+      for (ControlPointIndex neighbor : neighbors) {
+        if (visited.find(neighbor) != visited.end()) continue;
+        visited.insert(neighbor);
+        q.push({neighbor, depth + 1});
       }
     }
   }
@@ -178,14 +236,15 @@ ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
   // Get result
   std::map<int, std::pair<timestamp_t, timestamp_t>> res;
   for (auto& node : visited) {
-    if (res.find(node.sequence_id) == res.end()) {
-      res.emplace(node.sequence_id, node.timestamps);
+    auto cp = GetControlPoint(node);
+    if (res.find(cp.sequence_id) == res.end()) {
+      res.emplace(cp.sequence_id, cp.timestamps);
     } else {
-      if (res[node.sequence_id].first > node.timestamps.first) {
-        res[node.sequence_id].first = node.timestamps.first;
+      if (res[cp.sequence_id].first > cp.timestamps.first) {
+        res[cp.sequence_id].first = cp.timestamps.first;
       }
-      if (res[node.sequence_id].first < node.timestamps.first) {
-        res[node.sequence_id].second = node.timestamps.second;
+      if (res[cp.sequence_id].first < cp.timestamps.first) {
+        res[cp.sequence_id].second = cp.timestamps.second;
       }
     }
   }
@@ -193,16 +252,16 @@ ControlPointSegmentGraph::GetNeighboringRanges(ControlPoint base_cp,
 }
 
 std::map<int, std::pair<timestamp_t, timestamp_t>>
-ControlPointSegmentGraph::GetNeighboringRanges(Segment base_segment,
+ControlPointSegmentGraph::GetNeighboringRanges(const Segment& base_segment,
                                                int maxDepth) const {
   // BFS
-  std::queue<std::pair<ControlPoint, int>> q;
-  std::set<ControlPoint> visited;
-  std::vector<ControlPoint*> cps;
-  GetNeighboringControlPoints(base_segment, &cps);
-  for (ControlPoint* cp : cps) {
-    visited.insert(*cp);
-    q.push({*cp, 0});
+  std::queue<std::pair<ControlPointIndex, int>> q;
+  std::set<ControlPointIndex> visited;
+  std::vector<ControlPointIndex> cps;
+  GetNeighboringControlPointsFromSegment(GetSegmentIndex(base_segment), &cps);
+  for (ControlPointIndex cp_index : cps) {
+    visited.insert(cp_index);
+    q.push({cp_index, 0});
   }
 
   while (!q.empty()) {
@@ -212,15 +271,15 @@ ControlPointSegmentGraph::GetNeighboringRanges(Segment base_segment,
       continue;
     }
     // traverse
-    std::vector<Segment*> segments;
-    GetNeighboringSegments(node, &segments);
-    for (Segment* segment : segments) {
-      std::vector<ControlPoint*> neighbors;
-      GetNeighboringControlPoints(*segment, &neighbors);
-      for (ControlPoint* neighbor : neighbors) {
-        if (visited.find(*neighbor) != visited.end()) continue;
-        visited.insert(*neighbor);
-        q.push({*neighbor, depth + 1});
+    std::vector<SegmentIndex> segments;
+    GetNeighboringSegmentsFromCP(node, &segments);
+    for (SegmentIndex segment_index : segments) {
+      std::vector<ControlPointIndex> neighbors;
+      GetNeighboringControlPointsFromSegment(segment_index, &neighbors);
+      for (ControlPointIndex neighbor : neighbors) {
+        if (visited.find(neighbor) != visited.end()) continue;
+        visited.insert(neighbor);
+        q.push({neighbor, depth + 1});
       }
     }
   }
@@ -228,14 +287,15 @@ ControlPointSegmentGraph::GetNeighboringRanges(Segment base_segment,
   // Get result
   std::map<int, std::pair<timestamp_t, timestamp_t>> res;
   for (auto& node : visited) {
-    if (res.find(node.sequence_id) == res.end()) {
-      res.emplace(node.sequence_id, node.timestamps);
+    auto cp = GetControlPoint(node);
+    if (res.find(cp.sequence_id) == res.end()) {
+      res.emplace(cp.sequence_id, cp.timestamps);
     } else {
-      if (res[node.sequence_id].first > node.timestamps.first) {
-        res[node.sequence_id].first = node.timestamps.first;
+      if (res[cp.sequence_id].first > cp.timestamps.first) {
+        res[cp.sequence_id].first = cp.timestamps.first;
       }
-      if (res[node.sequence_id].first < node.timestamps.first) {
-        res[node.sequence_id].second = node.timestamps.second;
+      if (res[cp.sequence_id].first < cp.timestamps.first) {
+        res[cp.sequence_id].second = cp.timestamps.second;
       }
     }
   }

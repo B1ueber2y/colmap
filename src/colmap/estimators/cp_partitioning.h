@@ -33,7 +33,6 @@
 
 #include <map>
 #include <set>
-#include <unordered_map>
 #include <vector>
 
 namespace colmap {
@@ -66,22 +65,21 @@ struct ControlPoint {
 
 struct Segment {
   Segment() {}
-  Segment(int sequence_id, int cp_id_low, int cp_id_high)
+  Segment(int sequence_id, int segment_id, int cp_id_low, int cp_id_high)
       : sequence_id(sequence_id),
+        segment_id(segment_id),
         cp_id_low(cp_id_low),
         cp_id_high(cp_id_high) {}
   bool operator<(const Segment& other) const {
     if (sequence_id < other.sequence_id)
       return true;
-    else if (sequence_id == other.sequence_id && cp_id_low < other.cp_id_low)
-      return true;
-    else if (sequence_id == other.sequence_id && cp_id_low == other.cp_id_low &&
-             cp_id_high < other.cp_id_high)
+    else if (sequence_id == other.sequence_id && segment_id < other.segment_id)
       return true;
     return false;
   }
 
   int sequence_id;
+  int segment_id;
   int cp_id_low;
   int cp_id_high;
 };
@@ -99,56 +97,72 @@ class ControlPointSequence {
   std::vector<ControlPoint> control_points;
   std::vector<Segment> segments;
 
-  // TODO: import images
-  std::unordered_map<image_t, std::pair<NodeType, int>>
-      images;  // image_id -> Node
+  void ImportImages(const std::map<image_t, timestamp_t>& images);
+
+ private:
+  std::map<image_t, std::pair<NodeType, int>> images;  // image_id -> Node
 };
 
-class CrossSequenceMatching {
-  CrossSequenceMatching(int seq_id_1,
-                        int seq_id_2,
-                        const std::vector<std::pair<image_t, image_t>>& matches)
+class SequenceMatching {
+ public:
+  SequenceMatching() {}
+  SequenceMatching(int seq_id_1,
+                   int seq_id_2,
+                   const std::vector<std::pair<image_t, image_t>>& matches)
       : sequence_id_1(seq_id_1), sequence_id_2(seq_id_2), matches(matches) {}
   int sequence_id_1;
   int sequence_id_2;
   std::vector<std::pair<image_t, image_t>> matches;
 };
 
+using ControlPointIndex = std::pair<int, int>;
+using SegmentIndex = std::pair<int, int>;
 class ControlPointSegmentGraph {
  public:
   ControlPointSegmentGraph() {}
   // TODO: match cps by name when importing sequences
   void ImportSequence(ControlPointSequence* sequence);
-  void ImportCrossSequenceMatching(const CrossSequenceMatching& matches);
+  void ImportSequenceMatching(const SequenceMatching& matches);
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
-      ControlPoint base_cp, int maxDepth = 3) const;
+      const ControlPoint& base_cp, int maxDepth = 3) const;
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
-      Segment base_segment, int maxDepth = 3) const;
+      const Segment& base_segment, int maxDepth = 3) const;
 
  private:
-  void AddControlPoint(ControlPoint cp);
-  bool HasControlPoint(ControlPoint cp) const;
-  void AddSegment(Segment segment);
-  bool HasSegment(Segment segment) const;
+  void AddControlPoint(const ControlPoint& cp);
+  bool HasControlPoint(const ControlPointIndex& cp_index) const;
+  bool HasControlPoint(const ControlPoint& cp) const;
+  void AddSegment(const Segment& segment);
+  bool HasSegment(const SegmentIndex& segment_index) const;
+  bool HasSegment(const Segment& segment) const;
 
-  void AddEdge(ControlPoint* cp, Segment* segment);
-  void AddEdge(ControlPoint* cp1, ControlPoint* cp2);
-  void AddEdge(Segment* segment1, Segment* segment2);
+  ControlPointIndex GetControlPointIndex(const ControlPoint& cp) const;
+  ControlPoint GetControlPoint(const ControlPointIndex& cp_index) const;
+  SegmentIndex GetSegmentIndex(const Segment& segment) const;
+  Segment GetSegment(const SegmentIndex& segment_index) const;
 
-  void GetNeighboringSegments(
-      ControlPoint cp, std::vector<Segment*>* neighboring_segments) const;
-  void GetNeighboringSegments(
-      Segment segment, std::vector<Segment*>* neighboring_segments) const;
-  void GetNeighboringControlPoints(
-      ControlPoint cp, std::vector<ControlPoint*>* neighboring_cps) const;
-  void GetNeighboringControlPoints(
-      Segment segment, std::vector<ControlPoint*>* neighboring_cps) const;
+  void AddEdge(const ControlPoint& cp, const Segment& segment);
+  void AddEdge(const ControlPoint& cp1, const ControlPoint& cp2);
+  void AddEdge(const Segment& segment1, const Segment& segment2);
 
-  std::map<ControlPoint, std::vector<ControlPoint*>> m_cp_to_cp;
-  std::map<ControlPoint, std::vector<Segment*>> m_cp_to_segment;
-  std::map<Segment, std::vector<ControlPoint*>> m_segment_to_cp;
-  std::map<Segment, std::vector<Segment*>> m_segment_to_segment;
+  void GetNeighboringSegmentsFromCP(
+      const ControlPointIndex& cp_index,
+      std::vector<SegmentIndex>* neighboring_segments) const;
+  void GetNeighboringSegmentsFromSegment(
+      const SegmentIndex& segment_index,
+      std::vector<SegmentIndex>* neighboring_segments) const;
+  void GetNeighboringControlPointsFromCP(
+      const ControlPointIndex& cp_index,
+      std::vector<ControlPointIndex>* neighboring_cps) const;
+  void GetNeighboringControlPointsFromSegment(
+      const SegmentIndex& segment_index,
+      std::vector<ControlPointIndex>* neighboring_cps) const;
+
+  std::map<ControlPointIndex, std::set<ControlPointIndex>> m_cp_to_cp;
+  std::map<ControlPointIndex, std::set<SegmentIndex>> m_cp_to_segment;
+  std::map<SegmentIndex, std::set<ControlPointIndex>> m_segment_to_cp;
+  std::map<SegmentIndex, std::set<SegmentIndex>> m_segment_to_segment;
 
   std::map<int, ControlPointSequence*> sequences_;
 };
