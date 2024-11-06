@@ -63,7 +63,7 @@ timestamp_t ControlPointSequence::GetSegmentStartTime(
   if (segment.cp_id_left == -1)
     return time_ranges.first;
   else
-    return control_points[segment.cp_id_left].timestamps.first;
+    return control_points[segment.cp_id_left].timestamps.second;
 }
 
 timestamp_t ControlPointSequence::GetSegmentEndTime(
@@ -72,12 +72,36 @@ timestamp_t ControlPointSequence::GetSegmentEndTime(
   if (segment.cp_id_right == -1)
     return time_ranges.second;
   else
-    return control_points[segment.cp_id_right].timestamps.second;
+    return control_points[segment.cp_id_right].timestamps.first;
 }
 
 void ControlPointSequence::ImportImages(
     const std::map<image_t, timestamp_t>& images) {
-  // TODO: impl
+  // generate indexing list
+  std::map<timestamp_t, std::pair<NodeType, int>> start_times;
+  for (auto& cp : control_points) {
+    start_times.emplace(cp.timestamps.first,
+                        std::make_pair(NodeType::CP, cp.cp_id));
+  }
+  for (auto& segment : segments) {
+    timestamp_t starttime = GetSegmentStartTime(segment.segment_id);
+    start_times.emplace(starttime,
+                        std::make_pair(NodeType::SEGMENT, segment.segment_id));
+  }
+
+  // map images to cp / segment
+  for (auto [image_id, timestamp] : images) {
+    THROW_CHECK_LE(time_ranges.first, timestamp);
+    THROW_CHECK_GE(time_ranges.second, timestamp);
+    auto it = start_times.upper_bound(timestamp);
+    images_.emplace(image_id, it->second);
+  }
+}
+
+std::pair<NodeType, int> ControlPointSequence::GetIndex(
+    const image_t image_id) const {
+  THROW_CHECK(images_.find(image_id) != images_.end());
+  return images_.at(image_id);
 }
 
 void ControlPointSegmentGraph::AddNode(const Node& node) {
@@ -176,7 +200,20 @@ void ControlPointSegmentGraph::ImportSequence(ControlPointSequence* sequence) {
 
 void ControlPointSegmentGraph::ImportSequenceMatching(
     const SequenceMatching& matches) {
-  // TODO: impl later
+  THROW_CHECK(sequences_.find(matches.sequence_id_1) != sequences_.end());
+  ControlPointSequence* seq1 = sequences_.at(matches.sequence_id_1);
+  THROW_CHECK(sequences_.find(matches.sequence_id_2) != sequences_.end());
+  ControlPointSequence* seq2 = sequences_.at(matches.sequence_id_2);
+
+  for (auto& match : matches.matches) {
+    auto index1 = seq1->GetIndex(match.first);
+    Node node1 =
+        Node(index1.first, std::make_pair(seq1->sequence_id, index1.second));
+    auto index2 = seq2->GetIndex(match.second);
+    Node node2 =
+        Node(index2.first, std::make_pair(seq2->sequence_id, index2.second));
+    AddEdge(node1, node2);
+  }
 }
 
 std::map<int, std::pair<timestamp_t, timestamp_t>>
@@ -211,14 +248,22 @@ ControlPointSegmentGraph::GetNeighboringRanges(
   // Get result
   std::map<int, std::pair<timestamp_t, timestamp_t>> res;
   for (auto& node : visited) {
-    // only focus on segments since its time ranges include the cp
-    if (node.first == NodeType::CP) continue;
     // get timestamps
     timestamp_t timestamp_low, timestamp_high;
     int sequence_id = node.second.first;
-    int segment_id = node.second.second;
-    timestamp_low = sequences_.at(sequence_id)->GetSegmentStartTime(segment_id);
-    timestamp_high = sequences_.at(sequence_id)->GetSegmentEndTime(segment_id);
+    if (node.first == NodeType::CP) {
+      int cp_id = node.second.second;
+      timestamp_low =
+          sequences_.at(sequence_id)->control_points[cp_id].timestamps.first;
+      timestamp_high =
+          sequences_.at(sequence_id)->control_points[cp_id].timestamps.second;
+    } else {
+      int segment_id = node.second.second;
+      timestamp_low =
+          sequences_.at(sequence_id)->GetSegmentStartTime(segment_id);
+      timestamp_high =
+          sequences_.at(sequence_id)->GetSegmentEndTime(segment_id);
+    }
     if (res.find(sequence_id) == res.end()) {
       res.emplace(sequence_id, std::make_pair(timestamp_low, timestamp_high));
     } else {

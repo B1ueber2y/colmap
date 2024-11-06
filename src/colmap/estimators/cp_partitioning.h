@@ -91,9 +91,11 @@ class ControlPointSequence {
   timestamp_t GetSegmentEndTime(const int segment_id) const;
 
   void ImportImages(const std::map<image_t, timestamp_t>& images);
+  std::pair<NodeType, int> GetIndex(const image_t image_id) const;
 
  private:
-  std::map<image_t, std::pair<NodeType, int>> images_;  // image_id -> Node
+  std::map<image_t, std::pair<NodeType, int>>
+      images_;  // image_id -> cp / segment
 };
 
 class SequenceMatching {
