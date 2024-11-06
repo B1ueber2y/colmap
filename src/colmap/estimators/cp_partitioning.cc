@@ -38,8 +38,9 @@ namespace colmap {
 namespace cp_partitioning {
 
 ControlPointSequence::ControlPointSequence(
-    const std::vector<ControlPoint>& control_points, const std::pair<timestamp_t, timestamp_t>& time_ranges)
-    : control_points(control_points), time_ranges (time_ranges) {
+    const std::vector<ControlPoint>& control_points,
+    const std::pair<timestamp_t, timestamp_t>& time_ranges)
+    : control_points(control_points), time_ranges(time_ranges) {
   sequence_id = control_points[0].sequence_id;
   for (int i = 0; i < int(control_points.size()); ++i) {
     THROW_CHECK_EQ(control_points[i].cp_id, i);
@@ -50,10 +51,14 @@ ControlPointSequence::ControlPointSequence(
     Segment segment(sequence_id, int(segments.size()), i, i + 1);
     segments.push_back(segment);
   }
-  segments.push_back(Segment(sequence_id, int(control_points.size()), int(control_points.size()) - 1, -1));
+  segments.push_back(Segment(sequence_id,
+                             int(control_points.size()),
+                             int(control_points.size()) - 1,
+                             -1));
 }
 
-timestamp_t ControlPointSequence::GetSegmentStartTime(const int segment_id) const {
+timestamp_t ControlPointSequence::GetSegmentStartTime(
+    const int segment_id) const {
   Segment segment = segments[segment_id];
   if (segment.cp_id_left == -1)
     return time_ranges.first;
@@ -61,7 +66,8 @@ timestamp_t ControlPointSequence::GetSegmentStartTime(const int segment_id) cons
     return control_points[segment.cp_id_left].timestamps.first;
 }
 
-timestamp_t ControlPointSequence::GetSegmentEndTime(const int segment_id) const {
+timestamp_t ControlPointSequence::GetSegmentEndTime(
+    const int segment_id) const {
   Segment segment = segments[segment_id];
   if (segment.cp_id_right == -1)
     return time_ranges.second;
@@ -148,11 +154,10 @@ void ControlPointSegmentGraph::ImportSequence(ControlPointSequence* sequence) {
     Node node_cp = GetNode(cp);
     if (cp_name_to_nodes_.find(cp.name) != cp_name_to_nodes_.end()) {
       // connect control points with the same name.
-      for (Node& node_existing_cp: cp_name_to_nodes_.at(cp.name)) {
+      for (Node& node_existing_cp : cp_name_to_nodes_.at(cp.name)) {
         AddEdge(node_cp, node_existing_cp);
       }
-    }
-    else {
+    } else {
       cp_name_to_nodes_.emplace(cp.name, std::vector<Node>());
     }
     cp_name_to_nodes_.at(cp.name).push_back(node_cp);
@@ -165,7 +170,7 @@ void ControlPointSegmentGraph::ImportSequence(ControlPointSequence* sequence) {
     }
     if (segment.cp_id_right != -1) {
       AddEdge(sequence->control_points[segment.cp_id_right], segment);
-     }
+    }
   }
 }
 

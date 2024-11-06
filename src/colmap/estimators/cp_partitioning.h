@@ -69,15 +69,16 @@ struct Segment {
 
   int sequence_id;
   int segment_id;
-  int cp_id_left; // -1 means the segment is at thes tart of the session
-  int cp_id_right; // -1 means the segment is at the end of the session
+  int cp_id_left;   // -1 means the segment is at thes tart of the session
+  int cp_id_right;  // -1 means the segment is at the end of the session
 };
 
 enum NodeType { CP = 0, SEGMENT = 1 };
 class ControlPointSequence {
  public:
   ControlPointSequence() {}
-  ControlPointSequence(const std::vector<ControlPoint>& control_points, const std::pair<timestamp_t, timestamp_t>& time_ranges);
+  ControlPointSequence(const std::vector<ControlPoint>& control_points,
+                       const std::pair<timestamp_t, timestamp_t>& time_ranges);
   bool operator<(const ControlPointSequence& other) const {
     return sequence_id < other.sequence_id;
   }
