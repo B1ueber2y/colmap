@@ -40,11 +40,13 @@ void BindCPPartitioning(py::module& m) {
   py::class_<ControlPointSequence> PyControlPointSequence(
       m, "ControlPointSequence");
   PyControlPointSequence.def(py::init<>())
-      .def(py::init<const std::vector<ControlPoint>&>())
+      .def(py::init<const std::vector<ControlPoint>&,
+                    const std::pair<timestamp_t, timestamp_t>&>())
       .def("import_images", &ControlPointSequence::ImportImages)
       .def_readonly("sequence_id", &ControlPointSequence::sequence_id)
       .def_readonly("control_points", &ControlPointSequence::control_points)
-      .def_readonly("segments", &ControlPointSequence::segments);
+      .def_readonly("segments", &ControlPointSequence::segments)
+      .def_readonly("time_ranges", &ControlPointSequence::time_ranges);
 
   py::class_<SequenceMatching> PySequenceMatching(m, "SequenceMatching");
   PySequenceMatching.def(py::init<>())
