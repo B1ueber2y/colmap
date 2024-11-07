@@ -220,9 +220,11 @@ bool ControlPointSegmentGraph::HasSegment(const Segment& segment) const {
 void ControlPointSegmentGraph::AddEdge(const Node& node1, const Node& node2) {
   THROW_CHECK(HasNode(node1));
   THROW_CHECK(HasNode(node2));
+  if (g_nodes_.at(node1).find(node2) == g_nodes_.at(node1).end()) {
+    num_edges_ += 1;
+  }
   g_nodes_.at(node1).insert(node2);
   g_nodes_.at(node2).insert(node1);
-  num_edges_ += 1;
 }
 
 void ControlPointSegmentGraph::AddEdge(const ControlPoint& cp,
