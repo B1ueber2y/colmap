@@ -85,11 +85,14 @@ void BindCPPartitioning(py::module& m) {
   py::class_<ControlPointSegmentGraph>(m, "ControlPointSegmentGraph")
       .def(py::init<>())
       .def_readonly("sequences", &ControlPointSegmentGraph::sequences)
+      .def("num_edges", &ControlPointSegmentGraph::NumEdges)
       .def("import_sequence", &ControlPointSegmentGraph::ImportSequence)
       .def("import_sequence_matching",
            &ControlPointSegmentGraph::ImportSequenceMatching)
       .def("import_matching_from_reconstruction",
-           &ControlPointSegmentGraph::ImportMatchingFromReconstruction)
+           &ControlPointSegmentGraph::ImportMatchingFromReconstruction,
+           py::arg("reconstruction"),
+           py::arg("min_num_shared_points") = 20)
       .def("get_neighboring_ranges",
            py::overload_cast<const ControlPoint&, int>(
                &ControlPointSegmentGraph::GetNeighboringRanges, py::const_),

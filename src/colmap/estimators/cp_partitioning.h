@@ -130,7 +130,7 @@ class ControlPointSegmentGraph {
   void ImportSequence(const ControlPointSequence& sequence);
   void ImportSequenceMatching(const SequenceMatching& matches);
   void ImportMatchingFromReconstruction(const Reconstruction& reconstruction,
-                                        int min_shared_point = 20);
+                                        int min_num_shared_point = 20);
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const ControlPoint& base_cp, int maxDepth = 3) const;
@@ -156,6 +156,7 @@ class ControlPointSegmentGraph {
   void AddEdge(const ControlPoint& cp, const Segment& segment);
   void AddEdge(const ControlPoint& cp1, const ControlPoint& cp2);
   void AddEdge(const Segment& segment1, const Segment& segment2);
+  int NumEdges() const;
 
   // tmp for pybind
   Node GetNode(const ControlPoint& cp) const;
@@ -177,7 +178,9 @@ class ControlPointSegmentGraph {
       std::set<Node>& visited,
       int maxDepth = 3) const;
 
+  // graph
   std::map<Node, std::set<Node>> g_nodes_;
+  int num_edges_ = 0;
 
   // To help match cp with the same names
   std::map<std::string, std::vector<Node>> cp_name_to_nodes_;

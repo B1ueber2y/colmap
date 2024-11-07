@@ -222,6 +222,7 @@ void ControlPointSegmentGraph::AddEdge(const Node& node1, const Node& node2) {
   THROW_CHECK(HasNode(node2));
   g_nodes_.at(node1).insert(node2);
   g_nodes_.at(node2).insert(node1);
+  num_edges_ += 1;
 }
 
 void ControlPointSegmentGraph::AddEdge(const ControlPoint& cp,
@@ -238,6 +239,8 @@ void ControlPointSegmentGraph::AddEdge(const Segment& segment1,
                                        const Segment& segment2) {
   AddEdge(GetNode(segment1), GetNode(segment2));
 }
+
+int ControlPointSegmentGraph::NumEdges() const { return num_edges_; }
 
 void ControlPointSegmentGraph::GetNeighboringNodes(
     const Node& node, std::vector<Node>* neighbors) const {
@@ -322,7 +325,7 @@ void ControlPointSegmentGraph::ImportSequenceMatching(
 }
 
 void ControlPointSegmentGraph::ImportMatchingFromReconstruction(
-    const Reconstruction& reconstruction, int min_shared_points) {
+    const Reconstruction& reconstruction, int min_num_shared_points) {
   // build covisility graph
   std::map<std::pair<Node, Node>, int> covis;
   for (const auto& [point3D_id, point3D] : reconstruction.Points3D()) {
@@ -352,8 +355,8 @@ void ControlPointSegmentGraph::ImportMatchingFromReconstruction(
   }
 
   // add edge
-  for (auto& [key, counter] : covis) {
-    if (counter < min_shared_points) continue;
+  for (auto& [key, num_shared_points] : covis) {
+    if (num_shared_points < min_num_shared_points) continue;
     Node node1 = key.first;
     Node node2 = key.second;
     // skip if it is between temporally adjacent segment
