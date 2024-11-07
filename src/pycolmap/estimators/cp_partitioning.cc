@@ -85,6 +85,9 @@ void BindCPPartitioning(py::module& m) {
   py::class_<ControlPointSegmentGraph>(m, "ControlPointSegmentGraph")
       .def(py::init<>())
       .def_readonly("sequences", &ControlPointSegmentGraph::sequences)
+      .def("num_control_points", &ControlPointSegmentGraph::NumControlPoints)
+      .def("num_segments", &ControlPointSegmentGraph::NumSegments)
+      .def("num_nodes", &ControlPointSegmentGraph::NumNodes)
       .def("num_edges", &ControlPointSegmentGraph::NumEdges)
       .def("import_sequence", &ControlPointSegmentGraph::ImportSequence)
       .def("import_sequence_matching",

@@ -213,6 +213,24 @@ void ControlPointSegmentGraph::AddSegment(const Segment& segment) {
   AddNode(GetNode(segment));
 }
 
+int ControlPointSegmentGraph::NumControlPoints() const {
+  int counter = 0;
+  for (auto& [node, _] : g_nodes_) {
+    if (node.first == NodeType::CP) counter++;
+  }
+  return counter;
+}
+
+int ControlPointSegmentGraph::NumSegments() const {
+  int counter = 0;
+  for (auto& [node, _] : g_nodes_) {
+    if (node.first == NodeType::SEGMENT) counter++;
+  }
+  return counter;
+}
+
+int ControlPointSegmentGraph::NumNodes() const { return int(g_nodes_.size()); }
+
 bool ControlPointSegmentGraph::HasSegment(const Segment& segment) const {
   return HasNode(GetNode(segment));
 }

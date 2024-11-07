@@ -152,6 +152,9 @@ class ControlPointSegmentGraph {
   bool HasControlPoint(const ControlPoint& cp) const;
   void AddSegment(const Segment& segment);
   bool HasSegment(const Segment& segment) const;
+  int NumControlPoints() const;
+  int NumSegments() const;
+  int NumNodes() const;
 
   void AddEdge(const ControlPoint& cp, const Segment& segment);
   void AddEdge(const ControlPoint& cp1, const ControlPoint& cp2);
