@@ -95,7 +95,7 @@ void BindCPPartitioning(py::module& m) {
       .def("import_matching_from_reconstruction",
            &ControlPointSegmentGraph::ImportMatchingFromReconstruction,
            py::arg("reconstruction"),
-           py::arg("min_num_shared_points") = 20)
+           py::arg("min_num_shared_points") = 30)
       .def("get_neighboring_ranges",
            py::overload_cast<const ControlPoint&, int>(
                &ControlPointSegmentGraph::GetNeighboringRanges, py::const_),

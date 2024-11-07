@@ -130,7 +130,7 @@ class ControlPointSegmentGraph {
   void ImportSequence(const ControlPointSequence& sequence);
   void ImportSequenceMatching(const SequenceMatching& matches);
   void ImportMatchingFromReconstruction(const Reconstruction& reconstruction,
-                                        int min_num_shared_point = 20);
+                                        int min_num_shared_point = 30);
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const ControlPoint& base_cp, int maxDepth = 3) const;

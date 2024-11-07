@@ -81,22 +81,22 @@ void ControlPointSequence::ImportImageTimestamps(
   image_timestamps_ = image_timestamps;
 
   // generate indexing list
-  std::map<timestamp_t, std::pair<NodeType, int>> start_times;
+  std::map<timestamp_t, std::pair<NodeType, int>> end_times;
   for (auto& cp : control_points) {
-    start_times.emplace(cp.timestamps.first,
-                        std::make_pair(NodeType::CP, cp.cp_id));
+    end_times.emplace(cp.timestamps.second,
+                      std::make_pair(NodeType::CP, cp.cp_id));
   }
   for (auto& segment : segments) {
-    timestamp_t starttime = GetSegmentStartTime(segment.segment_id);
-    start_times.emplace(starttime,
-                        std::make_pair(NodeType::SEGMENT, segment.segment_id));
+    timestamp_t endtime = GetSegmentEndTime(segment.segment_id);
+    end_times.emplace(endtime,
+                      std::make_pair(NodeType::SEGMENT, segment.segment_id));
   }
 
   // map images to cp / segment
   for (auto [image_id, timestamp] : image_timestamps) {
     THROW_CHECK_LE(time_ranges.first, timestamp);
     THROW_CHECK_GE(time_ranges.second, timestamp);
-    auto it = start_times.upper_bound(timestamp);
+    auto it = end_times.lower_bound(timestamp);
     images_.emplace(image_id, it->second);
   }
 }
