@@ -379,7 +379,13 @@ void ControlPointSegmentGraph::ImportMatchingFromReconstruction(
     if (num_shared_points < min_num_shared_points) continue;
     Node node1 = key.first;
     Node node2 = key.second;
-    // skip if it is between temporally adjacent segment
+    // skip if it is the between control points from the same sequence
+    if (node1.first == NodeType::CP && node2.first == NodeType::CP &&
+        node1.second.first == node2.second.first) {
+      continue;
+    }
+    // skip if it is between temporally adjacent segment (since this is not loop
+    // closure)
     if (node1.first == NodeType::SEGMENT && node2.first == NodeType::SEGMENT &&
         node1.second.first == node2.second.first) {
       Segment& segment1 =
