@@ -164,8 +164,8 @@ std::vector<image_t> ControlPointSequence::GetImageIdsFromNodeCollection(
       t_low_index = GetSegmentStartTime(index.second);
       t_high_index = GetSegmentEndTime(index.second);
     }
-    if (t_low_index < t_low) t_low = t_low_index;
-    if (t_high_index > t_high) t_high = t_high_index;
+    if (t_low == -1 || t_low_index < t_low) t_low = t_low_index;
+    if (t_high == -1 || t_high_index > t_high) t_high = t_high_index;
   }
   // get image ids
   std::vector<image_t> image_ids;
