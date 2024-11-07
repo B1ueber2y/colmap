@@ -100,12 +100,12 @@ void BindCPPartitioning(py::module& m) {
            py::overload_cast<const ControlPoint&, int>(
                &ControlPointSegmentGraph::GetNeighboringRanges, py::const_),
            py::arg("base_cp"),
-           py::arg("max_depth") = 3)
+           py::arg("max_depth") = 2)
       .def("get_neighboring_ranges",
            py::overload_cast<const Segment&, int>(
                &ControlPointSegmentGraph::GetNeighboringRanges, py::const_),
            py::arg("base_segment"),
-           py::arg("max_depth") = 3)
+           py::arg("max_depth") = 2)
       .def(
           "get_neighboring_ranges",
           [](ControlPointSegmentGraph& self,
@@ -124,17 +124,17 @@ void BindCPPartitioning(py::module& m) {
             return self.GetNeighboringRanges(nodes, maxDepth);
           },
           py::arg("base_elements"),
-          py::arg("max_depth") = 3)
+          py::arg("max_depth") = 2)
       .def("get_neighboring_image_ids",
            py::overload_cast<const ControlPoint&, int>(
                &ControlPointSegmentGraph::GetNeighboringImageIds, py::const_),
            py::arg("base_cp"),
-           py::arg("max_depth") = 3)
+           py::arg("max_depth") = 2)
       .def("get_neighboring_image_ids",
            py::overload_cast<const Segment&, int>(
                &ControlPointSegmentGraph::GetNeighboringImageIds, py::const_),
            py::arg("base_segment"),
-           py::arg("max_depth") = 3)
+           py::arg("max_depth") = 2)
       .def(
           "get_neighboring_image_ids",
           [](ControlPointSegmentGraph& self,
@@ -153,5 +153,5 @@ void BindCPPartitioning(py::module& m) {
             return self.GetNeighboringImageIds(nodes, maxDepth);
           },
           py::arg("base_elements"),
-          py::arg("max_depth") = 3);
+          py::arg("max_depth") = 2);
 }

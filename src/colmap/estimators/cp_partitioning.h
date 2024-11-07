@@ -133,19 +133,19 @@ class ControlPointSegmentGraph {
                                         int min_num_shared_point = 30);
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
-      const ControlPoint& base_cp, int maxDepth = 3) const;
+      const ControlPoint& base_cp, int maxDepth = 2) const;
   std::vector<image_t> GetNeighboringImageIds(const ControlPoint& base_cp,
-                                              int maxDepth = 3) const;
+                                              int maxDepth = 2) const;
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
-      const Segment& base_segment, int maxDepth = 3) const;
+      const Segment& base_segment, int maxDepth = 2) const;
   std::vector<image_t> GetNeighboringImageIds(const Segment& base_segment,
-                                              int maxDepth = 3) const;
+                                              int maxDepth = 2) const;
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
-      const std::vector<Node>& base_nodes, int maxDepth = 3) const;
+      const std::vector<Node>& base_nodes, int maxDepth = 2) const;
   std::vector<image_t> GetNeighboringImageIds(
-      const std::vector<Node>& base_nodes, int maxDepth = 3) const;
+      const std::vector<Node>& base_nodes, int maxDepth = 2) const;
 
   // utilities
   void AddControlPoint(const ControlPoint& cp);
@@ -179,7 +179,7 @@ class ControlPointSegmentGraph {
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       std::queue<std::pair<Node, int>>& q,
       std::set<Node>& visited,
-      int maxDepth = 3) const;
+      int maxDepth = 2) const;
 
   // graph
   std::map<Node, std::set<Node>> g_nodes_;

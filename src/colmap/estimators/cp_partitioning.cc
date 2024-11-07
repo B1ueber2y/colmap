@@ -479,6 +479,21 @@ ControlPointSegmentGraph::GetNeighboringRanges(const Segment& base_segment,
   Node node = GetNode(base_segment);
   visited.insert(node);
   q.push({node, 0});
+  // add adjacent control points in the same sequence
+  if (base_segment.cp_id_left != -1) {
+    Node node_cp =
+        Node(NodeType::CP,
+             std::make_pair(base_segment.sequence_id, base_segment.cp_id_left));
+    visited.insert(node_cp);
+    q.push({node_cp, 0});
+  }
+  if (base_segment.cp_id_right != -1) {
+    Node node_cp = Node(
+        NodeType::CP,
+        std::make_pair(base_segment.sequence_id, base_segment.cp_id_right));
+    visited.insert(node_cp);
+    q.push({node_cp, 0});
+  }
   return GetNeighboringRanges(q, visited, maxDepth);
 }
 
@@ -488,8 +503,33 @@ ControlPointSegmentGraph::GetNeighboringRanges(
   std::queue<std::pair<Node, int>> q;
   std::set<Node> visited;
   for (auto& node : base_nodes) {
-    visited.insert(node);
-    q.push({node, 0});
+    if (visited.find(node) == visited.end()) {
+      visited.insert(node);
+      q.push({node, 0});
+    }
+    // for segments add adjacent control points in the same sequence
+    if (node.first == NodeType::SEGMENT) {
+      const Segment& base_segment =
+          sequences.at(node.second.first).segments[node.second.second];
+      if (base_segment.cp_id_left != -1) {
+        Node node_cp = Node(
+            NodeType::CP,
+            std::make_pair(base_segment.sequence_id, base_segment.cp_id_left));
+        if (visited.find(node_cp) == visited.end()) {
+          visited.insert(node_cp);
+          q.push({node_cp, 0});
+        }
+      }
+      if (base_segment.cp_id_right != -1) {
+        Node node_cp = Node(
+            NodeType::CP,
+            std::make_pair(base_segment.sequence_id, base_segment.cp_id_right));
+        if (visited.find(node_cp) == visited.end()) {
+          visited.insert(node_cp);
+          q.push({node_cp, 0});
+        }
+      }
+    }
   }
   return GetNeighboringRanges(q, visited, maxDepth);
 }
