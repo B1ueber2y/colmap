@@ -88,6 +88,8 @@ void BindCPPartitioning(py::module& m) {
       .def("import_sequence", &ControlPointSegmentGraph::ImportSequence)
       .def("import_sequence_matching",
            &ControlPointSegmentGraph::ImportSequenceMatching)
+      .def("import_matching_from_reconstruction",
+           &ControlPointSegmentGraph::ImportMatchingFromReconstruction)
       .def("get_neighboring_ranges",
            py::overload_cast<const ControlPoint&, int>(
                &ControlPointSegmentGraph::GetNeighboringRanges, py::const_),

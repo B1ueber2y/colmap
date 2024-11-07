@@ -107,6 +107,14 @@ std::pair<NodeType, int> ControlPointSequence::GetIndex(
   return images_.at(image_id);
 }
 
+std::vector<image_t> ControlPointSequence::GetImageIds() const {
+  std::vector<image_t> image_ids;
+  for (auto [image_id, timestamp] : image_timestamps_) {
+    image_ids.push_back(image_id);
+  }
+  return image_ids;
+}
+
 std::vector<image_t> ControlPointSequence::GetImageIdsInsideTimeRange(
     const std::pair<timestamp_t, timestamp_t>& time_range) const {
   std::vector<image_t> image_ids;
@@ -188,6 +196,11 @@ Node ControlPointSegmentGraph::GetNode(const Segment& segment) const {
               std::make_pair(segment.sequence_id, segment.segment_id));
 }
 
+Node ControlPointSegmentGraph::GetNode(const image_t image_id) const {
+  THROW_CHECK(m_image_id_to_node_.find(image_id) != m_image_id_to_node_.end());
+  return m_image_id_to_node_.at(image_id);
+}
+
 void ControlPointSegmentGraph::AddControlPoint(const ControlPoint& cp) {
   AddNode(GetNode(cp));
 }
@@ -237,7 +250,18 @@ void ControlPointSegmentGraph::GetNeighboringNodes(
 
 void ControlPointSegmentGraph::ImportSequence(
     const ControlPointSequence& sequence) {
+  THROW_CHECK(sequences.find(sequence.sequence_id) == sequences.end());
   sequences.emplace(sequence.sequence_id, sequence);
+  // add image id mapping
+  std::vector<image_t> image_ids = sequence.GetImageIds();
+  for (auto& image_id : image_ids) {
+    THROW_CHECK(m_image_id_to_node_.find(image_id) ==
+                m_image_id_to_node_.end());
+    std::pair<NodeType, int> index = sequence.GetIndex(image_id);
+    Node node(index.first, std::make_pair(sequence.sequence_id, index.second));
+    m_image_id_to_node_.emplace(image_id, node);
+  }
+
   // add control points
   for (auto& cp : sequence.control_points) {
     AddControlPoint(cp);
@@ -272,12 +296,77 @@ void ControlPointSegmentGraph::ImportSequenceMatching(
   ControlPointSequence& seq2 = sequences.at(matches.sequence_id_2);
 
   for (auto& match : matches.matches) {
+    // add edge
     auto index1 = seq1.GetIndex(match.first);
     Node node1 =
         Node(index1.first, std::make_pair(seq1.sequence_id, index1.second));
     auto index2 = seq2.GetIndex(match.second);
     Node node2 =
         Node(index2.first, std::make_pair(seq2.sequence_id, index2.second));
+    // here we only consider loop closure
+    // skip if it is between temporally adjacent segment
+    if (seq1.sequence_id == seq2.sequence_id) {
+      if (index1.first == NodeType::SEGMENT &&
+          index2.first == NodeType::SEGMENT) {
+        Segment& segment1 =
+            sequences.at(seq1.sequence_id).segments[index1.second];
+        Segment& segment2 =
+            sequences.at(seq2.sequence_id).segments[index2.second];
+        if (segment1.cp_id_left == segment2.cp_id_right ||
+            segment1.cp_id_right == segment2.cp_id_left)
+          continue;
+      }
+    }
+    AddEdge(node1, node2);
+  }
+}
+
+void ControlPointSegmentGraph::ImportMatchingFromReconstruction(
+    const Reconstruction& reconstruction, int min_shared_points) {
+  // build covisility graph
+  std::map<std::pair<Node, Node>, int> covis;
+  for (const auto& [point3D_id, point3D] : reconstruction.Points3D()) {
+    std::set<Node> nodes_in_point;
+    for (auto& elem : point3D.track.Elements()) {
+      Node node = GetNode(elem.image_id);
+      nodes_in_point.insert(node);
+    }
+    size_t n_nodes = nodes_in_point.size();
+    if (n_nodes == 1) continue;
+    std::vector<Node> node_list;
+    for (auto& node : nodes_in_point) {
+      node_list.push_back(node);
+    }
+    for (size_t i = 0; i < n_nodes - 1; ++i) {
+      for (size_t j = i + 1; j < n_nodes; ++j) {
+        Node node1 = node_list[i];
+        Node node2 = node_list[j];
+        if (node1 > node2) std::swap(node1, node2);
+        std::pair<Node, Node> key = std::make_pair(node1, node2);
+        if (covis.find(key) == covis.end()) {
+          covis.emplace(key, 0);
+        }
+        covis.at(key) += 1;
+      }
+    }
+  }
+
+  // add edge
+  for (auto& [key, counter] : covis) {
+    if (counter < min_shared_points) continue;
+    Node node1 = key.first;
+    Node node2 = key.second;
+    // skip if it is between temporally adjacent segment
+    if (node1.first == NodeType::SEGMENT && node2.first == NodeType::SEGMENT &&
+        node1.second.first == node2.second.first) {
+      Segment& segment1 =
+          sequences.at(node1.second.first).segments[node1.second.second];
+      Segment& segment2 =
+          sequences.at(node2.second.first).segments[node2.second.second];
+      if (segment1.cp_id_left == segment2.cp_id_right ||
+          segment1.cp_id_right == segment2.cp_id_left)
+        continue;
+    }
     AddEdge(node1, node2);
   }
 }

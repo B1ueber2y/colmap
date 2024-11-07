@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "colmap/scene/reconstruction.h"
 #include "colmap/util/types.h"
 
 #include <map>
@@ -93,9 +94,10 @@ class ControlPointSequence {
   void ImportImageTimestamps(
       const std::map<image_t, timestamp_t>& images_timestamps);
   std::pair<NodeType, int> GetIndex(const image_t image_id) const;
+
+  std::vector<image_t> GetImageIds() const;
   std::vector<image_t> GetImageIdsInsideTimeRange(
       const std::pair<timestamp_t, timestamp_t>& time_range) const;
-
   std::vector<image_t> GetImageIdsFromCP(const ControlPoint& cp) const;
   std::vector<image_t> GetImageIdsFromSegment(const Segment& segment) const;
   std::vector<image_t> GetImageIdsFromNodeCollection(
@@ -127,6 +129,8 @@ class ControlPointSegmentGraph {
   // interfaces
   void ImportSequence(const ControlPointSequence& sequence);
   void ImportSequenceMatching(const SequenceMatching& matches);
+  void ImportMatchingFromReconstruction(const Reconstruction& reconstruction,
+                                        int min_shared_point = 20);
 
   std::map<int, std::pair<timestamp_t, timestamp_t>> GetNeighboringRanges(
       const ControlPoint& base_cp, int maxDepth = 3) const;
@@ -163,6 +167,7 @@ class ControlPointSegmentGraph {
   void AddNode(const Node& node);
   bool HasNode(const Node& node) const;
   void AddEdge(const Node& node1, const Node& node2);
+  Node GetNode(const image_t image_id) const;
   void GetNeighboringNodes(const Node& node,
                            std::vector<Node>* neighbors) const;
   // customized bfs. max_depth limits the maximum control points that can be
@@ -176,6 +181,9 @@ class ControlPointSegmentGraph {
 
   // To help match cp with the same names
   std::map<std::string, std::vector<Node>> cp_name_to_nodes_;
+
+  // image_id -> node
+  std::map<image_t, Node> m_image_id_to_node_;
 };
 
 }  // namespace cp_partitioning
