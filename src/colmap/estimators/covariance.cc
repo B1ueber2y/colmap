@@ -573,6 +573,7 @@ bool BundleAdjustmentCovarianceEstimator::FactorizeFull() {
     L_matrix_variables_inv_.row(i) =
         L_matrix_variables_inv_.row(i).array() / sqrt_d;
   }
+  L_matrix_variables_inv_ *= ldltOfS.permutationP();
   LOG(INFO) << "Finish factorization by having the lower triangular matrix L "
                "inverted.";
   return true;
@@ -665,6 +666,7 @@ bool BundleAdjustmentCovarianceEstimator::Factorize() {
         std::max(sqrt(std::max(ldltOfS_poses.vectorD().coeff(i), 0.)), DBL_MIN);
     L_matrix_poses_inv_.row(i) = L_matrix_poses_inv_.row(i).array() / sqrt_d;
   }
+  L_matrix_poses_inv_ *= ldltOfS_poses.permutationP();
   LOG(INFO) << "Finish factorization by having the lower triangular matrix L "
                "inverted.";
   return true;
