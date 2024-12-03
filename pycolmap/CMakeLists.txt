@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
 option(GENERATE_STUBS "Whether to generate stubs" ON)
+option(PYCERES_ENABLED "Whether to enable pyceres features" OFF)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -50,4 +51,11 @@ if(GENERATE_STUBS AND UNIX)
         VERBATIM
     )
     install(DIRECTORY ${STUBGEN_OUTPUT_DIR} DESTINATION pycolmap)
+endif()
+
+if(PYCERES_ENABLED)
+  message(STATUS "Enabling pyceres support")
+  add_definitions("-DPYCOLMAP_PYCERES_ENABLED")
+else()
+  message(STATUS "Disabling pyceres support")
 endif()
