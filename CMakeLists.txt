@@ -56,7 +56,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CMakeHelper.cmake NO_POLICY_SCOPE)
 option(SIMD_ENABLED "Whether to enable SIMD optimizations" ON)
 option(OPENMP_ENABLED "Whether to enable OpenMP parallelization" ON)
 option(IPO_ENABLED "Whether to enable interprocedural optimization" ON)
-option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
+option(CUDA_ENABLED "Whether to enable CUDA, if available" OFF)
 option(GUI_ENABLED "Whether to enable the graphical UI" ON)
 option(OPENGL_ENABLED "Whether to enable OpenGL, if available" ON)
 option(TESTS_ENABLED "Whether to build test binaries" OFF)
@@ -144,7 +144,7 @@ if(CUDA_ENABLED)
 
             declare_imported_cuda_target(cudart ${CUDA_LIBRARIES})
             declare_imported_cuda_target(curand ${CUDA_LIBRARIES})
-            
+
             set(CUDAToolkit_VERSION "${CUDA_VERSION_STRING}")
             set(CUDAToolkit_BIN_DIR "${CUDA_TOOLKIT_ROOT_DIR}/bin")
         endif()
@@ -415,7 +415,7 @@ include_directories(
 link_directories(${COLMAP_LINK_DIRS})
 
 add_subdirectory(lib)
-add_subdirectory(src)
+add_subdirectory(src/colmap)
 
 
 ################################################################################
@@ -477,7 +477,7 @@ set_target_properties(
 ################################################################################
 
 # Install header files.
-install(DIRECTORY src/
+install(DIRECTORY src/colmap
         DESTINATION include/colmap
         FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY lib/
