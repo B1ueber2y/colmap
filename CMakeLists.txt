@@ -417,6 +417,12 @@ link_directories(${COLMAP_LINK_DIRS})
 add_subdirectory(lib)
 add_subdirectory(src/colmap)
 
+target_include_directories(
+    colmap
+    INTERFACE
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>)
 
 ################################################################################
 # Generate source groups for Visual Studio, XCode, etc.
@@ -477,7 +483,7 @@ set_target_properties(
 ################################################################################
 
 # Install header files.
-install(DIRECTORY src/colmap
+install(DIRECTORY src
         DESTINATION include/colmap
         FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY lib/
