@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "feature/utils"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "feature/utils.h"
+#include "colmap/feature/utils.h"
 
 using namespace colmap;
 

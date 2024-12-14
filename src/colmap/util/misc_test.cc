@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "util/misc"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "util/misc.h"
+#include "colmap/util/misc.h"
 
 using namespace colmap;
 

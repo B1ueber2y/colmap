@@ -30,14 +30,14 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/projection"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
 #include <Eigen/Core>
 
-#include "base/camera_models.h"
-#include "base/pose.h"
-#include "base/projection.h"
-#include "util/math.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/util/math.h"
 
 using namespace colmap;
 

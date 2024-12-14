@@ -29,13 +29,13 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/camera.h"
+#include "colmap/base/camera.h"
 
 #include <iomanip>
 
-#include "base/camera_models.h"
-#include "util/logging.h"
-#include "util/misc.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 

@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/render_options.h"
+#include "colmap/ui/render_options.h"
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

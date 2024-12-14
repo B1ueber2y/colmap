@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/gps"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/gps.h"
+#include "colmap/base/gps.h"
 
 using namespace colmap;
 

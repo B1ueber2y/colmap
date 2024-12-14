@@ -32,7 +32,7 @@
 #ifndef COLMAP_SRC_MVS_GPU_MAT_PRNG_H_
 #define COLMAP_SRC_MVS_GPU_MAT_PRNG_H_
 
-#include "mvs/gpu_mat.h"
+#include "colmap/mvs/gpu_mat.h"
 
 namespace colmap {
 namespace mvs {

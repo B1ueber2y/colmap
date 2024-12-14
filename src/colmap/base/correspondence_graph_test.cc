@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/correspondence_graph"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/correspondence_graph.h"
+#include "colmap/base/correspondence_graph.h"
 
 using namespace colmap;
 

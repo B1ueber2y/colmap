@@ -36,12 +36,12 @@
 #include <memory>
 #include <vector>
 
-#include "mvs/depth_map.h"
-#include "mvs/image.h"
-#include "mvs/model.h"
-#include "mvs/normal_map.h"
+#include "colmap/mvs/depth_map.h"
+#include "colmap/mvs/image.h"
+#include "colmap/mvs/model.h"
+#include "colmap/mvs/normal_map.h"
 #ifndef __CUDACC__
-#include "util/threading.h"
+#include "colmap/util/threading.h"
 #endif
 
 namespace colmap {

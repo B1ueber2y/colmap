@@ -29,16 +29,16 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/coordinate_frame.h"
+#include "colmap/estimators/coordinate_frame.h"
 
-#include "base/gps.h"
-#include "base/line.h"
-#include "base/pose.h"
-#include "base/undistortion.h"
-#include "estimators/utils.h"
-#include "optim/ransac.h"
-#include "util/logging.h"
-#include "util/misc.h"
+#include "colmap/base/gps.h"
+#include "colmap/base/line.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/undistortion.h"
+#include "colmap/estimators/utils.h"
+#include "colmap/optim/ransac.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

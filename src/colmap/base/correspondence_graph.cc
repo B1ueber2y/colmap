@@ -29,12 +29,12 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/correspondence_graph.h"
+#include "colmap/base/correspondence_graph.h"
 
 #include <unordered_set>
 
-#include "base/pose.h"
-#include "util/string.h"
+#include "colmap/base/pose.h"
+#include "colmap/util/string.h"
 
 namespace colmap {
 

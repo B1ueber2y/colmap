@@ -35,12 +35,12 @@
 #include <QtCore>
 #include <QtWidgets>
 
-#include "base/reconstruction.h"
-#include "base/undistortion.h"
-#include "ui/options_widget.h"
-#include "ui/thread_control_widget.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/base/undistortion.h"
+#include "colmap/ui/options_widget.h"
+#include "colmap/ui/thread_control_widget.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

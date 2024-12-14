@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/colormaps.h"
+#include "colmap/ui/colormaps.h"
 
-#include "util/bitmap.h"
+#include "colmap/util/bitmap.h"
 
 namespace colmap {
 

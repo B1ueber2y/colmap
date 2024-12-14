@@ -32,9 +32,9 @@
 #ifndef COLMAP_SRC_SFM_INCREMENTAL_TRIANGULATOR_H_
 #define COLMAP_SRC_SFM_INCREMENTAL_TRIANGULATOR_H_
 
-#include "base/database_cache.h"
-#include "base/reconstruction.h"
-#include "util/alignment.h"
+#include "colmap/base/database_cache.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/alignment.h"
 
 namespace colmap {
 

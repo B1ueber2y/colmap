@@ -29,13 +29,13 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/consistency_graph.h"
+#include "colmap/mvs/consistency_graph.h"
 
 #include <fstream>
 #include <numeric>
 
-#include "util/logging.h"
-#include "util/misc.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace mvs {

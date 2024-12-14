@@ -38,14 +38,14 @@
 
 #include <cuda_runtime.h>
 
-#include "mvs/cuda_array_wrapper.h"
-#include "mvs/depth_map.h"
-#include "mvs/gpu_mat.h"
-#include "mvs/gpu_mat_prng.h"
-#include "mvs/gpu_mat_ref_image.h"
-#include "mvs/image.h"
-#include "mvs/normal_map.h"
-#include "mvs/patch_match.h"
+#include "colmap/mvs/cuda_array_wrapper.h"
+#include "colmap/mvs/depth_map.h"
+#include "colmap/mvs/gpu_mat.h"
+#include "colmap/mvs/gpu_mat_prng.h"
+#include "colmap/mvs/gpu_mat_ref_image.h"
+#include "colmap/mvs/image.h"
+#include "colmap/mvs/normal_map.h"
+#include "colmap/mvs/patch_match.h"
 
 namespace colmap {
 namespace mvs {

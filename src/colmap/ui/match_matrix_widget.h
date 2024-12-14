@@ -32,8 +32,8 @@
 #ifndef COLMAP_SRC_UI_MATCH_MATRIX_WIDGET_H_
 #define COLMAP_SRC_UI_MATCH_MATRIX_WIDGET_H_
 
-#include "ui/image_viewer_widget.h"
-#include "util/option_manager.h"
+#include "colmap/ui/image_viewer_widget.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

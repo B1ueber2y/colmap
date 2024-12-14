@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "optim/bundle_adjustment.h"
+#include "colmap/optim/bundle_adjustment.h"
 
 #include <iomanip>
 
@@ -37,12 +37,12 @@
 #include <omp.h>
 #endif
 
-#include "base/camera_models.h"
-#include "base/cost_functions.h"
-#include "base/projection.h"
-#include "util/misc.h"
-#include "util/threading.h"
-#include "util/timer.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/cost_functions.h"
+#include "colmap/base/projection.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/threading.h"
+#include "colmap/util/timer.h"
 
 namespace colmap {
 

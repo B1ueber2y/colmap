@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/track.h"
+#include "colmap/base/track.h"
 
 namespace colmap {
 

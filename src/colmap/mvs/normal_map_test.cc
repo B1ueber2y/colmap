@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "mvs/normal_map_test"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "mvs/normal_map.h"
+#include "colmap/mvs/normal_map.h"
 
 using namespace colmap;
 using namespace colmap::mvs;

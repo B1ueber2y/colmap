@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

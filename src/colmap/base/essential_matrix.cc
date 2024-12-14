@@ -29,12 +29,12 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/essential_matrix.h"
+#include "colmap/base/essential_matrix.h"
 
 #include <array>
 
-#include "base/pose.h"
-#include "estimators/pose.h"
+#include "colmap/base/pose.h"
+#include "colmap/estimators/pose.h"
 
 namespace colmap {
 

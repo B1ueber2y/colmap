@@ -29,15 +29,15 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/homography_matrix.h"
+#include "colmap/estimators/homography_matrix.h"
 
 #include <Eigen/Geometry>
 #include <Eigen/LU>
 #include <Eigen/SVD>
 
-#include "base/projection.h"
-#include "estimators/utils.h"
-#include "util/logging.h"
+#include "colmap/base/projection.h"
+#include "colmap/estimators/utils.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

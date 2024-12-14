@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/threading.h"
+#include "colmap/util/threading.h"
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

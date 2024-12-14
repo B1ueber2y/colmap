@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/utils.h"
+#include "colmap/estimators/utils.h"
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

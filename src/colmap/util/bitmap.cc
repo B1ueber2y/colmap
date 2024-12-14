@@ -29,16 +29,16 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/bitmap.h"
+#include "colmap/util/bitmap.h"
 
 #include <regex>
 #include <unordered_map>
 
 #include "VLFeat/imopv.h"
-#include "base/camera_database.h"
-#include "util/logging.h"
-#include "util/math.h"
-#include "util/misc.h"
+#include "colmap/base/camera_database.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

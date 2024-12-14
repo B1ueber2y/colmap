@@ -38,8 +38,8 @@
 
 #include <ceres/ceres.h>
 
-#include "util/alignment.h"
-#include "util/types.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

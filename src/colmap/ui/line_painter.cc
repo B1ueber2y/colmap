@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/line_painter.h"
+#include "colmap/ui/line_painter.h"
 
-#include "util/opengl_utils.h"
+#include "colmap/util/opengl_utils.h"
 
 namespace colmap {
 

@@ -29,17 +29,17 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "feature/matching.h"
+#include "colmap/feature/matching.h"
 
 #include <fstream>
 #include <numeric>
 
 #include "SiftGPU/SiftGPU.h"
-#include "base/gps.h"
-#include "feature/utils.h"
-#include "retrieval/visual_index.h"
-#include "util/cuda.h"
-#include "util/misc.h"
+#include "colmap/base/gps.h"
+#include "colmap/feature/utils.h"
+#include "colmap/retrieval/visual_index.h"
+#include "colmap/util/cuda.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

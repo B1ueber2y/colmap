@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/match_matrix_widget.h"
+#include "colmap/ui/match_matrix_widget.h"
 
 namespace colmap {
 

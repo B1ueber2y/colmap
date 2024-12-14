@@ -34,9 +34,9 @@
 
 #include <unordered_set>
 
-#include "base/database.h"
-#include "util/bitmap.h"
-#include "util/threading.h"
+#include "colmap/base/database.h"
+#include "colmap/util/bitmap.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

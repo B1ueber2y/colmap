@@ -29,12 +29,12 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/image.h"
+#include "colmap/mvs/image.h"
 
 #include <Eigen/Core>
 
-#include "base/projection.h"
-#include "util/logging.h"
+#include "colmap/base/projection.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 namespace mvs {

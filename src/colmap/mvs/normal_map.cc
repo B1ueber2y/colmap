@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/normal_map.h"
+#include "colmap/mvs/normal_map.h"
 
-#include "base/warp.h"
+#include "colmap/base/warp.h"
 
 namespace colmap {
 namespace mvs {

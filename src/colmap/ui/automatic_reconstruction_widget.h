@@ -32,9 +32,9 @@
 #ifndef COLMAP_SRC_UI_AUTOMATIC_RECONSTRUCTION_WIDGET_H_
 #define COLMAP_SRC_UI_AUTOMATIC_RECONSTRUCTION_WIDGET_H_
 
-#include "controllers/automatic_reconstruction.h"
-#include "ui/options_widget.h"
-#include "ui/thread_control_widget.h"
+#include "colmap/controllers/automatic_reconstruction.h"
+#include "colmap/ui/options_widget.h"
+#include "colmap/ui/thread_control_widget.h"
 
 namespace colmap {
 

@@ -43,9 +43,9 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-#include "retrieval/inverted_file.h"
-#include "util/alignment.h"
-#include "util/random.h"
+#include "colmap/retrieval/inverted_file.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/random.h"
 
 namespace colmap {
 namespace retrieval {

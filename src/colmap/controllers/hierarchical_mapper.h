@@ -32,10 +32,10 @@
 #ifndef COLMAP_SRC_CONTROLLERS_HIERARCHICAL_MAPPER_H_
 #define COLMAP_SRC_CONTROLLERS_HIERARCHICAL_MAPPER_H_
 
-#include "base/reconstruction_manager.h"
-#include "base/scene_clustering.h"
-#include "controllers/incremental_mapper.h"
-#include "util/threading.h"
+#include "colmap/base/reconstruction_manager.h"
+#include "colmap/base/scene_clustering.h"
+#include "colmap/controllers/incremental_mapper.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

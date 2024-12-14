@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/ply.h"
+#include "colmap/util/ply.h"
 
 #include <fstream>
 
 #include <Eigen/Core>
 
-#include "util/logging.h"
-#include "util/misc.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 

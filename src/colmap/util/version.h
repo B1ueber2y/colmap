@@ -32,14 +32,14 @@
 #ifndef COLMAP_SRC_UTIL_VERSION_H_
 #define COLMAP_SRC_UTIL_VERSION_H_
 
-#include "misc.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 
 const static std::string COLMAP_VERSION = "3.8";
 const static int COLMAP_VERSION_NUMBER = 3800;
-const static std::string COLMAP_COMMIT_ID = "43de802c";
-const static std::string COLMAP_COMMIT_DATE = "2023-01-31";
+const static std::string COLMAP_COMMIT_ID = "a8631823";
+const static std::string COLMAP_COMMIT_DATE = "2024-12-14";
 
 std::string GetVersionInfo();
 

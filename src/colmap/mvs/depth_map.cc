@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/depth_map.h"
+#include "colmap/mvs/depth_map.h"
 
-#include "base/warp.h"
-#include "util/math.h"
+#include "colmap/base/warp.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 namespace mvs {

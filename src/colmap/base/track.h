@@ -34,8 +34,8 @@
 
 #include <vector>
 
-#include "util/logging.h"
-#include "util/types.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

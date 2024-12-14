@@ -37,9 +37,9 @@
 #include <QtCore>
 #include <QtOpenGL>
 
-#include "feature/types.h"
-#include "util/bitmap.h"
-#include "util/types.h"
+#include "colmap/feature/types.h"
+#include "colmap/util/bitmap.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

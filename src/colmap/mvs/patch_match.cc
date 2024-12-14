@@ -29,16 +29,16 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/patch_match.h"
+#include "colmap/mvs/patch_match.h"
 
 #include <numeric>
 #include <unordered_set>
 
-#include "mvs/consistency_graph.h"
-#include "mvs/patch_match_cuda.h"
-#include "mvs/workspace.h"
-#include "util/math.h"
-#include "util/misc.h"
+#include "colmap/mvs/consistency_graph.h"
+#include "colmap/mvs/patch_match_cuda.h"
+#include "colmap/mvs/workspace.h"
+#include "colmap/util/math.h"
+#include "colmap/util/misc.h"
 
 #define PrintOption(option) std::cout << #option ": " << option << std::endl
 

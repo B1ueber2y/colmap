@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/automatic_reconstruction_widget.h"
+#include "colmap/ui/automatic_reconstruction_widget.h"
 
-#include "ui/main_window.h"
+#include "colmap/ui/main_window.h"
 
 namespace colmap {
 

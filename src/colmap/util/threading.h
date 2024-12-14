@@ -41,7 +41,7 @@
 #include <unordered_map>
 #include <thread>
 
-#include "util/timer.h"
+#include "colmap/util/timer.h"
 
 namespace colmap {
 

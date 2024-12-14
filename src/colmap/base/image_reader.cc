@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/image_reader.h"
+#include "colmap/base/image_reader.h"
 
-#include "base/camera_models.h"
-#include "util/misc.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 

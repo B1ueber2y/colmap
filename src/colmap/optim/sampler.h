@@ -35,7 +35,7 @@
 #include <cstddef>
 #include <vector>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

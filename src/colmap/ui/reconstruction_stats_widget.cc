@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/reconstruction_stats_widget.h"
+#include "colmap/ui/reconstruction_stats_widget.h"
 
 namespace colmap {
 

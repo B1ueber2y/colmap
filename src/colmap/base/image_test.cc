@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/image"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/image.h"
+#include "colmap/base/image.h"
 
 using namespace colmap;
 

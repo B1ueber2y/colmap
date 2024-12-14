@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/image.h"
+#include "colmap/exe/image.h"
 
-#include "base/reconstruction.h"
-#include "base/undistortion.h"
-#include "controllers/incremental_mapper.h"
-#include "sfm/incremental_mapper.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/base/undistortion.h"
+#include "colmap/controllers/incremental_mapper.h"
+#include "colmap/sfm/incremental_mapper.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 namespace {

@@ -35,8 +35,8 @@
 #include <QtCore>
 #include <QtWidgets>
 
-#include "base/reconstruction.h"
-#include "util/option_manager.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

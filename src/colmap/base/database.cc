@@ -29,13 +29,13 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/database.h"
+#include "colmap/base/database.h"
 
 #include <fstream>
 
-#include "util/sqlite3_utils.h"
-#include "util/string.h"
-#include "util/version.h"
+#include "colmap/util/sqlite3_utils.h"
+#include "colmap/util/string.h"
+#include "colmap/util/version.h"
 
 namespace colmap {
 namespace {

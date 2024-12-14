@@ -34,7 +34,7 @@
 
 #include <QtWidgets>
 
-#include "base/reconstruction_manager.h"
+#include "colmap/base/reconstruction_manager.h"
 
 namespace colmap {
 

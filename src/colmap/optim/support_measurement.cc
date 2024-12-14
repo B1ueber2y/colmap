@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "optim/support_measurement.h"
+#include "colmap/optim/support_measurement.h"
 
 namespace colmap {
 

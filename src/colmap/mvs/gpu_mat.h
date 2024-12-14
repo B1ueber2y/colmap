@@ -40,13 +40,13 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-#include "mvs/cuda_flip.h"
-#include "mvs/cuda_rotate.h"
-#include "mvs/cuda_transpose.h"
-#include "mvs/mat.h"
-#include "util/cuda.h"
-#include "util/cudacc.h"
-#include "util/endian.h"
+#include "colmap/mvs/cuda_flip.h"
+#include "colmap/mvs/cuda_rotate.h"
+#include "colmap/mvs/cuda_transpose.h"
+#include "colmap/mvs/mat.h"
+#include "colmap/util/cuda.h"
+#include "colmap/util/cudacc.h"
+#include "colmap/util/endian.h"
 
 namespace colmap {
 namespace mvs {

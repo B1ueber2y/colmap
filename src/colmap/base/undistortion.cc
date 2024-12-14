@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/undistortion.h"
+#include "colmap/base/undistortion.h"
 
 #include <fstream>
 
-#include "base/camera_models.h"
-#include "base/pose.h"
-#include "base/warp.h"
-#include "util/misc.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/warp.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

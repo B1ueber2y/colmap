@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/essential_matrix.h"
+#include "colmap/estimators/essential_matrix.h"
 
 #include <complex>
 
@@ -37,10 +37,10 @@
 #include <Eigen/LU>
 #include <Eigen/SVD>
 
-#include "base/polynomial.h"
-#include "estimators/utils.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/base/polynomial.h"
+#include "colmap/estimators/utils.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 
@@ -76,7 +76,7 @@ EssentialMatrixFivePointEstimator::Estimate(const std::vector<X_t>& points1,
   // Step 3: Gauss-Jordan elimination with partial pivoting on A.
 
   Eigen::Matrix<double, 10, 20> A;
-#include "estimators/essential_matrix_poly.h"
+#include "colmap/estimators/essential_matrix_poly.h"
   Eigen::Matrix<double, 10, 10> AA =
       A.block<10, 10>(0, 0).partialPivLu().solve(A.block<10, 10>(0, 10));
 
@@ -98,7 +98,7 @@ EssentialMatrixFivePointEstimator::Estimate(const std::vector<X_t>& points1,
 
   // Step 5: Extraction of roots from the degree 10 polynomial.
   Eigen::Matrix<double, 11, 1> coeffs;
-#include "estimators/essential_matrix_coeffs.h"
+#include "colmap/estimators/essential_matrix_coeffs.h"
 
   Eigen::VectorXd roots_real;
   Eigen::VectorXd roots_imag;

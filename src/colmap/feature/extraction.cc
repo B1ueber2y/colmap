@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "feature/extraction.h"
+#include "colmap/feature/extraction.h"
 
 #include <numeric>
 
 #include "SiftGPU/SiftGPU.h"
-#include "feature/sift.h"
-#include "util/cuda.h"
-#include "util/misc.h"
+#include "colmap/feature/sift.h"
+#include "colmap/util/cuda.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

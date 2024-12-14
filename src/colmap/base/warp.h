@@ -32,9 +32,9 @@
 #ifndef COLMAP_SRC_BASE_WARP_H_
 #define COLMAP_SRC_BASE_WARP_H_
 
-#include "base/camera.h"
-#include "util/alignment.h"
-#include "util/bitmap.h"
+#include "colmap/base/camera.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/bitmap.h"
 
 namespace colmap {
 

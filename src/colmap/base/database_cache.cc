@@ -29,13 +29,13 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/database_cache.h"
+#include "colmap/base/database_cache.h"
 
 #include <unordered_set>
 
-#include "feature/utils.h"
-#include "util/string.h"
-#include "util/timer.h"
+#include "colmap/feature/utils.h"
+#include "colmap/util/string.h"
+#include "colmap/util/timer.h"
 
 namespace colmap {
 

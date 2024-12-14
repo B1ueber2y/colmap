@@ -29,23 +29,23 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/two_view_geometry.h"
+#include "colmap/estimators/two_view_geometry.h"
 
 #include <unordered_set>
 
-#include "base/camera.h"
-#include "base/essential_matrix.h"
-#include "base/homography_matrix.h"
-#include "base/pose.h"
-#include "base/projection.h"
-#include "base/triangulation.h"
-#include "estimators/essential_matrix.h"
-#include "estimators/fundamental_matrix.h"
-#include "estimators/homography_matrix.h"
-#include "estimators/translation_transform.h"
-#include "optim/loransac.h"
-#include "optim/ransac.h"
-#include "util/random.h"
+#include "colmap/base/camera.h"
+#include "colmap/base/essential_matrix.h"
+#include "colmap/base/homography_matrix.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/triangulation.h"
+#include "colmap/estimators/essential_matrix.h"
+#include "colmap/estimators/fundamental_matrix.h"
+#include "colmap/estimators/homography_matrix.h"
+#include "colmap/estimators/translation_transform.h"
+#include "colmap/optim/loransac.h"
+#include "colmap/optim/ransac.h"
+#include "colmap/util/random.h"
 
 namespace colmap {
 namespace {

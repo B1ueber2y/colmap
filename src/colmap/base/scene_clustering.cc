@@ -29,12 +29,12 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/scene_clustering.h"
+#include "colmap/base/scene_clustering.h"
 
 #include <set>
 
-#include "base/graph_cut.h"
-#include "util/random.h"
+#include "colmap/base/graph_cut.h"
+#include "colmap/util/random.h"
 
 namespace colmap {
 

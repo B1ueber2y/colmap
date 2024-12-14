@@ -29,19 +29,19 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/vocab_tree.h"
+#include "colmap/exe/vocab_tree.h"
 
 #include <numeric>
 
-#include "base/database.h"
-#include "exe/gui.h"
-#include "feature/matching.h"
-#include "feature/sift.h"
-#include "feature/utils.h"
-#include "retrieval/visual_index.h"
-#include "util/misc.h"
-#include "util/opengl_utils.h"
-#include "util/option_manager.h"
+#include "colmap/base/database.h"
+#include "colmap/exe/gui.h"
+#include "colmap/feature/matching.h"
+#include "colmap/feature/sift.h"
+#include "colmap/feature/utils.h"
+#include "colmap/retrieval/visual_index.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 namespace {

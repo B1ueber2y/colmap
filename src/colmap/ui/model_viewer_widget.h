@@ -37,17 +37,17 @@
 
 #include <QOpenGLFunctions_3_2_Core>
 
-#include "base/database.h"
-#include "base/reconstruction.h"
-#include "ui/colormaps.h"
-#include "ui/image_viewer_widget.h"
-#include "ui/line_painter.h"
-#include "ui/movie_grabber_widget.h"
-#include "ui/point_painter.h"
-#include "ui/point_viewer_widget.h"
-#include "ui/render_options.h"
-#include "ui/triangle_painter.h"
-#include "util/option_manager.h"
+#include "colmap/base/database.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/ui/colormaps.h"
+#include "colmap/ui/image_viewer_widget.h"
+#include "colmap/ui/line_painter.h"
+#include "colmap/ui/movie_grabber_widget.h"
+#include "colmap/ui/point_painter.h"
+#include "colmap/ui/point_viewer_widget.h"
+#include "colmap/ui/render_options.h"
+#include "colmap/ui/triangle_painter.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

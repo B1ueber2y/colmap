@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/polynomial.h"
+#include "colmap/base/polynomial.h"
 
 #include <Eigen/Eigenvalues>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 namespace {

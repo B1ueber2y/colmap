@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/gui.h"
+#include "colmap/exe/gui.h"
 
-#include "util/opengl_utils.h"
-#include "util/option_manager.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

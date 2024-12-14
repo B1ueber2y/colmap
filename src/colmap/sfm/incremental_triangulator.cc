@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "sfm/incremental_triangulator.h"
+#include "colmap/sfm/incremental_triangulator.h"
 
-#include "base/projection.h"
-#include "estimators/triangulation.h"
-#include "util/misc.h"
+#include "colmap/base/projection.h"
+#include "colmap/estimators/triangulation.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 

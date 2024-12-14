@@ -35,7 +35,7 @@
 #include <bitset>
 #include <fstream>
 
-#include "retrieval/geometry.h"
+#include "colmap/retrieval/geometry.h"
 
 namespace colmap {
 namespace retrieval {

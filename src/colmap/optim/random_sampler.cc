@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "optim/random_sampler.h"
+#include "colmap/optim/random_sampler.h"
 
 #include <numeric>
 
-#include "util/random.h"
+#include "colmap/util/random.h"
 
 namespace colmap {
 

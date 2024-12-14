@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/model.h"
+#include "colmap/mvs/model.h"
 
-#include "base/camera_models.h"
-#include "base/pose.h"
-#include "base/projection.h"
-#include "base/reconstruction.h"
-#include "base/triangulation.h"
-#include "util/misc.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/base/triangulation.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace mvs {

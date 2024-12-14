@@ -37,10 +37,10 @@
 #include <QtCore>
 #include <QtWidgets>
 
-#include "base/database.h"
-#include "ui/image_viewer_widget.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/base/database.h"
+#include "colmap/ui/image_viewer_widget.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

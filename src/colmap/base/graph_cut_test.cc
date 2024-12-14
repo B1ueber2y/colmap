@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/graph_cut"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/graph_cut.h"
+#include "colmap/base/graph_cut.h"
 
 using namespace colmap;
 

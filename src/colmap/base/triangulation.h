@@ -36,10 +36,10 @@
 
 #include <Eigen/Core>
 
-#include "base/camera.h"
-#include "util/alignment.h"
-#include "util/math.h"
-#include "util/types.h"
+#include "colmap/base/camera.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/math.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

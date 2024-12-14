@@ -32,13 +32,13 @@
 #ifndef COLMAP_SRC_MVS_WORKSPACE_H_
 #define COLMAP_SRC_MVS_WORKSPACE_H_
 
-#include "mvs/consistency_graph.h"
-#include "mvs/depth_map.h"
-#include "mvs/model.h"
-#include "mvs/normal_map.h"
-#include "util/bitmap.h"
-#include "util/cache.h"
-#include "util/misc.h"
+#include "colmap/mvs/consistency_graph.h"
+#include "colmap/mvs/depth_map.h"
+#include "colmap/mvs/model.h"
+#include "colmap/mvs/normal_map.h"
+#include "colmap/util/bitmap.h"
+#include "colmap/util/cache.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace mvs {

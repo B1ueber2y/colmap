@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/feature_matching_widget.h"
+#include "colmap/ui/feature_matching_widget.h"
 
-#include "feature/matching.h"
-#include "ui/options_widget.h"
-#include "ui/thread_control_widget.h"
+#include "colmap/feature/matching.h"
+#include "colmap/ui/options_widget.h"
+#include "colmap/ui/thread_control_widget.h"
 
 namespace colmap {
 

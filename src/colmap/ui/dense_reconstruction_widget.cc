@@ -29,13 +29,13 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/dense_reconstruction_widget.h"
+#include "colmap/ui/dense_reconstruction_widget.h"
 
-#include "base/undistortion.h"
-#include "mvs/fusion.h"
-#include "mvs/meshing.h"
-#include "mvs/patch_match.h"
-#include "ui/main_window.h"
+#include "colmap/base/undistortion.h"
+#include "colmap/mvs/fusion.h"
+#include "colmap/mvs/meshing.h"
+#include "colmap/mvs/patch_match.h"
+#include "colmap/ui/main_window.h"
 
 namespace colmap {
 namespace {

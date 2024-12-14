@@ -29,15 +29,15 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "retrieval/vote_and_verify.h"
+#include "colmap/retrieval/vote_and_verify.h"
 
 #include <array>
 #include <unordered_map>
 
-#include "estimators/affine_transform.h"
-#include "optim/ransac.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/estimators/affine_transform.h"
+#include "colmap/optim/ransac.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 namespace retrieval {

@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/gpu_mat_prng.h"
+#include "colmap/mvs/gpu_mat_prng.h"
 
 namespace colmap {
 namespace mvs {

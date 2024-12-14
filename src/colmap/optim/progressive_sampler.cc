@@ -29,12 +29,12 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "optim/progressive_sampler.h"
+#include "colmap/optim/progressive_sampler.h"
 
 #include <numeric>
 
-#include "util/misc.h"
-#include "util/random.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/random.h"
 
 namespace colmap {
 

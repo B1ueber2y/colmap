@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/reconstruction_options_widget.h"
+#include "colmap/ui/reconstruction_options_widget.h"
 
-#include "controllers/incremental_mapper.h"
+#include "colmap/controllers/incremental_mapper.h"
 
 namespace colmap {
 

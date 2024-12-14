@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "controllers/hierarchical_mapper.h"
+#include "colmap/controllers/hierarchical_mapper.h"
 
-#include "base/scene_clustering.h"
-#include "util/misc.h"
+#include "colmap/base/scene_clustering.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

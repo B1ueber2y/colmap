@@ -32,7 +32,7 @@
 #ifndef COLMAP_SRC_FEATURE_UTILS_H_
 #define COLMAP_SRC_FEATURE_UTILS_H_
 
-#include "feature/types.h"
+#include "colmap/feature/types.h"
 
 namespace colmap {
 

@@ -36,7 +36,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 
-#include "retrieval/geometry.h"
+#include "colmap/retrieval/geometry.h"
 
 using namespace colmap::retrieval;
 

@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/model_viewer_widget.h"
+#include "colmap/ui/model_viewer_widget.h"
 
-#include "ui/main_window.h"
+#include "colmap/ui/main_window.h"
 
 #define SELECTION_BUFFER_IMAGE_IDX 0
 #define SELECTION_BUFFER_POINT_IDX 1

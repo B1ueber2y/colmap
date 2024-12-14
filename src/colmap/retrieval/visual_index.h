@@ -36,14 +36,14 @@
 #include <boost/heap/fibonacci_heap.hpp>
 
 #include "flann/flann.hpp"
-#include "feature/types.h"
-#include "retrieval/inverted_file.h"
-#include "retrieval/inverted_index.h"
-#include "retrieval/vote_and_verify.h"
-#include "util/alignment.h"
-#include "util/endian.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/feature/types.h"
+#include "colmap/retrieval/inverted_file.h"
+#include "colmap/retrieval/inverted_index.h"
+#include "colmap/retrieval/vote_and_verify.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/endian.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 namespace retrieval {

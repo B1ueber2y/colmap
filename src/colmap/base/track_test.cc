@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/track"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/track.h"
+#include "colmap/base/track.h"
 
 using namespace colmap;
 

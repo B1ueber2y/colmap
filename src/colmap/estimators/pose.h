@@ -38,13 +38,13 @@
 
 #include <ceres/ceres.h>
 
-#include "base/camera.h"
-#include "base/camera_models.h"
-#include "optim/loransac.h"
-#include "util/alignment.h"
-#include "util/logging.h"
-#include "util/threading.h"
-#include "util/types.h"
+#include "colmap/base/camera.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/optim/loransac.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/threading.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

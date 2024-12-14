@@ -35,11 +35,11 @@
 #include <QtCore>
 #include <QtWidgets>
 
-#include "mvs/fusion.h"
-#include "ui/image_viewer_widget.h"
-#include "ui/options_widget.h"
-#include "ui/thread_control_widget.h"
-#include "util/option_manager.h"
+#include "colmap/mvs/fusion.h"
+#include "colmap/ui/image_viewer_widget.h"
+#include "colmap/ui/options_widget.h"
+#include "colmap/ui/thread_control_widget.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

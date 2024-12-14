@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/generalized_absolute_pose.h"
+#include "colmap/estimators/generalized_absolute_pose.h"
 
 #include <array>
 
-#include "base/polynomial.h"
-#include "base/projection.h"
-#include "estimators/generalized_absolute_pose_coeffs.h"
-#include "util/logging.h"
+#include "colmap/base/polynomial.h"
+#include "colmap/base/projection.h"
+#include "colmap/estimators/generalized_absolute_pose_coeffs.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 namespace {

@@ -36,7 +36,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

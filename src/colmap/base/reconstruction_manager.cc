@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/reconstruction_manager.h"
+#include "colmap/base/reconstruction_manager.h"
 
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

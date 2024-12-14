@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/string.h"
+#include "colmap/util/string.h"
 
 #include <algorithm>
 #include <cstdarg>

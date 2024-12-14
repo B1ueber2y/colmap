@@ -30,10 +30,10 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "estimators/coordinate_frame"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "estimators/coordinate_frame.h"
-#include "base/gps.h"
+#include "colmap/estimators/coordinate_frame.h"
+#include "colmap/base/gps.h"
 
 using namespace colmap;
 

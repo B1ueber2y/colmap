@@ -30,16 +30,16 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "optim/ransac"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "base/pose.h"
-#include "base/similarity_transform.h"
-#include "estimators/similarity_transform.h"
-#include "optim/ransac.h"
-#include "util/random.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/similarity_transform.h"
+#include "colmap/estimators/similarity_transform.h"
+#include "colmap/optim/ransac.h"
+#include "colmap/util/random.h"
 
 using namespace colmap;
 

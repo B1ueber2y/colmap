@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "feature/types.h"
+#include "colmap/feature/types.h"
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

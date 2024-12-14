@@ -32,11 +32,11 @@
 #ifndef COLMAP_SRC_ESTIMATORS_TWO_VIEW_GEOMETRY_H_
 #define COLMAP_SRC_ESTIMATORS_TWO_VIEW_GEOMETRY_H_
 
-#include "base/camera.h"
-#include "feature/types.h"
-#include "optim/ransac.h"
-#include "util/alignment.h"
-#include "util/logging.h"
+#include "colmap/base/camera.h"
+#include "colmap/feature/types.h"
+#include "colmap/optim/ransac.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

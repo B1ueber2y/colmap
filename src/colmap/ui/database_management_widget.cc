@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/database_management_widget.h"
+#include "colmap/ui/database_management_widget.h"
 
-#include "base/camera_models.h"
+#include "colmap/base/camera_models.h"
 
 namespace colmap {
 

@@ -46,7 +46,7 @@
 #endif
 #include <FreeImage.h>
 
-#include "util/string.h"
+#include "colmap/util/string.h"
 
 namespace colmap {
 

@@ -36,7 +36,7 @@
 #include <list>
 #include <unordered_map>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

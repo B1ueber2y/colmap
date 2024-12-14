@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/visibility_pyramid.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/base/visibility_pyramid.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 

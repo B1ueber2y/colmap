@@ -29,18 +29,18 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/reconstruction.h"
+#include "colmap/base/reconstruction.h"
 
 #include <fstream>
 
-#include "base/database_cache.h"
-#include "base/gps.h"
-#include "base/pose.h"
-#include "base/projection.h"
-#include "base/triangulation.h"
-#include "util/bitmap.h"
-#include "util/misc.h"
-#include "util/ply.h"
+#include "colmap/base/database_cache.h"
+#include "colmap/base/gps.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/triangulation.h"
+#include "colmap/util/bitmap.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/ply.h"
 
 namespace colmap {
 

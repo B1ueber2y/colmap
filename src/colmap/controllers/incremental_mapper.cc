@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "controllers/incremental_mapper.h"
+#include "colmap/controllers/incremental_mapper.h"
 
-#include "util/misc.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

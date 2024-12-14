@@ -38,7 +38,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "base/camera.h"
+#include "colmap/base/camera.h"
 
 namespace colmap {
 

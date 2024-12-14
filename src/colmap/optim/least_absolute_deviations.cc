@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "optim/least_absolute_deviations.h"
+#include "colmap/optim/least_absolute_deviations.h"
 
 #include <Eigen/SparseCholesky>
 

@@ -29,16 +29,16 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "sfm/incremental_mapper.h"
+#include "colmap/sfm/incremental_mapper.h"
 
 #include <array>
 #include <fstream>
 
-#include "base/projection.h"
-#include "base/triangulation.h"
-#include "estimators/pose.h"
-#include "util/bitmap.h"
-#include "util/misc.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/triangulation.h"
+#include "colmap/estimators/pose.h"
+#include "colmap/util/bitmap.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

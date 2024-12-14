@@ -29,17 +29,17 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/triangulation.h"
+#include "colmap/estimators/triangulation.h"
 
 #include <Eigen/Geometry>
 
-#include "base/projection.h"
-#include "base/triangulation.h"
-#include "estimators/essential_matrix.h"
-#include "optim/combination_sampler.h"
-#include "optim/loransac.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/triangulation.h"
+#include "colmap/estimators/essential_matrix.h"
+#include "colmap/optim/combination_sampler.h"
+#include "colmap/optim/loransac.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 

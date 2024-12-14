@@ -32,8 +32,8 @@
 #ifndef COLMAP_SRC_EXE_SFM_H_
 #define COLMAP_SRC_EXE_SFM_H_
 
-#include "base/reconstruction.h"
-#include "controllers/incremental_mapper.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/controllers/incremental_mapper.h"
 
 namespace colmap {
 

@@ -32,9 +32,9 @@
 #ifndef COLMAP_SRC_CONTROLLERS_BUNDLE_ADJUSTMENT_H_
 #define COLMAP_SRC_CONTROLLERS_BUNDLE_ADJUSTMENT_H_
 
-#include "base/reconstruction.h"
-#include "util/option_manager.h"
-#include "util/threading.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/option_manager.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

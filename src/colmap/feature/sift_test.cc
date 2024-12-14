@@ -30,20 +30,20 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "feature/sift_test"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
 #ifdef GUI_ENABLED
 #include <QApplication>
 #else
-#include "exe/gui.h"
+#include "colmap/exe/gui.h"
 #endif
 
 #include "SiftGPU/SiftGPU.h"
-#include "feature/sift.h"
-#include "feature/utils.h"
-#include "util/math.h"
-#include "util/opengl_utils.h"
-#include "util/random.h"
+#include "colmap/feature/sift.h"
+#include "colmap/feature/utils.h"
+#include "colmap/util/math.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/random.h"
 
 using namespace colmap;
 

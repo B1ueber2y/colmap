@@ -36,9 +36,9 @@
 
 #include <Eigen/Core>
 
-#include "base/track.h"
-#include "util/logging.h"
-#include "util/types.h"
+#include "colmap/base/track.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

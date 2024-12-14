@@ -35,7 +35,7 @@
 #include <QtCore>
 #include <QtOpenGL>
 
-#include "ui/point_painter.h"
+#include "colmap/ui/point_painter.h"
 
 namespace colmap {
 

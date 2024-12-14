@@ -29,13 +29,13 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/feature_extraction_widget.h"
+#include "colmap/ui/feature_extraction_widget.h"
 
-#include "base/camera_models.h"
-#include "feature/extraction.h"
-#include "ui/options_widget.h"
-#include "ui/qt_utils.h"
-#include "ui/thread_control_widget.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/feature/extraction.h"
+#include "colmap/ui/options_widget.h"
+#include "colmap/ui/qt_utils.h"
+#include "colmap/ui/thread_control_widget.h"
 
 namespace colmap {
 

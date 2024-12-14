@@ -32,12 +32,12 @@
 #ifndef COLMAP_SRC_SFM_INCREMENTAL_MAPPER_H_
 #define COLMAP_SRC_SFM_INCREMENTAL_MAPPER_H_
 
-#include "base/database.h"
-#include "base/database_cache.h"
-#include "base/reconstruction.h"
-#include "optim/bundle_adjustment.h"
-#include "sfm/incremental_triangulator.h"
-#include "util/alignment.h"
+#include "colmap/base/database.h"
+#include "colmap/base/database_cache.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/optim/bundle_adjustment.h"
+#include "colmap/sfm/incremental_triangulator.h"
+#include "colmap/util/alignment.h"
 
 namespace colmap {
 

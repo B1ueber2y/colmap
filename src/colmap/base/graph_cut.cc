@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/graph_cut.h"
+#include "colmap/base/graph_cut.h"
 
 #include <unordered_map>
 
@@ -41,7 +41,7 @@ extern "C" {
 #include "metis.h"
 }
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 namespace {

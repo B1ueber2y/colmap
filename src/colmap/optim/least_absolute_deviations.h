@@ -35,7 +35,7 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

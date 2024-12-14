@@ -29,19 +29,19 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/sfm.h"
+#include "colmap/exe/sfm.h"
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "base/reconstruction.h"
-#include "controllers/automatic_reconstruction.h"
-#include "controllers/bundle_adjustment.h"
-#include "controllers/hierarchical_mapper.h"
-#include "exe/gui.h"
-#include "util/misc.h"
-#include "util/opengl_utils.h"
-#include "util/option_manager.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/controllers/automatic_reconstruction.h"
+#include "colmap/controllers/bundle_adjustment.h"
+#include "colmap/controllers/hierarchical_mapper.h"
+#include "colmap/exe/gui.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

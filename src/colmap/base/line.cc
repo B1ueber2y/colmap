@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/line.h"
+#include "colmap/base/line.h"
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 extern "C" {
 #include "LSD/lsd.h"

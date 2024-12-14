@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/fundamental_matrix.h"
+#include "colmap/estimators/fundamental_matrix.h"
 
 #include <cfloat>
 #include <complex>
@@ -39,9 +39,9 @@
 #include <Eigen/LU>
 #include <Eigen/SVD>
 
-#include "base/polynomial.h"
-#include "estimators/utils.h"
-#include "util/logging.h"
+#include "colmap/base/polynomial.h"
+#include "colmap/estimators/utils.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "util/bitmap"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "util/bitmap.h"
+#include "colmap/util/bitmap.h"
 
 using namespace colmap;
 

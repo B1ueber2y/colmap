@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/fusion.h"
+#include "colmap/mvs/fusion.h"
 
-#include "util/misc.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace mvs {

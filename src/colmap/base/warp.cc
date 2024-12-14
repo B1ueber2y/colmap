@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/warp.h"
+#include "colmap/base/warp.h"
 
 #include "VLFeat/imopv.h"
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 namespace {

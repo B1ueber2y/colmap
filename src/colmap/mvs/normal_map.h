@@ -35,8 +35,8 @@
 #include <string>
 #include <vector>
 
-#include "mvs/mat.h"
-#include "util/bitmap.h"
+#include "colmap/mvs/mat.h"
+#include "colmap/util/bitmap.h"
 
 namespace colmap {
 namespace mvs {

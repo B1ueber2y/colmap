@@ -36,8 +36,8 @@
 
 #include <cuda_runtime.h>
 
-#include "mvs/gpu_mat.h"
-#include "util/cudacc.h"
+#include "colmap/mvs/gpu_mat.h"
+#include "colmap/util/cudacc.h"
 
 namespace colmap {
 namespace mvs {

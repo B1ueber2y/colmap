@@ -38,17 +38,17 @@
 
 #include <Eigen/Core>
 
-#include "mvs/depth_map.h"
-#include "mvs/image.h"
-#include "mvs/mat.h"
-#include "mvs/model.h"
-#include "mvs/normal_map.h"
-#include "mvs/workspace.h"
-#include "util/alignment.h"
-#include "util/cache.h"
-#include "util/math.h"
-#include "util/ply.h"
-#include "util/threading.h"
+#include "colmap/mvs/depth_map.h"
+#include "colmap/mvs/image.h"
+#include "colmap/mvs/mat.h"
+#include "colmap/mvs/model.h"
+#include "colmap/mvs/normal_map.h"
+#include "colmap/mvs/workspace.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/cache.h"
+#include "colmap/util/math.h"
+#include "colmap/util/ply.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 namespace mvs {

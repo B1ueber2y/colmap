@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "retrieval/inverted_file_entry"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "retrieval/inverted_file_entry.h"
+#include "colmap/retrieval/inverted_file_entry.h"
 
 using namespace colmap::retrieval;
 

@@ -39,13 +39,13 @@
 
 #include <Eigen/Core>
 
-#include "base/camera.h"
-#include "base/camera_models.h"
-#include "base/correspondence_graph.h"
-#include "base/database.h"
-#include "base/image.h"
-#include "util/alignment.h"
-#include "util/types.h"
+#include "colmap/base/camera.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/correspondence_graph.h"
+#include "colmap/base/database.h"
+#include "colmap/base/image.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

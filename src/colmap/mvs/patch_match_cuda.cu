@@ -31,7 +31,7 @@
 
 #define _USE_MATH_DEFINES
 
-#include "mvs/patch_match_cuda.h"
+#include "colmap/mvs/patch_match_cuda.h"
 
 #include <algorithm>
 #include <cfloat>
@@ -39,9 +39,9 @@
 #include <cstdint>
 #include <sstream>
 
-#include "util/cuda.h"
-#include "util/cudacc.h"
-#include "util/logging.h"
+#include "colmap/util/cuda.h"
+#include "colmap/util/cudacc.h"
+#include "colmap/util/logging.h"
 
 // The number of threads per Cuda thread. Warning: Do not change this value,
 // since the templated window sizes rely on this value.

@@ -39,7 +39,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "util/bitmap.h"
+#include "colmap/util/bitmap.h"
 
 namespace colmap {
 namespace mvs {

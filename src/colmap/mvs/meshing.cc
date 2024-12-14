@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/meshing.h"
+#include "colmap/mvs/meshing.h"
 
 #include <fstream>
 #include <unordered_map>
@@ -42,16 +42,16 @@
 
 #include "PoissonRecon/PoissonRecon.h"
 #include "PoissonRecon/SurfaceTrimmer.h"
-#include "base/graph_cut.h"
-#include "base/reconstruction.h"
-#include "util/endian.h"
-#include "util/logging.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
-#include "util/ply.h"
-#include "util/random.h"
-#include "util/threading.h"
-#include "util/timer.h"
+#include "colmap/base/graph_cut.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/endian.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
+#include "colmap/util/ply.h"
+#include "colmap/util/random.h"
+#include "colmap/util/threading.h"
+#include "colmap/util/timer.h"
 
 #ifdef CGAL_ENABLED
 

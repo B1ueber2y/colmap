@@ -40,7 +40,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/one_bit_color_map.hpp>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

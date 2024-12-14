@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/project_widget.h"
+#include "colmap/ui/project_widget.h"
 
-#include "base/database.h"
+#include "colmap/base/database.h"
 
 namespace colmap {
 

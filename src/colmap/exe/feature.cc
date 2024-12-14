@@ -29,16 +29,16 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/feature.h"
+#include "colmap/exe/feature.h"
 
-#include "base/camera_models.h"
-#include "base/image_reader.h"
-#include "exe/gui.h"
-#include "feature/extraction.h"
-#include "feature/matching.h"
-#include "util/misc.h"
-#include "util/opengl_utils.h"
-#include "util/option_manager.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/image_reader.h"
+#include "colmap/exe/gui.h"
+#include "colmap/feature/extraction.h"
+#include "colmap/feature/matching.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 namespace {

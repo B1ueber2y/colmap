@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/qt_utils.h"
+#include "colmap/ui/qt_utils.h"
 
-#include "base/camera_models.h"
-#include "util/misc.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 

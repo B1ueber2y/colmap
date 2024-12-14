@@ -30,12 +30,12 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/triangulation"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
 #include <Eigen/Core>
 
-#include "base/similarity_transform.h"
-#include "base/triangulation.h"
+#include "colmap/base/similarity_transform.h"
+#include "colmap/base/triangulation.h"
 
 using namespace colmap;
 

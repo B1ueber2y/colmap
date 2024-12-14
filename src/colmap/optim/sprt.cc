@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "optim/sprt.h"
+#include "colmap/optim/sprt.h"
 
 namespace colmap {
 

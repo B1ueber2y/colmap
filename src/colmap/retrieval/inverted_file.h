@@ -42,12 +42,12 @@
 
 #include <Eigen/Core>
 
-#include "retrieval/geometry.h"
-#include "retrieval/inverted_file_entry.h"
-#include "retrieval/utils.h"
-#include "util/alignment.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/retrieval/geometry.h"
+#include "colmap/retrieval/inverted_file_entry.h"
+#include "colmap/retrieval/utils.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 namespace retrieval {

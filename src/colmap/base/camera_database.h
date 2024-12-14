@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "util/camera_specs.h"
+#include "colmap/util/camera_specs.h"
 
 namespace colmap {
 

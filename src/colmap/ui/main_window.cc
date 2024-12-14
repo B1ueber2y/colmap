@@ -31,9 +31,9 @@
 
 #include <clocale>
 
-#include "ui/main_window.h"
+#include "colmap/ui/main_window.h"
 
-#include "util/version.h"
+#include "colmap/util/version.h"
 
 namespace colmap {
 

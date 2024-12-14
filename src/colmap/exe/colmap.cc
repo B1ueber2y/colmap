@@ -29,15 +29,15 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/database.h"
-#include "exe/feature.h"
-#include "exe/gui.h"
-#include "exe/image.h"
-#include "exe/model.h"
-#include "exe/mvs.h"
-#include "exe/sfm.h"
-#include "exe/vocab_tree.h"
-#include "util/version.h"
+#include "colmap/exe/database.h"
+#include "colmap/exe/feature.h"
+#include "colmap/exe/gui.h"
+#include "colmap/exe/image.h"
+#include "colmap/exe/model.h"
+#include "colmap/exe/mvs.h"
+#include "colmap/exe/sfm.h"
+#include "colmap/exe/vocab_tree.h"
+#include "colmap/util/version.h"
 
 namespace {
 

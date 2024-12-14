@@ -32,11 +32,11 @@
 #ifndef COLMAP_SRC_BASE_UNDISTORTION_H_
 #define COLMAP_SRC_BASE_UNDISTORTION_H_
 
-#include "base/reconstruction.h"
-#include "util/alignment.h"
-#include "util/bitmap.h"
-#include "util/misc.h"
-#include "util/threading.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/bitmap.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

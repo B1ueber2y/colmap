@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "mvs/depth_map_test"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "mvs/depth_map.h"
+#include "colmap/mvs/depth_map.h"
 
 using namespace colmap;
 using namespace colmap::mvs;

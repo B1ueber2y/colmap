@@ -32,7 +32,7 @@
 #ifndef COLMAP_SRC_OPTIM_COMBINATION_SAMPLER_H_
 #define COLMAP_SRC_OPTIM_COMBINATION_SAMPLER_H_
 
-#include "optim/sampler.h"
+#include "colmap/optim/sampler.h"
 
 namespace colmap {
 

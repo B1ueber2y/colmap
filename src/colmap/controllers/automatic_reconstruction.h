@@ -34,9 +34,9 @@
 
 #include <string>
 
-#include "base/reconstruction_manager.h"
-#include "util/option_manager.h"
-#include "util/threading.h"
+#include "colmap/base/reconstruction_manager.h"
+#include "colmap/util/option_manager.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

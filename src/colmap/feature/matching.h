@@ -36,13 +36,13 @@
 #include <string>
 #include <vector>
 
-#include "base/database.h"
-#include "feature/sift.h"
-#include "util/alignment.h"
-#include "util/cache.h"
-#include "util/opengl_utils.h"
-#include "util/threading.h"
-#include "util/timer.h"
+#include "colmap/base/database.h"
+#include "colmap/feature/sift.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/cache.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/threading.h"
+#include "colmap/util/timer.h"
 
 namespace colmap {
 

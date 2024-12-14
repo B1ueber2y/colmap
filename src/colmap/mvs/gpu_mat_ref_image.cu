@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/gpu_mat_ref_image.h"
+#include "colmap/mvs/gpu_mat_ref_image.h"
 
 #include <iostream>
 
-#include "util/cudacc.h"
+#include "colmap/util/cudacc.h"
 
 namespace colmap {
 namespace mvs {

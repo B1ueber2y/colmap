@@ -30,13 +30,13 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/reconstruction"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/camera_models.h"
-#include "base/correspondence_graph.h"
-#include "base/pose.h"
-#include "base/reconstruction.h"
-#include "base/similarity_transform.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/correspondence_graph.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/base/similarity_transform.h"
 
 using namespace colmap;
 

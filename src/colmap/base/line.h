@@ -34,8 +34,8 @@
 
 #include <Eigen/Core>
 
-#include "util/alignment.h"
-#include "util/bitmap.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/bitmap.h"
 
 namespace colmap {
 

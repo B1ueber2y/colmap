@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "util/string"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "util/string.h"
+#include "colmap/util/string.h"
 
 using namespace colmap;
 

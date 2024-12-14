@@ -35,8 +35,8 @@
 #include <QtCore>
 #include <QtWidgets>
 
-#include "ui/options_widget.h"
-#include "util/option_manager.h"
+#include "colmap/ui/options_widget.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

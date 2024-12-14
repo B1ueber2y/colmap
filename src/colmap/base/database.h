@@ -39,11 +39,11 @@
 #include <Eigen/Core>
 #include <sqlite3.h>
 
-#include "base/camera.h"
-#include "base/image.h"
-#include "estimators/two_view_geometry.h"
-#include "feature/types.h"
-#include "util/types.h"
+#include "colmap/base/camera.h"
+#include "colmap/base/image.h"
+#include "colmap/estimators/two_view_geometry.h"
+#include "colmap/feature/types.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

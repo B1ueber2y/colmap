@@ -30,18 +30,18 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/generalized_absolute_pose"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
 #include <array>
 
 #include <Eigen/Core>
 
-#include "base/pose.h"
-#include "base/projection.h"
-#include "base/similarity_transform.h"
-#include "estimators/generalized_absolute_pose.h"
-#include "optim/ransac.h"
-#include "util/random.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/similarity_transform.h"
+#include "colmap/estimators/generalized_absolute_pose.h"
+#include "colmap/optim/ransac.h"
+#include "colmap/util/random.h"
 
 using namespace colmap;
 

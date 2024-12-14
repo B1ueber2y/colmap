@@ -29,12 +29,12 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "controllers/bundle_adjustment.h"
+#include "colmap/controllers/bundle_adjustment.h"
 
 #include <ceres/ceres.h>
 
-#include "optim/bundle_adjustment.h"
-#include "util/misc.h"
+#include "colmap/optim/bundle_adjustment.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 namespace {

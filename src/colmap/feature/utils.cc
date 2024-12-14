@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "feature/utils.h"
+#include "colmap/feature/utils.h"
 
-#include "util/math.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 

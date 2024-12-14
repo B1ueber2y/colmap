@@ -30,13 +30,13 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "util/opengl_utils"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
 #include <thread>
 
 #include <QApplication>
 
-#include "util/opengl_utils.h"
+#include "colmap/util/opengl_utils.h"
 
 using namespace colmap;
 

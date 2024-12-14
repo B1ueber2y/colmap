@@ -29,18 +29,18 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/pose.h"
+#include "colmap/estimators/pose.h"
 
-#include "base/camera_models.h"
-#include "base/cost_functions.h"
-#include "base/essential_matrix.h"
-#include "base/pose.h"
-#include "estimators/absolute_pose.h"
-#include "estimators/essential_matrix.h"
-#include "optim/bundle_adjustment.h"
-#include "util/matrix.h"
-#include "util/misc.h"
-#include "util/threading.h"
+#include "colmap/base/camera_models.h"
+#include "colmap/base/cost_functions.h"
+#include "colmap/base/essential_matrix.h"
+#include "colmap/base/pose.h"
+#include "colmap/estimators/absolute_pose.h"
+#include "colmap/estimators/essential_matrix.h"
+#include "colmap/optim/bundle_adjustment.h"
+#include "colmap/util/matrix.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 namespace {

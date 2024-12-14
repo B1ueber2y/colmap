@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "estimators/generalized_absolute_pose_coeffs.h"
+#include "colmap/estimators/generalized_absolute_pose_coeffs.h"
 
 namespace colmap {
 

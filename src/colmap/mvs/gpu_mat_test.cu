@@ -34,11 +34,11 @@
 #endif  // __CUDACC__
 
 #define TEST_NAME "mvs/gpu_mat_test"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "mvs/gpu_mat.h"
-#include "mvs/gpu_mat_prng.h"
-#include "util/math.h"
+#include "colmap/mvs/gpu_mat.h"
+#include "colmap/mvs/gpu_mat_prng.h"
+#include "colmap/util/math.h"
 
 using namespace colmap;
 using namespace colmap::mvs;

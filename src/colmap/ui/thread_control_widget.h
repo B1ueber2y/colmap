@@ -37,7 +37,7 @@
 
 #include <memory>
 
-#include "util/threading.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

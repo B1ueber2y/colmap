@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "mvs/workspace.h"
+#include "colmap/mvs/workspace.h"
 
 #include <numeric>
 
-#include "util/threading.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 namespace mvs {

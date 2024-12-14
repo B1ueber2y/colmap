@@ -39,9 +39,9 @@
 
 #include <boost/filesystem.hpp>
 
-#include "util/endian.h"
-#include "util/logging.h"
-#include "util/string.h"
+#include "colmap/util/endian.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/string.h"
 
 namespace colmap {
 

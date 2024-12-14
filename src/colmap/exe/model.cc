@@ -29,15 +29,15 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/model.h"
+#include "colmap/exe/model.h"
 
-#include "base/gps.h"
-#include "base/pose.h"
-#include "base/similarity_transform.h"
-#include "estimators/coordinate_frame.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
-#include "util/threading.h"
+#include "colmap/base/gps.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/similarity_transform.h"
+#include "colmap/estimators/coordinate_frame.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 namespace {

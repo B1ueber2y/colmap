@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/triangulation.h"
+#include "colmap/base/triangulation.h"
 
-#include "base/essential_matrix.h"
-#include "base/pose.h"
+#include "colmap/base/essential_matrix.h"
+#include "colmap/base/pose.h"
 
 namespace colmap {
 

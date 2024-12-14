@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/bundle_adjustment_widget.h"
+#include "colmap/ui/bundle_adjustment_widget.h"
 
-#include "controllers/bundle_adjustment.h"
-#include "ui/main_window.h"
+#include "colmap/controllers/bundle_adjustment.h"
+#include "colmap/ui/main_window.h"
 
 namespace colmap {
 

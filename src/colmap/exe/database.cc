@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/database.h"
+#include "colmap/exe/database.h"
 
-#include "base/database.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/base/database.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/image_viewer_widget.h"
+#include "colmap/ui/image_viewer_widget.h"
 
-#include "ui/model_viewer_widget.h"
-#include "util/misc.h"
+#include "colmap/ui/model_viewer_widget.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 

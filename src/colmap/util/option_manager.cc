@@ -29,24 +29,24 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/option_manager.h"
+#include "colmap/util/option_manager.h"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-#include "base/image_reader.h"
-#include "controllers/incremental_mapper.h"
-#include "feature/extraction.h"
-#include "feature/matching.h"
-#include "feature/sift.h"
-#include "mvs/fusion.h"
-#include "mvs/meshing.h"
-#include "mvs/patch_match.h"
-#include "optim/bundle_adjustment.h"
-#include "ui/render_options.h"
-#include "util/misc.h"
-#include "util/random.h"
-#include "util/version.h"
+#include "colmap/base/image_reader.h"
+#include "colmap/controllers/incremental_mapper.h"
+#include "colmap/feature/extraction.h"
+#include "colmap/feature/matching.h"
+#include "colmap/feature/sift.h"
+#include "colmap/mvs/fusion.h"
+#include "colmap/mvs/meshing.h"
+#include "colmap/mvs/patch_match.h"
+#include "colmap/optim/bundle_adjustment.h"
+#include "colmap/ui/render_options.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/random.h"
+#include "colmap/util/version.h"
 
 namespace config = boost::program_options;
 

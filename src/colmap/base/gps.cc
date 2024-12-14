@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/gps.h"
+#include "colmap/base/gps.h"
 
-#include "util/math.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 

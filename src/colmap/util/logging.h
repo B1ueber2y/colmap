@@ -36,7 +36,7 @@
 
 #include <glog/logging.h>
 
-#include "util/string.h"
+#include "colmap/util/string.h"
 
 // Option checker macros. In contrast to glog, this function does not abort the
 // program, but simply returns false on failure.

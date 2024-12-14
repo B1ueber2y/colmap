@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/math.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 

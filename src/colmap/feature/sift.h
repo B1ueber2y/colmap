@@ -32,9 +32,9 @@
 #ifndef COLMAP_SRC_FEATURE_SIFT_H_
 #define COLMAP_SRC_FEATURE_SIFT_H_
 
-#include "estimators/two_view_geometry.h"
-#include "feature/types.h"
-#include "util/bitmap.h"
+#include "colmap/estimators/two_view_geometry.h"
+#include "colmap/feature/types.h"
+#include "colmap/util/bitmap.h"
 
 class SiftGPU;
 class SiftMatchGPU;

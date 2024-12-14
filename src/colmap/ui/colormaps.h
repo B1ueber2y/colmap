@@ -34,9 +34,9 @@
 
 #include <Eigen/Core>
 
-#include "base/reconstruction.h"
-#include "util/alignment.h"
-#include "util/types.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/point3d.h"
+#include "colmap/base/point3d.h"
 
 namespace colmap {
 

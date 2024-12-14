@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/license_widget.h"
+#include "colmap/ui/license_widget.h"
 
 namespace colmap {
 

@@ -32,7 +32,7 @@
 #ifndef COLMAP_SRC_RETRIEVAL_VOTE_AND_VERIFY_H_
 #define COLMAP_SRC_RETRIEVAL_VOTE_AND_VERIFY_H_
 
-#include "retrieval/geometry.h"
+#include "colmap/retrieval/geometry.h"
 
 namespace colmap {
 namespace retrieval {

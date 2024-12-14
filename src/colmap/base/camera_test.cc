@@ -30,10 +30,10 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/camera"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/camera.h"
-#include "base/camera_models.h"
+#include "colmap/base/camera.h"
+#include "colmap/base/camera_models.h"
 
 using namespace colmap;
 

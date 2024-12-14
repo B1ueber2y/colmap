@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/render_options_widget.h"
+#include "colmap/ui/render_options_widget.h"
 
-#include "ui/colormaps.h"
+#include "colmap/ui/colormaps.h"
 
 namespace colmap {
 

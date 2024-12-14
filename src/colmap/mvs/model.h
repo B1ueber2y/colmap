@@ -40,9 +40,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "mvs/depth_map.h"
-#include "mvs/image.h"
-#include "mvs/normal_map.h"
+#include "colmap/mvs/depth_map.h"
+#include "colmap/mvs/image.h"
+#include "colmap/mvs/normal_map.h"
 
 namespace colmap {
 namespace mvs {

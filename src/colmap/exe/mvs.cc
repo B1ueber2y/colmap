@@ -29,14 +29,14 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "exe/mvs.h"
+#include "colmap/exe/mvs.h"
 
-#include "base/reconstruction.h"
-#include "mvs/fusion.h"
-#include "mvs/meshing.h"
-#include "mvs/patch_match.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/mvs/fusion.h"
+#include "colmap/mvs/meshing.h"
+#include "colmap/mvs/patch_match.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

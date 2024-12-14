@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/options_widget.h"
+#include "colmap/ui/options_widget.h"
 
 namespace colmap {
 

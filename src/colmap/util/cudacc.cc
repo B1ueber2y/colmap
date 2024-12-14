@@ -29,9 +29,9 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/cudacc.h"
+#include "colmap/util/cudacc.h"
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

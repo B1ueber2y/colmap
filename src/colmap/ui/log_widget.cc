@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/log_widget.h"
+#include "colmap/ui/log_widget.h"
 
 namespace colmap {
 

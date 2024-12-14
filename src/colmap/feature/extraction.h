@@ -32,11 +32,11 @@
 #ifndef COLMAP_SRC_FEATURE_EXTRACTION_H_
 #define COLMAP_SRC_FEATURE_EXTRACTION_H_
 
-#include "base/database.h"
-#include "base/image_reader.h"
-#include "feature/sift.h"
-#include "util/opengl_utils.h"
-#include "util/threading.h"
+#include "colmap/base/database.h"
+#include "colmap/base/image_reader.h"
+#include "colmap/feature/sift.h"
+#include "colmap/util/opengl_utils.h"
+#include "colmap/util/threading.h"
 
 namespace colmap {
 

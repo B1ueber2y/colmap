@@ -37,7 +37,7 @@
 #include <random>
 #include <thread>
 
-#include "util/logging.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 

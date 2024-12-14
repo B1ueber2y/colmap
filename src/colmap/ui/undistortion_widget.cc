@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/undistortion_widget.h"
+#include "colmap/ui/undistortion_widget.h"
 
 namespace colmap {
 

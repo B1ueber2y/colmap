@@ -37,9 +37,9 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "estimators/similarity_transform.h"
-#include "util/alignment.h"
-#include "util/types.h"
+#include "colmap/estimators/similarity_transform.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

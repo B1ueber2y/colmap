@@ -30,9 +30,9 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #define TEST_NAME "base/polynomial"
-#include "util/testing.h"
+#include "colmap/util/testing.h"
 
-#include "base/polynomial.h"
+#include "colmap/base/polynomial.h"
 
 using namespace colmap;
 

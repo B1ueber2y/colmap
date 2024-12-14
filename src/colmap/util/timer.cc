@@ -29,10 +29,10 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "util/timer.h"
+#include "colmap/util/timer.h"
 
-#include "util/logging.h"
-#include "util/misc.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/misc.h"
 
 using namespace std::chrono;
 

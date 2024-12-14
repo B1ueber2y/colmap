@@ -34,8 +34,8 @@
 
 #include <memory>
 
-#include "mvs/cuda_array_wrapper.h"
-#include "mvs/gpu_mat.h"
+#include "colmap/mvs/cuda_array_wrapper.h"
+#include "colmap/mvs/gpu_mat.h"
 
 namespace colmap {
 namespace mvs {

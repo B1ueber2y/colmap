@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-#include "types.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

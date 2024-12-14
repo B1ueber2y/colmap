@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "retrieval/geometry.h"
+#include "colmap/retrieval/geometry.h"
 
 namespace colmap {
 namespace retrieval {

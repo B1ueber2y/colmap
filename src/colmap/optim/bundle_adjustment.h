@@ -40,9 +40,9 @@
 #include <ceres/ceres.h>
 
 #include "PBA/pba.h"
-#include "base/camera_rig.h"
-#include "base/reconstruction.h"
-#include "util/alignment.h"
+#include "colmap/base/camera_rig.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/util/alignment.h"
 
 namespace colmap {
 

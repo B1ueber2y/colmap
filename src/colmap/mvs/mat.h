@@ -36,8 +36,8 @@
 #include <string>
 #include <vector>
 
-#include "util/endian.h"
-#include "util/logging.h"
+#include "colmap/util/endian.h"
+#include "colmap/util/logging.h"
 
 namespace colmap {
 namespace mvs {

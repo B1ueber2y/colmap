@@ -35,11 +35,11 @@
 #include <QtCore>
 #include <QtWidgets>
 
-#include "base/database.h"
-#include "base/projection.h"
-#include "base/reconstruction.h"
-#include "ui/qt_utils.h"
-#include "util/option_manager.h"
+#include "colmap/base/database.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/reconstruction.h"
+#include "colmap/ui/qt_utils.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

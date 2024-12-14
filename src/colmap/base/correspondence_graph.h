@@ -35,8 +35,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "base/database.h"
-#include "util/types.h"
+#include "colmap/base/database.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

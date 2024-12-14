@@ -56,14 +56,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "estimators/generalized_relative_pose.h"
+#include "colmap/estimators/generalized_relative_pose.h"
 
-#include "base/essential_matrix.h"
-#include "base/pose.h"
-#include "base/projection.h"
-#include "base/triangulation.h"
-#include "util/logging.h"
-#include "util/random.h"
+#include "colmap/base/essential_matrix.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/base/triangulation.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/random.h"
 
 namespace colmap {
 namespace {

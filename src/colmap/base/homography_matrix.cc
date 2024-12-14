@@ -29,15 +29,15 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "base/homography_matrix.h"
+#include "colmap/base/homography_matrix.h"
 
 #include <array>
 
 #include <Eigen/Dense>
 
-#include "base/pose.h"
-#include "util/logging.h"
-#include "util/math.h"
+#include "colmap/base/pose.h"
+#include "colmap/util/logging.h"
+#include "colmap/util/math.h"
 
 namespace colmap {
 namespace {

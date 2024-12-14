@@ -39,17 +39,17 @@
 
 #include <Eigen/Core>
 
-#include "base/camera.h"
-#include "base/database.h"
-#include "base/image.h"
-#include "base/point2d.h"
-#include "base/point3d.h"
-#include "base/similarity_transform.h"
-#include "base/track.h"
-#include "estimators/similarity_transform.h"
-#include "optim/loransac.h"
-#include "util/alignment.h"
-#include "util/types.h"
+#include "colmap/base/camera.h"
+#include "colmap/base/database.h"
+#include "colmap/base/image.h"
+#include "colmap/base/point2d.h"
+#include "colmap/base/point3d.h"
+#include "colmap/base/similarity_transform.h"
+#include "colmap/base/track.h"
+#include "colmap/estimators/similarity_transform.h"
+#include "colmap/optim/loransac.h"
+#include "colmap/util/alignment.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 

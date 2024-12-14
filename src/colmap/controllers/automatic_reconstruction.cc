@@ -29,17 +29,17 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "controllers/automatic_reconstruction.h"
+#include "colmap/controllers/automatic_reconstruction.h"
 
-#include "base/undistortion.h"
-#include "controllers/incremental_mapper.h"
-#include "feature/extraction.h"
-#include "feature/matching.h"
-#include "mvs/fusion.h"
-#include "mvs/meshing.h"
-#include "mvs/patch_match.h"
-#include "util/misc.h"
-#include "util/option_manager.h"
+#include "colmap/base/undistortion.h"
+#include "colmap/controllers/incremental_mapper.h"
+#include "colmap/feature/extraction.h"
+#include "colmap/feature/matching.h"
+#include "colmap/mvs/fusion.h"
+#include "colmap/mvs/meshing.h"
+#include "colmap/mvs/patch_match.h"
+#include "colmap/util/misc.h"
+#include "colmap/util/option_manager.h"
 
 namespace colmap {
 

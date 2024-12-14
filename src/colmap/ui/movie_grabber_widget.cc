@@ -29,11 +29,11 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/movie_grabber_widget.h"
+#include "colmap/ui/movie_grabber_widget.h"
 
-#include "base/pose.h"
-#include "base/projection.h"
-#include "ui/model_viewer_widget.h"
+#include "colmap/base/pose.h"
+#include "colmap/base/projection.h"
+#include "colmap/ui/model_viewer_widget.h"
 
 namespace colmap {
 

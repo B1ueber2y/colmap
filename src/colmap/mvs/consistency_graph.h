@@ -37,7 +37,7 @@
 
 #include <Eigen/Core>
 
-#include "util/types.h"
+#include "colmap/util/types.h"
 
 namespace colmap {
 namespace mvs {
