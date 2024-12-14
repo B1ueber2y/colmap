@@ -32,7 +32,7 @@
 #ifndef COLMAP_SRC_UTIL_VERSION_H_
 #define COLMAP_SRC_UTIL_VERSION_H_
 
-#include "colmap/misc.h"
+#include "colmap/util/misc.h"
 
 namespace colmap {
 
