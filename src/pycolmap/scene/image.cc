@@ -40,6 +40,22 @@ std::shared_ptr<Image> MakeImage(const std::string& name,
   return image;
 }
 
+void BindImageTest(py::module& m) {
+  struct TestExtension : public Image::Extension {
+    int test_field = 42;
+  };
+
+  py::class_<TestExtension, Image::Extension, std::shared_ptr<TestExtension>>(
+      m, "TestExtension")
+    .def_readwrite("test_field", &TestExtension::test_field);
+
+  m.def("create_test_image", []() {
+    Image image;
+    image.SetExtension(std::make_shared<TestExtension>());
+    return image;
+  });
+}
+
 void BindImage(py::module& m) {
   py::class_<Image::Extension, std::shared_ptr<Image::Extension>>(
       m, "ImageExtension");
@@ -181,4 +197,6 @@ void BindImage(py::module& m) {
   MakeDataclass(PyImage);
 
   py::bind_map<ImageMap>(m, "MapImageIdToImage");
+
+  BindImageTest(m);
 }
