@@ -18,6 +18,7 @@ void BindSimilarityTransformEstimator(py::module& m);
 void BindTriangulationEstimator(py::module& m);
 void BindTwoViewGeometryEstimator(py::module& m);
 void BindImuPreintegration(py::module& m);
+void BindCPPartitioning(py::module& m);
 
 void BindEstimators(py::module& m) {
   BindCeres(m);
@@ -36,4 +37,5 @@ void BindEstimators(py::module& m) {
   BindTriangulationEstimator(m);
   BindTwoViewGeometryEstimator(m);
   BindImuPreintegration(m);
+  BindCPPartitioning(m);
 }
