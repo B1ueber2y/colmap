@@ -65,6 +65,7 @@ COLMAP_ADD_LIBRARY(
         Eigen3::Eigen
         Ceres::ceres
         PoseLib::PoseLib
+        SuiteSparse::CHOLMOD
 )
 
 if(CUDA_ENABLED)

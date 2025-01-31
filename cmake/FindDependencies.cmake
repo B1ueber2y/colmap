@@ -15,6 +15,8 @@ find_package(Boost ${COLMAP_FIND_TYPE} COMPONENTS
 
 find_package(Eigen3 ${COLMAP_FIND_TYPE})
 
+find_package(SuiteSparse COMPONENTS CHOLMOD ${COLMAP_FIND_TYPE})
+
 find_package(FreeImage ${COLMAP_FIND_TYPE})
 
 find_package(FLANN ${COLMAP_FIND_TYPE})

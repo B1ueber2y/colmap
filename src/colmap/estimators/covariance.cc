@@ -34,6 +34,7 @@
 #include <unordered_set>
 
 #include <ceres/crs_matrix.h>
+#include <cholmod.h>
 
 namespace colmap {
 namespace {
@@ -171,7 +172,50 @@ bool SchurEliminateOtherParams(double damping,
   }
 
   S = S_cc - S_co * llt_S_oo.solve(S_oc);
+  return true;
+}
 
+
+bool ComputeLInverse_CHOLMOD(Eigen::SparseMatrix<double>& S, Eigen::MatrixXd& L_inv) {
+  // Initialize CHOLMOD
+  cholmod_common c;
+  cholmod_start(&c);
+
+  // Convert Eigen::SparseMatrix to CHOLMOD sparse format
+  cholmod_sparse chol_S;
+  chol_S.nrow = S.rows();
+  chol_S.ncol = S.cols();
+  chol_S.nzmax = S.nonZeros();
+  chol_S.p = S.outerIndexPtr();
+  chol_S.i = S.innerIndexPtr();
+  chol_S.x = S.valuePtr();
+  chol_S.stype = 1;  // Symmetric
+  chol_S.itype = CHOLMOD_INT;
+  chol_S.xtype = CHOLMOD_REAL;
+  chol_S.dtype = CHOLMOD_DOUBLE;
+  chol_S.sorted = 1;
+  chol_S.packed = 1;
+
+  // Perform Cholesky factorization
+  cholmod_factor* L = cholmod_analyze(&chol_S, &c);
+  cholmod_factorize(&chol_S, L, &c);
+
+  // Compute the covariance matrix as the inverse of Hessian
+  cholmod_dense* identity = cholmod_zeros(S.rows(), S.cols(), CHOLMOD_REAL, &c);
+  double* identity_data = static_cast<double*>(identity->x);
+  for (int i = 0; i < S.rows(); i++) {
+    identity_data[i * S.cols() + i] = 1.0;
+  }
+  cholmod_dense* dense_cov = cholmod_solve(CHOLMOD_A, L, identity, &c);
+  int rows = dense_cov->nrow;
+  int cols = dense_cov->ncol;
+  L_inv = Eigen::Map<Eigen::MatrixXd>(static_cast<double*>(dense_cov->x), rows, cols);
+
+  // Free CHOLMOD dense matrix
+  cholmod_free_factor(&L, &c);
+  cholmod_free_dense(&identity, &c);
+  cholmod_free_dense(&dense_cov, &c);
+  cholmod_finish(&c);
   return true;
 }
 
@@ -215,8 +259,9 @@ Eigen::MatrixXd ExtractCovFromLInverse(const Eigen::MatrixXd& L_inv,
                                        int col_start,
                                        int row_block_size,
                                        int col_block_size) {
-  return L_inv.block(0, row_start, L_inv.rows(), row_block_size).transpose() *
-         L_inv.block(0, col_start, L_inv.cols(), col_block_size);
+  return L_inv.block(row_start, col_start, row_block_size, col_block_size);
+  // return L_inv.block(0, row_start, L_inv.rows(), row_block_size).transpose() *
+  //        L_inv.block(0, col_start, L_inv.cols(), col_block_size);
 }
 
 }  // namespace
@@ -370,7 +415,7 @@ std::optional<BACovariance> EstimateBACovarianceFromProblem(
   VLOG(2) << "Computing L inverse";
 
   Eigen::MatrixXd L_inv;
-  if (!ComputeLInverse(S, L_inv)) {
+  if (!ComputeLInverse_CHOLMOD(S, L_inv)) {
     return std::nullopt;
   }
 
