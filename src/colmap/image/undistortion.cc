@@ -789,7 +789,7 @@ Camera UndistortCamera(const UndistortCameraOptions& options,
   THROW_CHECK_LT(options.roi_min_y, options.roi_max_y);
 
   Camera undistorted_camera;
-  undistorted_camera.model_id = PinholeCameraModel::model_id;
+  undistorted_camera.model_id = SimpleRadialFisheyeCameraModel::model_id;
   undistorted_camera.width = camera.width;
   undistorted_camera.height = camera.height;
   undistorted_camera.params.resize(PinholeCameraModel::num_params, 0);
