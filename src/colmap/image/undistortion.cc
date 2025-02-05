@@ -792,7 +792,7 @@ Camera UndistortCamera(const UndistortCameraOptions& options,
   undistorted_camera.model_id = SimpleRadialFisheyeCameraModel::model_id;
   undistorted_camera.width = camera.width;
   undistorted_camera.height = camera.height;
-  undistorted_camera.params.resize(PinholeCameraModel::num_params, 0);
+  undistorted_camera.params.resize(SimpleRadialFisheyeCameraModel::num_params, 0);
 
   // Copy focal length parameters.
   const span<const size_t> focal_length_idxs = camera.FocalLengthIdxs();
