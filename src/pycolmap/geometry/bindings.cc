@@ -66,7 +66,6 @@ void BindGeometry(py::module& m) {
             return self.angularDistance(other);
           },
           "other"_a)
-      .def("inverse", &Eigen::Quaterniond::inverse)
       .def("__repr__", [](const Eigen::Quaterniond& self) {
         std::ostringstream ss;
         ss << "Rotation3d(quat_xyzw=[" << self.coeffs().format(vec_fmt) << "])";
@@ -116,6 +115,16 @@ void BindGeometry(py::module& m) {
       });
   py::implicitly_convertible<py::array, Rigid3d>();
   MakeDataclass(PyRigid3d);
+
+  m.def("get_covariance_for_composed_rigid3d",
+        &GetCovarianceForComposedRigid3d,
+        "left_rigid3d"_a,
+        "joint_covar"_a);
+  m.def("get_covariance_for_relative_rigid3d",
+        &GetCovarianceForRelativeRigid3d,
+        "base_rigid3d"_a,
+        "target_rigid3d"_a,
+        "joint_covar"_a);
 
   py::class_ext_<Sim3d> PySim3d(m, "Sim3d");
   PySim3d.def(py::init<>())
