@@ -55,13 +55,53 @@ bool GlobalMapper::Solve(const colmap::Database* database,
 
     colmap::Timer run_timer;
     run_timer.Start();
-    // Relative pose relies on the undistorted images
-    EstimateRelativePoses(
-        view_graph, reconstruction, options.relative_pose_estimation);
 
-    InlierThresholdOptions inlier_thresholds = options.inlier_thresholds;
-    // Undistort the images and filter edges by inlier number
-    ImagePairsInlierCount(view_graph, reconstruction, inlier_thresholds, true);
+    // Estimate calibrated two-view geometry with current camera calibration.
+    // This repopulates inlier_matches and estimates cam2_from_cam1.
+    colmap::TwoViewGeometryOptions two_view_options;
+    two_view_options.compute_relative_pose = true;
+    if (options.random_seed >= 0) {
+      two_view_options.ransac_options.random_seed = options.random_seed;
+    }
+
+    for (auto& [pair_id, image_pair] : view_graph.ImagePairs()) {
+      const auto [image_id1, image_id2] = colmap::PairIdToImagePair(pair_id);
+      const Image& image1 = reconstruction.Image(image_id1);
+      const Image& image2 = reconstruction.Image(image_id2);
+      const colmap::Camera& camera1 =
+          reconstruction.Camera(image1.CameraId());
+      const colmap::Camera& camera2 =
+          reconstruction.Camera(image2.CameraId());
+
+      // Collect all 2D points from images.
+      std::vector<Eigen::Vector2d> points1(image1.NumPoints2D());
+      std::vector<Eigen::Vector2d> points2(image2.NumPoints2D());
+      for (colmap::point2D_t i = 0; i < image1.NumPoints2D(); ++i) {
+        points1[i] = image1.Point2D(i).xy;
+      }
+      for (colmap::point2D_t i = 0; i < image2.NumPoints2D(); ++i) {
+        points2[i] = image2.Point2D(i).xy;
+      }
+
+      // Convert matches from Eigen matrix to FeatureMatches.
+      colmap::FeatureMatches matches(image_pair.matches.rows());
+      for (Eigen::Index i = 0; i < image_pair.matches.rows(); ++i) {
+        matches[i] = colmap::FeatureMatch(image_pair.matches(i, 0),
+                                          image_pair.matches(i, 1));
+      }
+
+      // Estimate and assign to base class (config, E, F, H, cam2_from_cam1, inlier_matches).
+      static_cast<colmap::TwoViewGeometry&>(image_pair) =
+          colmap::EstimateCalibratedTwoViewGeometry(
+              camera1, points1, camera2, points2, matches, two_view_options);
+
+      if (image_pair.config == colmap::TwoViewGeometry::DEGENERATE ||
+          image_pair.config == colmap::TwoViewGeometry::UNDEFINED) {
+        view_graph.SetInvalidImagePair(pair_id);
+      } else {
+        view_graph.SetValidImagePair(pair_id);
+      }
+    }
 
     view_graph.FilterByNumInliers(options.inlier_thresholds.min_inlier_num);
     view_graph.FilterByInlierRatio(options.inlier_thresholds.min_inlier_ratio);
