@@ -60,6 +60,10 @@ bool GlobalMapper::Solve(const colmap::Database* database,
     // This repopulates inlier_matches and estimates cam2_from_cam1.
     colmap::TwoViewGeometryOptions two_view_options;
     two_view_options.compute_relative_pose = true;
+    // Use 1.0 px threshold to match ImagePairsInlierCount's max_epipolar_error_E
+    two_view_options.ransac_options.max_error = 1.0;
+    two_view_options.min_num_inliers = 30;
+    two_view_options.min_inlier_ratio = 0.25;
     if (options.random_seed >= 0) {
       two_view_options.ransac_options.random_seed = options.random_seed;
     }
@@ -103,8 +107,8 @@ bool GlobalMapper::Solve(const colmap::Database* database,
       }
     }
 
-    view_graph.FilterByNumInliers(options.inlier_thresholds.min_inlier_num);
-    view_graph.FilterByInlierRatio(options.inlier_thresholds.min_inlier_ratio);
+    // view_graph.FilterByNumInliers(options.inlier_thresholds.min_inlier_num);
+    // view_graph.FilterByInlierRatio(options.inlier_thresholds.min_inlier_ratio);
 
     if (view_graph.KeepLargestConnectedComponents(reconstruction) == 0) {
       LOG(ERROR) << "no connected components are found";
