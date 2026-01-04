@@ -71,6 +71,7 @@ void ViewGraph::LoadFromDatabase(const colmap::Database& database,
       image_pair.matches.conservativeResize(count, 2);
 
       // Decompose relative pose if not already present.
+      image_pair.cam2_from_cam1.reset();
       if (!image_pair.cam2_from_cam1.has_value()) {
         const colmap::Image& image1 = image_map.at(image_id1);
         const colmap::Image& image2 = image_map.at(image_id2);
