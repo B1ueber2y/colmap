@@ -154,6 +154,13 @@ AutomaticReconstructionController::AutomaticReconstructionController(
   }
 
   if (options_.matching) {
+      LOG(INFO) << "Creating matchers with TVG: max_error="
+                      << option_manager_.two_view_geometry->ransac_options.max_error
+                                  << ", min_num_inliers=" << option_manager_.two_view_geometry->min_num_inliers
+                                              << ", min_inlier_ratio=" << option_manager_.two_view_geometry->min_inlier_ratio
+                                                          << ", mapper=" << static_cast<int>(options_.mapper);
+      option_manager_.two_view_geometry->compute_relative_pose = true;
+
     exhaustive_matcher_ =
         CreateExhaustiveFeatureMatcher(*option_manager_.exhaustive_pairing,
                                        *option_manager_.feature_matching,

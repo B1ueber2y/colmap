@@ -345,40 +345,40 @@ void ReestimateRelativePoses(const RelativePoseReestimationOptions& options,
 bool CalibrateViewGraph(const ViewGraphCalibratorOptions& options,
                         ViewGraph& view_graph,
                         colmap::Reconstruction& reconstruction) {
-  // Cross-validate prior focal lengths if enabled.
-  if (options.cross_validate_prior_focal_lengths) {
-    CrossValidatePriorFocalLengths(reconstruction, view_graph);
-  }
+  // // Cross-validate prior focal lengths if enabled.
+  // if (options.cross_validate_prior_focal_lengths) {
+  //   CrossValidatePriorFocalLengths(reconstruction, view_graph);
+  // }
 
-  // Recompute F from E for all CALIBRATED pairs.
-  for (auto& [pair_id, image_pair] : view_graph.ImagePairs()) {
-    if (image_pair.config != colmap::TwoViewGeometry::CALIBRATED) continue;
-    const auto [image_id1, image_id2] = colmap::PairIdToImagePair(pair_id);
-    const colmap::Camera& camera1 =
-        *reconstruction.Image(image_id1).CameraPtr();
-    const colmap::Camera& camera2 =
-        *reconstruction.Image(image_id2).CameraPtr();
-    image_pair.F = colmap::FundamentalFromEssentialMatrix(
-        camera2.CalibrationMatrix(),
-        colmap::EssentialMatrixFromPose(*image_pair.cam2_from_cam1),
-        camera1.CalibrationMatrix());
-  }
+  // // Recompute F from E for all CALIBRATED pairs.
+  // for (auto& [pair_id, image_pair] : view_graph.ImagePairs()) {
+  //   if (image_pair.config != colmap::TwoViewGeometry::CALIBRATED) continue;
+  //   const auto [image_id1, image_id2] = colmap::PairIdToImagePair(pair_id);
+  //   const colmap::Camera& camera1 =
+  //       *reconstruction.Image(image_id1).CameraPtr();
+  //   const colmap::Camera& camera2 =
+  //       *reconstruction.Image(image_id2).CameraPtr();
+  //   image_pair.F = colmap::FundamentalFromEssentialMatrix(
+  //       camera2.CalibrationMatrix(),
+  //       colmap::EssentialMatrixFromPose(*image_pair.cam2_from_cam1),
+  //       camera1.CalibrationMatrix());
+  // }
 
-  ViewGraphCalibrator calibrator(options);
-  if (!calibrator.Solve(view_graph, reconstruction)) {
-    return false;
-  }
+  // ViewGraphCalibrator calibrator(options);
+  // if (!calibrator.Solve(view_graph, reconstruction)) {
+  //   return false;
+  // }
 
   // Re-estimate relative poses and filter by inliers.
-  if (options.reestimate_relative_pose) {
-    RelativePoseReestimationOptions relpose_options;
-    relpose_options.num_threads = options.solver_options.num_threads;
-    relpose_options.random_seed = options.random_seed;
-    relpose_options.max_error = options.relpose_max_error;
-    relpose_options.min_num_inliers = options.relpose_min_num_inliers;
-    relpose_options.min_inlier_ratio = options.relpose_min_inlier_ratio;
-    ReestimateRelativePoses(relpose_options, view_graph, reconstruction);
-  }
+  // if (options.reestimate_relative_pose) {
+  //   RelativePoseReestimationOptions relpose_options;
+  //   relpose_options.num_threads = options.solver_options.num_threads;
+  //   relpose_options.random_seed = options.random_seed;
+  //   relpose_options.max_error = options.relpose_max_error;
+  //   relpose_options.min_num_inliers = options.relpose_min_num_inliers;
+  //   relpose_options.min_inlier_ratio = options.relpose_min_inlier_ratio;
+  //   ReestimateRelativePoses(relpose_options, view_graph, reconstruction);
+  // }
 
   return true;
 }
