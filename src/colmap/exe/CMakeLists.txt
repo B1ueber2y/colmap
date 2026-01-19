@@ -93,3 +93,13 @@ COLMAP_ADD_EXECUTABLE(
         Boost::boost
 )
 set_target_properties(colmap_main PROPERTIES OUTPUT_NAME colmap)
+
+COLMAP_ADD_EXECUTABLE(
+    NAME rig_pose_test
+    SRCS
+        rig_pose_test.cc
+    LINK_LIBS
+        colmap_estimators
+        colmap_scene
+        colmap_util
+)

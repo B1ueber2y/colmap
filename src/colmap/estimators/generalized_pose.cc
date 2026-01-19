@@ -45,6 +45,10 @@
 #include <Eigen/Core>
 #include <ceres/ceres.h>
 
+#include "colmap/util/timer.h"
+
+#include <iostream>
+
 namespace colmap {
 namespace {
 
@@ -172,7 +176,14 @@ bool EstimateGeneralizedAbsolutePose(
       options_copy,
       GP3PEstimator(GP3PEstimator::ResidualType::ReprojectionError),
       UniqueInlierSupportMeasurer(std::move(unique_point3D_ids)));
+
+  Timer timer;
+  timer.Start();
   auto report = ransac.Estimate(rig_points2D, points3D);
+  timer.Pause();
+  std::cout << "EstimateGeneralizedAbsolutePose RANSAC time: "
+            << timer.ElapsedSeconds() << " s, num_trials: " << report.num_trials
+            << std::endl;
   if (!report.success) {
     return false;
   }
