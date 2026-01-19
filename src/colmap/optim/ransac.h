@@ -34,7 +34,10 @@
 #include "colmap/optim/support_measurement.h"
 #include "colmap/util/logging.h"
 
+#include "colmap/util/timer.h"
+
 #include <cfloat>
+#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -239,6 +242,15 @@ RANSAC<Estimator, SupportMeasurer, Sampler>::Estimate(
   size_t dyn_max_num_trials = max_num_trials;
   const size_t min_num_trials = options_.min_num_trials;
 
+  Timer timer_estimation, timer_residuals, timer_scoring;
+  timer_estimation.Start();
+  timer_estimation.Pause();
+  timer_residuals.Start();
+  timer_residuals.Pause();
+  timer_scoring.Start();
+  timer_scoring.Pause();
+  size_t total_models = 0;
+
   for (report.num_trials = 0; report.num_trials < max_num_trials;
        ++report.num_trials) {
     if (abort) {
@@ -249,14 +261,21 @@ RANSAC<Estimator, SupportMeasurer, Sampler>::Estimate(
     sampler.SampleXY(X, Y, &X_rand, &Y_rand);
 
     // Estimate model for current subset.
+    timer_estimation.Resume();
     estimator.Estimate(X_rand, Y_rand, &sample_models);
+    timer_estimation.Pause();
+    total_models += sample_models.size();
 
     // Iterate through all estimated models.
     for (const auto& sample_model : sample_models) {
+      timer_residuals.Resume();
       estimator.Residuals(X, Y, sample_model, &residuals);
+      timer_residuals.Pause();
       THROW_CHECK_EQ(residuals.size(), num_samples);
 
+      timer_scoring.Resume();
       const auto support = support_measurer.Evaluate(residuals, max_residual);
+      timer_scoring.Pause();
 
       // Save as best subset if better than all previous subsets.
       if (support_measurer.IsLeftBetter(support, best_support)) {
@@ -277,6 +296,17 @@ RANSAC<Estimator, SupportMeasurer, Sampler>::Estimate(
       }
     }
   }
+
+  const double ms_estimation = timer_estimation.ElapsedSeconds() * 1000;
+  const double ms_residuals = timer_residuals.ElapsedSeconds() * 1000;
+  const double ms_scoring = timer_scoring.ElapsedSeconds() * 1000;
+  const double ms_total = ms_estimation + ms_residuals + ms_scoring;
+  std::cout << "[RANSAC] " << report.num_trials << " trials, "
+            << total_models << " models, " << best_support.num_inliers << " inliers\n"
+            << "  Estimation: " << ms_estimation << " ms (" << (100 * ms_estimation / ms_total) << "%)\n"
+            << "  Residuals:  " << ms_residuals << " ms (" << (100 * ms_residuals / ms_total) << "%)\n"
+            << "  Scoring:    " << ms_scoring << " ms (" << (100 * ms_scoring / ms_total) << "%)\n"
+            << "  Total:      " << ms_total << " ms" << std::endl;
 
   if (!best_model.has_value()) {
     return report;
