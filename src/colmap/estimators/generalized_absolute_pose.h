@@ -44,14 +44,14 @@ class GP3PEstimator {
   // The generalized image observations, which is composed of the relative pose
   // of a camera in the generalized camera and a ray in the camera frame.
   struct X_t {
-    Eigen::Matrix3x4d cam_from_rig;  // Stored as matrix for fast residuals
+    Rigid3d cam_from_rig;
     Eigen::Vector3d ray_in_cam;
   };
 
   // The observed 3D feature points in the world frame.
   typedef Eigen::Vector3d Y_t;
-  // The estimated rig_from_world pose of the generalized camera (as matrix for speed).
-  typedef Eigen::Matrix3x4d M_t;
+  // The estimated rig_from_world pose of the generalized camera.
+  typedef Rigid3d M_t;
 
   // The minimum number of samples needed to estimate a model.
   static const int kMinNumSamples = 3;

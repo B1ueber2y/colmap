@@ -32,6 +32,7 @@
 #include "colmap/estimators/bundle_adjustment.h"
 #include "colmap/estimators/cost_functions.h"
 #include "colmap/estimators/generalized_absolute_pose.h"
+#include "colmap/estimators/generalized_absolute_pose_legacy.h"
 #include "colmap/estimators/generalized_relative_pose.h"
 #include "colmap/estimators/manifold.h"
 #include "colmap/estimators/pose.h"
@@ -147,12 +148,6 @@ bool EstimateGeneralizedAbsolutePose(
     return false;
   }
 
-  // Precompute cam_from_rig matrices for each camera (for fast residual computation)
-  std::vector<Eigen::Matrix3x4d> cams_from_rig_mats(cams_from_rig.size());
-  for (size_t i = 0; i < cams_from_rig.size(); i++) {
-    cams_from_rig_mats[i] = cams_from_rig[i].ToMatrix();
-  }
-
   std::vector<GP3PEstimator::X_t> rig_points2D(points2D.size());
   for (size_t i = 0; i < points2D.size(); i++) {
     const size_t camera_idx = camera_idxs[i];
@@ -163,7 +158,7 @@ bool EstimateGeneralizedAbsolutePose(
     } else {
       rig_points2D[i].ray_in_cam.setZero();
     }
-    rig_points2D[i].cam_from_rig = cams_from_rig_mats[camera_idx];
+    rig_points2D[i].cam_from_rig = cams_from_rig[camera_idx];
   }
 
   // Associate unique ids to each 3D point.
@@ -194,7 +189,7 @@ bool EstimateGeneralizedAbsolutePose(
     return false;
   }
 
-  *rig_from_world = Rigid3d::FromMatrix(report.model);
+  *rig_from_world = report.model;
   *num_inliers = report.support.num_unique_inliers;
   *inlier_mask = std::move(report.inlier_mask);
 

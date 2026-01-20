@@ -55,13 +55,10 @@ void GP3PEstimator::Estimate(const std::vector<X_t>& points2D,
   std::vector<Eigen::Vector3d> rays_in_rig(3);
   std::vector<Eigen::Vector3d> origins_in_rig(3);
   for (int i = 0; i < 3; ++i) {
-    // Compute inverse of cam_from_rig: [R|t]^-1 = [R^T | -R^T*t]
-    const Eigen::Matrix3d R = points2D[i].cam_from_rig.leftCols<3>();
-    const Eigen::Vector3d t = points2D[i].cam_from_rig.col(3);
-    const Eigen::Matrix3d R_inv = R.transpose();
-    const Eigen::Vector3d t_inv = -R_inv * t;
-    rays_in_rig[i] = (R_inv * points2D[i].ray_in_cam).normalized();
-    origins_in_rig[i] = t_inv;
+    const Rigid3d rig_from_cam = Inverse(points2D[i].cam_from_rig);
+    rays_in_rig[i] =
+        (rig_from_cam.rotation * points2D[i].ray_in_cam).normalized();
+    origins_in_rig[i] = rig_from_cam.translation;
   }
 
   std::vector<poselib::CameraPose> poses;
@@ -78,8 +75,7 @@ void GP3PEstimator::Estimate(const std::vector<X_t>& points2D,
 
   rigs_from_world->reserve(poses.size());
   for (const poselib::CameraPose& pose : poses) {
-    // Convert to Matrix3x4d for fast residual computation
-    rigs_from_world->emplace_back(ConvertPoseLibPoseToRigid3d(pose).ToMatrix());
+    rigs_from_world->emplace_back(ConvertPoseLibPoseToRigid3d(pose));
   }
 }
 
@@ -93,14 +89,15 @@ void GP3PEstimator::Residuals(const std::vector<X_t>& points2D,
   // Note that this code might not be as nice as Eigen expressions,
   // but it is significantly faster in various tests (avoiding temporaries).
 
-  // Extract rig_from_world matrix elements once (M_t is already Matrix3x4d)
-  const Eigen::Matrix3x4d& R = rig_from_world;
+  // Convert rig_from_world to matrix and extract elements once
+  const Eigen::Matrix3x4d R = rig_from_world.ToMatrix();
   const double R_00 = R(0, 0), R_01 = R(0, 1), R_02 = R(0, 2), R_03 = R(0, 3);
   const double R_10 = R(1, 0), R_11 = R(1, 1), R_12 = R(1, 2), R_13 = R(1, 3);
   const double R_20 = R(2, 0), R_21 = R(2, 1), R_22 = R(2, 2), R_23 = R(2, 3);
 
   for (size_t i = 0; i < points2D.size(); ++i) {
-    const Eigen::Matrix3x4d& C = points2D[i].cam_from_rig;
+    // Convert cam_from_rig to matrix for fast computation
+    const Eigen::Matrix3x4d C = points2D[i].cam_from_rig.ToMatrix();
     const double X_0 = points3D[i](0);
     const double X_1 = points3D[i](1);
     const double X_2 = points3D[i](2);
