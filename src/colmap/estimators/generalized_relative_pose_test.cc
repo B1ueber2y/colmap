@@ -42,6 +42,15 @@
 namespace colmap {
 namespace {
 
+std::vector<GRNPSrcObservation> ToSrcObservations(
+    const std::vector<GRNPObservation>& obs) {
+  std::vector<GRNPSrcObservation> src(obs.size());
+  for (size_t i = 0; i < obs.size(); ++i) {
+    src[i] = obs[i].ToSrc();
+  }
+  return src;
+}
+
 struct GeneralizedRelativePoseProblem {
   std::vector<GRNPObservation> points1;
   std::vector<GRNPObservation> points2;
@@ -104,11 +113,11 @@ GeneralizedRelativePoseProblem CreateGeneralizedRelativePoseProblem(
     }
 
     auto& point1 = problem.points1.emplace_back();
-    point1.cam_from_rig = cams_from_rig1[cam_idx1];
+    point1.cam_from_rig = cams_from_rig1[cam_idx1].ToMatrix();
     point1.ray_in_cam = point3D_in_cam1.normalized();
 
     auto& point2 = problem.points2.emplace_back();
-    point2.cam_from_rig = cams_from_rig2[cam_idx2];
+    point2.cam_from_rig = cams_from_rig2[cam_idx2].ToMatrix();
     point2.ray_in_cam = point3D_in_cam2.normalized();
   }
 
@@ -134,10 +143,12 @@ TEST_P(ParameterizedGRNPEstimatorTests, GR6P) {
     const auto problem = CreateGeneralizedRelativePoseProblem(
         kNumPoints, kNumCams1, kNumCams2, kPanoramic1, kPanoramic2);
 
+    const auto src_points1 = ToSrcObservations(problem.points1);
+
     RANSACOptions options;
     options.max_error = 1e-3;
     RANSAC<GR6PEstimator> ransac(options);
-    const auto report = ransac.Estimate(problem.points1, problem.points2);
+    const auto report = ransac.Estimate(src_points1, problem.points2);
 
     EXPECT_TRUE(report.success);
     EXPECT_THAT(report.model,
@@ -147,7 +158,7 @@ TEST_P(ParameterizedGRNPEstimatorTests, GR6P) {
 
     std::vector<double> residuals;
     GR6PEstimator::Residuals(
-        problem.points1, problem.points2, report.model, &residuals);
+        src_points1, problem.points2, report.model, &residuals);
     for (size_t i = 0; i < residuals.size(); ++i) {
       EXPECT_LE(residuals[i], options.max_error);
     }
@@ -170,11 +181,13 @@ TEST_P(ParameterizedGRNPEstimatorTests, GR8P) {
     const auto problem = CreateGeneralizedRelativePoseProblem(
         kNumPoints, kNumCams1, kNumCams2, kPanoramic1, kPanoramic2);
 
+    const auto src_points1 = ToSrcObservations(problem.points1);
+
     RANSACOptions options;
     options.max_num_trials = 1000;
     options.max_error = 1e-2;
     RANSAC<GR8PEstimator> ransac(options);
-    const auto report = ransac.Estimate(problem.points1, problem.points2);
+    const auto report = ransac.Estimate(src_points1, problem.points2);
 
     if (!report.success) {
       continue;
@@ -189,7 +202,7 @@ TEST_P(ParameterizedGRNPEstimatorTests, GR8P) {
 
     std::vector<double> residuals;
     GR8PEstimator::Residuals(
-        problem.points1, problem.points2, report.model, &residuals);
+        src_points1, problem.points2, report.model, &residuals);
     for (size_t i = 0; i < residuals.size(); ++i) {
       if (residuals[i] > options.max_error) {
         continue;

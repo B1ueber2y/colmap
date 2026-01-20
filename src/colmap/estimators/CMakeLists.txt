@@ -47,6 +47,7 @@ COLMAP_ADD_LIBRARY(
         generalized_absolute_pose.h generalized_absolute_pose.cc
         generalized_absolute_pose_legacy.h generalized_absolute_pose_legacy.cc
         generalized_relative_pose.h generalized_relative_pose.cc
+        generalized_relative_pose_legacy.h generalized_relative_pose_legacy.cc
         homography_matrix.h homography_matrix.cc
         pose.h pose.cc
         poselib_utils.h poselib_utils.cc

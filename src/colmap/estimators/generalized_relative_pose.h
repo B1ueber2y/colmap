@@ -38,16 +38,42 @@
 
 namespace colmap {
 
+// Forward declaration.
+struct GRNPSrcObservation;
+
+// General observation storing cam_from_rig as matrix.
 struct GRNPObservation {
-  Rigid3d cam_from_rig;
+  Eigen::Matrix3x4d cam_from_rig;
+  Eigen::Vector3d ray_in_cam;
+
+  // Convert to source observation by computing the inverse.
+  GRNPSrcObservation ToSrc() const;
+};
+
+// Source observation (points1) - stores rig_from_cam for fast Residuals.
+struct GRNPSrcObservation {
+  Eigen::Matrix3x4d rig_from_cam;
   Eigen::Vector3d ray_in_cam;
 };
+
+inline GRNPSrcObservation GRNPObservation::ToSrc() const {
+  GRNPSrcObservation src;
+  // Compute inverse: [R|t]^-1 = [R^T | -R^T*t]
+  const Eigen::Matrix3d R_inv = cam_from_rig.leftCols<3>().transpose();
+  src.rig_from_cam.leftCols<3>() = R_inv;
+  src.rig_from_cam.col(3) = -R_inv * cam_from_rig.col(3);
+  src.ray_in_cam = ray_in_cam;
+  return src;
+}
+
+// Target observation (points2) - alias for GRNPObservation.
+using GRNPTgtObservation = GRNPObservation;
 
 // Minimal generalized relative pose estimator based on poselib.
 class GR6PEstimator {
  public:
-  typedef GRNPObservation X_t;
-  typedef GRNPObservation Y_t;
+  typedef GRNPSrcObservation X_t;
+  typedef GRNPTgtObservation Y_t;
   // The estimated rig2_from_rig1 relative pose between the generalized cameras.
   typedef Rigid3d M_t;
 
@@ -82,8 +108,8 @@ class GR6PEstimator {
 // implementation in OpenGV licensed under the BSD license.
 class GR8PEstimator {
  public:
-  typedef GRNPObservation X_t;
-  typedef GRNPObservation Y_t;
+  typedef GRNPSrcObservation X_t;
+  typedef GRNPTgtObservation Y_t;
   // The estimated rig2_from_rig1 relative pose between the generalized cameras.
   typedef Rigid3d M_t;
 

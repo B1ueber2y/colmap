@@ -54,12 +54,16 @@ void GR6PEstimator::Estimate(const std::vector<X_t>& points1,
   std::vector<Eigen::Vector3d> rays_in_rig1(6);
   std::vector<Eigen::Vector3d> rays_in_rig2(6);
   for (int i = 0; i < 6; ++i) {
-    origins_in_rig1[i] = points1[i].cam_from_rig.TgtOriginInSrc();
-    origins_in_rig2[i] = points2[i].cam_from_rig.TgtOriginInSrc();
-    rays_in_rig1[i] =
-        points1[i].cam_from_rig.rotation.inverse() * points1[i].ray_in_cam;
-    rays_in_rig2[i] =
-        points2[i].cam_from_rig.rotation.inverse() * points2[i].ray_in_cam;
+    // points1 stores rig_from_cam directly
+    const Eigen::Matrix3x4d& rfc1 = points1[i].rig_from_cam;
+    origins_in_rig1[i] = rfc1.col(3);
+    rays_in_rig1[i] = rfc1.leftCols<3>() * points1[i].ray_in_cam;
+
+    // points2 stores cam_from_rig, compute rig_from_cam: [R|t]^-1 = [R^T|-R^T*t]
+    const Eigen::Matrix3x4d& cfr2 = points2[i].cam_from_rig;
+    const Eigen::Matrix3d R2_inv = cfr2.leftCols<3>().transpose();
+    origins_in_rig2[i] = -R2_inv * cfr2.col(3);
+    rays_in_rig2[i] = R2_inv * points2[i].ray_in_cam;
   }
 
   std::vector<poselib::CameraPose> poses;
@@ -78,10 +82,35 @@ void GR6PEstimator::Residuals(const std::vector<X_t>& points1,
                               std::vector<double>* residuals) {
   THROW_CHECK_EQ(points1.size(), points2.size());
   residuals->resize(points1.size());
+
+  // Precompute rig2_from_rig1 matrix once
+  const Eigen::Matrix3x4d rig2_from_rig1_mat = rig2_from_rig1.ToMatrix();
+  const Eigen::Matrix3d R_rig = rig2_from_rig1_mat.leftCols<3>();
+  const Eigen::Vector3d t_rig = rig2_from_rig1_mat.col(3);
+
   for (size_t i = 0; i < points1.size(); ++i) {
-    const Rigid3d cam2_from_cam1 = points2[i].cam_from_rig * rig2_from_rig1 *
-                                   Inverse(points1[i].cam_from_rig);
-    const Eigen::Matrix3d E = EssentialMatrixFromPose(cam2_from_cam1);
+    // points1 stores rig_from_cam, points2 stores cam_from_rig
+    const Eigen::Matrix3x4d& rfc1 = points1[i].rig_from_cam;
+    const Eigen::Matrix3x4d& cfr2 = points2[i].cam_from_rig;
+
+    const Eigen::Matrix3d R1 = rfc1.leftCols<3>();
+    const Eigen::Vector3d t1 = rfc1.col(3);
+    const Eigen::Matrix3d R2 = cfr2.leftCols<3>();
+    const Eigen::Vector3d t2 = cfr2.col(3);
+
+    // Compute cam2_from_cam1 = cam2_from_rig2 * rig2_from_rig1 * rig1_from_cam1
+    // First: rig2_from_cam1 = rig2_from_rig1 * rig1_from_cam1
+    const Eigen::Matrix3d R_rig_cam1 = R_rig * R1;
+    const Eigen::Vector3d t_rig_cam1 = R_rig * t1 + t_rig;
+
+    // Then: cam2_from_cam1 = cam2_from_rig2 * rig2_from_cam1
+    const Eigen::Matrix3d R_cam2_cam1 = R2 * R_rig_cam1;
+    const Eigen::Vector3d t_cam2_cam1 = R2 * t_rig_cam1 + t2;
+
+    // Compute essential matrix: E = [t]_x * R
+    const Eigen::Matrix3d E = CrossProductMatrix(t_cam2_cam1) * R_cam2_cam1;
+
+    // Compute Sampson error
     const Eigen::Vector3d epipolar_line1 = E * points1[i].ray_in_cam;
     const double num = points2[i].ray_in_cam.dot(epipolar_line1);
     const Eigen::Vector4d denom(points2[i].ray_in_cam.dot(E.col(0)),
@@ -94,14 +123,14 @@ void GR6PEstimator::Residuals(const std::vector<X_t>& points1,
 
 namespace {
 
-void ComposePlueckerData(const Rigid3d& rig_from_cam,
+void ComposePlueckerData(const Eigen::Matrix3x4d& rig_from_cam,
                          const Eigen::Vector3d& ray_in_cam,
                          Eigen::Vector3d* origin_in_rig,
                          Eigen::Vector6d* pluecker) {
   const Eigen::Vector3d ray_in_rig =
-      (rig_from_cam.rotation * ray_in_cam).normalized();
-  *origin_in_rig = rig_from_cam.translation;
-  *pluecker << ray_in_rig, rig_from_cam.translation.cross(ray_in_rig);
+      (rig_from_cam.leftCols<3>() * ray_in_cam).normalized();
+  *origin_in_rig = rig_from_cam.col(3);
+  *pluecker << ray_in_rig, origin_in_rig->cross(ray_in_rig);
 }
 
 Eigen::Matrix3d CayleyToRotationMatrix(const Eigen::Vector3d& cayley) {
@@ -485,11 +514,18 @@ void GR8PEstimator::Estimate(const std::vector<X_t>& points1,
   std::vector<Eigen::Vector6d> plueckers1(points1.size());
   std::vector<Eigen::Vector6d> plueckers2(points1.size());
   for (size_t i = 0; i < points1.size(); ++i) {
-    ComposePlueckerData(Inverse(points1[i].cam_from_rig),
+    // points1 stores rig_from_cam directly
+    ComposePlueckerData(points1[i].rig_from_cam,
                         points1[i].ray_in_cam,
                         &origins_in_rig1[i],
                         &plueckers1[i]);
-    ComposePlueckerData(Inverse(points2[i].cam_from_rig),
+    // points2 stores cam_from_rig, compute rig_from_cam: [R|t]^-1 = [R^T|-R^T*t]
+    const Eigen::Matrix3x4d& cfr2 = points2[i].cam_from_rig;
+    const Eigen::Matrix3d R2_inv = cfr2.leftCols<3>().transpose();
+    Eigen::Matrix3x4d rfc2;
+    rfc2.leftCols<3>() = R2_inv;
+    rfc2.col(3) = -R2_inv * cfr2.col(3);
+    ComposePlueckerData(rfc2,
                         points2[i].ray_in_cam,
                         &origins_in_rig2[i],
                         &plueckers2[i]);

@@ -271,10 +271,11 @@ bool EstimateGeneralizedRelativePose(
     return false;
   }
 
-  std::vector<GRNPObservation> points1(num_points);
-  std::vector<GRNPObservation> points2(num_points);
+  std::vector<GRNPSrcObservation> points1(num_points);
+  std::vector<GRNPTgtObservation> points2(num_points);
   for (size_t i = 0; i < num_points; ++i) {
-    points1[i].cam_from_rig = cams_from_rig[camera_idxs1[i]];
+    // Src stores rig_from_cam
+    points1[i].rig_from_cam = Inverse(cams_from_rig[camera_idxs1[i]]).ToMatrix();
     if (const std::optional<Eigen::Vector2d> cam_point1 =
             cameras[camera_idxs1[i]].CamFromImg(points2D1[i]);
         cam_point1.has_value()) {
@@ -283,7 +284,8 @@ bool EstimateGeneralizedRelativePose(
       points1[i].ray_in_cam.setZero();
     }
 
-    points2[i].cam_from_rig = cams_from_rig[camera_idxs2[i]];
+    // Tgt stores cam_from_rig
+    points2[i].cam_from_rig = cams_from_rig[camera_idxs2[i]].ToMatrix();
     if (const std::optional<Eigen::Vector2d> cam_point2 =
             cameras[camera_idxs2[i]].CamFromImg(points2D2[i]);
         cam_point2.has_value()) {
@@ -470,11 +472,13 @@ bool EstimateStructureLessAbsolutePose(
   }
 
   const size_t num_points = world_points2D.size();
-  std::vector<GRNPObservation> world_obs(num_points);
-  std::vector<GRNPObservation> query_obs(num_points);
+  std::vector<GRNPSrcObservation> world_obs(num_points);
+  std::vector<GRNPTgtObservation> query_obs(num_points);
   for (size_t i = 0; i < num_points; ++i) {
     const size_t world_camera_idx = world_camera_idxs[i];
-    world_obs[i].cam_from_rig = world_cams_from_world[world_camera_idx];
+    // Src stores rig_from_cam
+    world_obs[i].rig_from_cam =
+        Inverse(world_cams_from_world[world_camera_idx]).ToMatrix();
     if (const std::optional<Eigen::Vector2d> world_cam_point =
             world_cameras[world_camera_idx].CamFromImg(world_points2D[i]);
         world_cam_point.has_value()) {
@@ -483,7 +487,8 @@ bool EstimateStructureLessAbsolutePose(
       world_obs[i].ray_in_cam.setZero();
     }
 
-    query_obs[i].cam_from_rig = Rigid3d();
+    // Tgt stores cam_from_rig (identity for single query camera)
+    query_obs[i].cam_from_rig = Rigid3d().ToMatrix();
     if (const std::optional<Eigen::Vector2d> query_cam_point =
             query_camera.CamFromImg(query_points2D[i]);
         query_cam_point.has_value()) {

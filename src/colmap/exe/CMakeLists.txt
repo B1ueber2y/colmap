@@ -103,3 +103,14 @@ COLMAP_ADD_EXECUTABLE(
         colmap_scene
         colmap_util
 )
+
+COLMAP_ADD_EXECUTABLE(
+    NAME gr6p_benchmark
+    SRCS
+        gr6p_benchmark.cc
+    LINK_LIBS
+        colmap_estimators
+        colmap_math
+        colmap_optim
+        colmap_util
+)
