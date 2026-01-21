@@ -15,7 +15,7 @@ class CasparBundleAdjuster : public BundleAdjuster {
       : BundleAdjuster(std::move(options), std::move(config)),
         params_(params),
         reconstruction_(reconstruction) {
-    LOG(INFO) << "Using Caspar bundle adjuster";
+    VLOG(1) << "Using Caspar bundle adjuster";
 
     // PASS 1: Count all observations
     BuildObservationCounts();
@@ -257,21 +257,21 @@ class CasparBundleAdjuster : public BundleAdjuster {
   }
 
   void SetupSolverData(caspar::GraphSolver& solver) {
-    LOG(INFO) << "=== CASPAR SOLVER SETUP ===";
-    LOG(INFO) << "Node counts:";
-    LOG(INFO) << "  Points: " << num_points_;
-    LOG(INFO) << "  Poses: " << num_poses_;
-    LOG(INFO) << "  Calibrations: " << num_calibs_;
+    VLOG(1) << "=== CASPAR SOLVER SETUP ===";
+    VLOG(1) << "Node counts:";
+    VLOG(1) << "  Points: " << num_points_;
+    VLOG(1) << "  Poses: " << num_poses_;
+    VLOG(1) << "  Calibrations: " << num_calibs_;
 
-    LOG(INFO) << "Factor counts:";
-    LOG(INFO) << "  simple_radial: " << num_simple_radial_;
-    LOG(INFO) << "  simple_radial_fixed_pose: "
+    VLOG(1) << "Factor counts:";
+    VLOG(1) << "  simple_radial: " << num_simple_radial_;
+    VLOG(1) << "  simple_radial_fixed_pose: "
               << num_simple_radial_fixed_pose_;
-    LOG(INFO) << "  simple_radial_fixed_point: "
+    VLOG(1) << "  simple_radial_fixed_point: "
               << num_simple_radial_fixed_point_;
 
     size_t total_residuals = ComputeTotalResiduals();
-    LOG(INFO) << "Total residuals: " << total_residuals;
+    VLOG(1) << "Total residuals: " << total_residuals;
 
     // Set node data
     if (num_points_ > 0) {
@@ -340,7 +340,7 @@ class CasparBundleAdjuster : public BundleAdjuster {
     solver.set_simple_radial_fixed_point_num(num_simple_radial_fixed_point_);
 
     solver.finish_indices();
-    LOG(INFO) << "Solver setup complete";
+    VLOG(1) << "Solver setup complete";
   }
 
   void ReadSolverResults(caspar::GraphSolver& solver) {
@@ -440,9 +440,9 @@ class CasparBundleAdjuster : public BundleAdjuster {
 
     SetupSolverData(solver);
 
-    LOG(INFO) << "Starting Caspar solver...";
+    VLOG(1) << "Starting Caspar solver...";
     const float result = solver.solve(false);
-    LOG(INFO) << "Solve completed with cost: " << result;
+    VLOG(1) << "Solve completed with cost: " << result;
 
     ReadSolverResults(solver);
     WriteResultsToReconstruction();
