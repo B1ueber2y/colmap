@@ -20,6 +20,9 @@ endif()
 
 find_package(colmap REQUIRED)
 
+# Add path to caspar library if not installed system-wide
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../src/colmap/estimators/generated/build")
+
 if (CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)
 else()
