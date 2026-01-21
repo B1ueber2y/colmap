@@ -249,6 +249,32 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
+def convert_camera_to_simple_radial(camera: pycolmap.Camera) -> pycolmap.Camera:
+    """Convert a camera to SimpleRadial model if needed."""
+    if camera.model == pycolmap.CameraModelId.SIMPLE_RADIAL:
+        return camera
+    if camera.model == pycolmap.CameraModelId.PINHOLE:
+        # PINHOLE: fx, fy, cx, cy -> SimpleRadial: f, cx, cy, k
+        fx, fy, cx, cy = camera.params
+        f = (fx + fy) / 2
+        k = 0.0  # No distortion for undistorted images
+        new_camera = pycolmap.Camera(
+            camera_id=camera.camera_id,
+            model=pycolmap.CameraModelId.SIMPLE_RADIAL,
+            width=camera.width,
+            height=camera.height,
+            params=[f, cx, cy, k],
+        )
+        pycolmap.logging.info(
+            f"Converted camera {camera.camera_id} from PINHOLE to SIMPLE_RADIAL"
+        )
+        return new_camera
+    pycolmap.logging.warning(
+        f"Cannot convert camera model {camera.model} to SIMPLE_RADIAL"
+    )
+    return camera
+
+
 def set_camera_priors(
     database_path: Path, camera_priors_sparse_gt: pycolmap.Reconstruction
 ) -> None:
@@ -271,10 +297,26 @@ def set_camera_priors(
             if image.camera_id in updated_camera_ids:
                 continue
             camera_gt = camera_priors_sparse_gt.cameras[image_gt.camera_id]
+            pycolmap.logging.info(
+                f"Camera {camera_gt.camera_id} before conversion: "
+                f"model={camera_gt.model}, params={camera_gt.params}"
+            )
+            camera_gt = convert_camera_to_simple_radial(camera_gt)
+            pycolmap.logging.info(
+                f"Camera {camera_gt.camera_id} after conversion: "
+                f"model={camera_gt.model}, params={camera_gt.params}"
+            )
             camera_gt.camera_id = image.camera_id
             camera_gt.has_prior_focal_length = True
             database.update_camera(camera_gt)
             updated_camera_ids.add(image.camera_id)
+
+        # Verify the update worked
+        for camera in database.read_all_cameras():
+            pycolmap.logging.info(
+                f"Database camera {camera.camera_id} after update: "
+                f"model={camera.model}, params={camera.params}"
+            )
 
 
 def colmap_reconstruction(
