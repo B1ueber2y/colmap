@@ -31,7 +31,6 @@
 
 #include "colmap/estimators/bundle_adjustment.h"
 #include "colmap/estimators/generalized_pose.h"
-#include "colmap/estimators/generated/solver_params.h"
 #include "colmap/estimators/pose.h"
 #include "colmap/estimators/triangulation.h"
 #include "colmap/scene/reconstruction_pruning.h"
@@ -1124,15 +1123,9 @@ bool IncrementalMapper::AdjustGlobalBundle(
     ba_config.FixGauge(BundleAdjustmentGauge::TWO_CAMS_FROM_WORLD);
 
 #ifdef CASPAR_ENABLED
-
-    if (ba_config.NumImages() > 100) {
       caspar::SolverParams params;
       bundle_adjuster = CreateCasparBundleAdjuster(
           ba_options, std::move(ba_config), *reconstruction_, params);
-    } else {
-      bundle_adjuster = CreateDefaultBundleAdjuster(
-          ba_options, std::move(ba_config), *reconstruction_);
-    }
 #else
     bundle_adjuster = CreateDefaultBundleAdjuster(
         ba_options, std::move(ba_config), *reconstruction_);
@@ -1175,9 +1168,14 @@ bool IncrementalMapper::AdjustGlobalBundle(
       }
     }
 
+#ifdef CASPAR_ENABLED
     caspar::SolverParams params;
     bundle_adjuster = CreateCasparBundleAdjuster(
         ba_options, std::move(ba_config), *reconstruction_, params);
+#else
+    bundle_adjuster = CreateDefaultBundleAdjuster(
+        ba_options, std::move(ba_config), *reconstruction_);
+#endif
   }
 
   return bundle_adjuster->Solve().termination_type != ceres::FAILURE;
