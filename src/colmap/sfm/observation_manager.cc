@@ -95,6 +95,82 @@ ObservationManager::ObservationManager(
   }
 }
 
+void ObservationManager::AddImagePairStats(const image_t image_id1,
+                                            const image_t image_id2) {
+  if (!correspondence_graph_) return;
+  const point2D_t num_matches =
+      correspondence_graph_->NumMatchesBetweenImages(image_id1, image_id2);
+  if (num_matches == 0) return;
+
+  // 1. Update image pair stats (num_total_corrs + num_tri_corrs).
+  const image_pair_t pair_id = ImagePairToPairId(image_id1, image_id2);
+  size_t num_tri = 0;
+  FeatureMatches matches;
+  correspondence_graph_->ExtractMatchesBetweenImages(
+      image_id1, image_id2, matches);
+  if (reconstruction_.ExistsImage(image_id1) &&
+      reconstruction_.ExistsImage(image_id2)) {
+    const Image& img1 = reconstruction_.Image(image_id1);
+    const Image& img2 = reconstruction_.Image(image_id2);
+    for (const auto& m : matches) {
+      if (m.point2D_idx1 < img1.NumPoints2D() &&
+          m.point2D_idx2 < img2.NumPoints2D()) {
+        const auto& p1 = img1.Point2D(m.point2D_idx1);
+        const auto& p2 = img2.Point2D(m.point2D_idx2);
+        if (p1.HasPoint3D() && p2.HasPoint3D() &&
+            p1.point3D_id == p2.point3D_id) {
+          num_tri++;
+        }
+      }
+    }
+  }
+  auto it = image_pair_stats_.find(pair_id);
+  if (it == image_pair_stats_.end()) {
+    ImagePairStat stat;
+    stat.num_total_corrs = num_matches;
+    stat.num_tri_corrs = num_tri;
+    image_pair_stats_.emplace(pair_id, stat);
+  } else {
+    it->second.num_total_corrs = num_matches;
+    it->second.num_tri_corrs = num_tri;
+  }
+
+  // 2. Refresh per-image observation/correspondence counts.
+  for (const image_t id : {image_id1, image_id2}) {
+    auto si = image_stats_.find(id);
+    if (si != image_stats_.end()) {
+      si->second.num_observations =
+          correspondence_graph_->NumObservationsForImage(id);
+      si->second.num_correspondences =
+          correspondence_graph_->NumCorrespondencesForImage(id);
+    }
+  }
+
+  // 3. Propagate visibility from already-triangulated points.
+  for (const auto& m : matches) {
+    if (image_stats_.count(image_id1) &&
+        reconstruction_.ExistsImage(image_id2)) {
+      const Image& img2 = reconstruction_.Image(image_id2);
+      if (img2.HasPose() && m.point2D_idx2 < img2.NumPoints2D()) {
+        const Point2D& p2 = img2.Point2D(m.point2D_idx2);
+        if (p2.HasPoint3D()) {
+          IncrementCorrespondenceHasPoint3D(image_id1, m.point2D_idx1);
+        }
+      }
+    }
+    if (image_stats_.count(image_id2) &&
+        reconstruction_.ExistsImage(image_id1)) {
+      const Image& img1 = reconstruction_.Image(image_id1);
+      if (img1.HasPose() && m.point2D_idx1 < img1.NumPoints2D()) {
+        const Point2D& p1 = img1.Point2D(m.point2D_idx1);
+        if (p1.HasPoint3D()) {
+          IncrementCorrespondenceHasPoint3D(image_id2, m.point2D_idx2);
+        }
+      }
+    }
+  }
+}
+
 void ObservationManager::AddImage(const image_t image_id) {
   THROW_CHECK(image_stats_.find(image_id) == image_stats_.end())
       << "Image " << image_id << " already exists in the ObservationManager";

@@ -75,6 +75,11 @@ class ObservationManager {
   // images for image pair stats update.
   void AddImage(image_t image_id);
 
+  // Update image pair stats after adding new correspondences to the CG
+  // for an existing pair. This is needed when correspondences are added
+  // after AddImage() was already called for both images.
+  void AddImagePairStats(image_t image_id1, image_t image_id2);
+
   // Add new 3D object, and return its unique ID.
   point3D_t AddPoint3D(
       const Eigen::Vector3d& xyz,
