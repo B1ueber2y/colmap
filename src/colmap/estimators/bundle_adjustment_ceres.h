@@ -46,6 +46,11 @@ struct CeresBundleAdjustmentOptions {
   // Scaling factor determines residual at which robustification takes place.
   double loss_function_scale = 1.0;
 
+  // Weight applied to the loss function via ScaledLoss.
+  // The final cost is: weight * rho(s), where rho is the loss function.
+  // Use 1/sigma^2 to normalize reprojection residuals by keypoint uncertainty.
+  double loss_function_weight = 1.0;
+
   // Whether to use Ceres' CUDA linear algebra library, if available.
   bool use_gpu = false;
   std::string gpu_index = "-1";
