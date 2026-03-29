@@ -115,7 +115,13 @@ CeresBundleAdjustmentOptions::CeresBundleAdjustmentOptions() {
 
 std::unique_ptr<ceres::LossFunction>
 CeresBundleAdjustmentOptions::CreateLossFunction() const {
-  return colmap::CreateLossFunction(loss_function_type, loss_function_scale);
+  auto loss = colmap::CreateLossFunction(loss_function_type, loss_function_scale);
+  if (loss_function_weight != 1.0) {
+    THROW_CHECK_GT(loss_function_weight, 0);
+    return std::make_unique<ceres::ScaledLoss>(
+        loss.release(), loss_function_weight, ceres::TAKE_OWNERSHIP);
+  }
+  return loss;
 }
 
 ceres::Solver::Options CeresBundleAdjustmentOptions::CreateSolverOptions(
