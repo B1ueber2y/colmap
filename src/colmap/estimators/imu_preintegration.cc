@@ -396,26 +396,28 @@ void ImuPreintegrator::IntegrateRK4(const Eigen::Vector3d& accel_true,
   const Eigen::Matrix3d R_eval_mid = R_mid * Rs;
 
   // k1: evaluate at start rotation.
-  auto [F1, G1] = build_F_G(Rs);
-  Eigen::Matrix<double, 15, 15> P_dot_1 = F1 * data_.covariance +
-                                          data_.covariance * F1.transpose() +
-                                          G1 * Q_c * G1.transpose();
+  const auto [F1, G1] = build_F_G(Rs);
+  const Eigen::Matrix<double, 15, 15> P_dot_1 =
+      F1 * data_.covariance + data_.covariance * F1.transpose() +
+      G1 * Q_c * G1.transpose();
 
   // k2: evaluate at midpoint rotation.
-  auto [F2, G2] = build_F_G(R_eval_mid);
-  Eigen::Matrix<double, 15, 15> P_2 = data_.covariance + P_dot_1 * dt / 2.0;
-  Eigen::Matrix<double, 15, 15> P_dot_2 =
+  const auto [F2, G2] = build_F_G(R_eval_mid);
+  const Eigen::Matrix<double, 15, 15> P_2 =
+      data_.covariance + P_dot_1 * dt / 2.0;
+  const Eigen::Matrix<double, 15, 15> P_dot_2 =
       F2 * P_2 + P_2 * F2.transpose() + G2 * Q_c * G2.transpose();
 
   // k3: same F as k2 (same midpoint).
-  Eigen::Matrix<double, 15, 15> P_3 = data_.covariance + P_dot_2 * dt / 2.0;
-  Eigen::Matrix<double, 15, 15> P_dot_3 =
+  const Eigen::Matrix<double, 15, 15> P_3 =
+      data_.covariance + P_dot_2 * dt / 2.0;
+  const Eigen::Matrix<double, 15, 15> P_dot_3 =
       F2 * P_3 + P_3 * F2.transpose() + G2 * Q_c * G2.transpose();
 
   // k4: evaluate at end rotation.
-  auto [F4, G4] = build_F_G(Rs_new);
-  Eigen::Matrix<double, 15, 15> P_4 = data_.covariance + P_dot_3 * dt;
-  Eigen::Matrix<double, 15, 15> P_dot_4 =
+  const auto [F4, G4] = build_F_G(Rs_new);
+  const Eigen::Matrix<double, 15, 15> P_4 = data_.covariance + P_dot_3 * dt;
+  const Eigen::Matrix<double, 15, 15> P_dot_4 =
       F4 * P_4 + P_4 * F4.transpose() + G4 * Q_c * G4.transpose();
 
   // Combine RK4 increments.
@@ -499,7 +501,7 @@ void ImuPreintegrator::FeedImu(const ImuMeasurement& m) {
     THROW_CHECK_LE(m.timestamp, t_start_)
         << "The timestamp of the first IMU measurement should not be later "
            "than the start of integration";
-    measurements_.push_back(m);
+    measurements_.Insert(m);
     has_started_ = true;
     return;
   }
@@ -510,8 +512,8 @@ void ImuPreintegrator::FeedImu(const ImuMeasurement& m) {
   if (m.timestamp <= t_start_) {
     LOG(WARNING) << "The timestamp of this measurement is earlier than "
                     "t_start. Ignore the previous measurements.";
-    measurements_.clear();
-    measurements_.push_back(m);
+    measurements_.Clear();
+    measurements_.Insert(m);
     return;
   }
   if (last_measurement.timestamp >= t_end_) {
@@ -521,11 +523,11 @@ void ImuPreintegrator::FeedImu(const ImuMeasurement& m) {
   }
 
   // Append measurements
-  measurements_.push_back(m);
+  measurements_.Insert(m);
   IntegrateOneMeasurement(last_measurement, m);
 }
 
-void ImuPreintegrator::FeedImu(const std::vector<ImuMeasurement>& ms) {
+void ImuPreintegrator::FeedImu(const ImuMeasurements& ms) {
   for (const auto& m : ms) {
     FeedImu(m);
   }
@@ -541,7 +543,7 @@ void ImuPreintegrator::Update(PreintegratedImuData* data) { *data = data_; }
 void ImuPreintegrator::Reintegrate() {
   Reset();
   has_started_ = true;
-  for (size_t i = 1; i < measurements_.size(); ++i) {
+  for (size_t i = 1; i < measurements_.Size(); ++i) {
     IntegrateOneMeasurement(measurements_[i - 1], measurements_[i]);
   }
   data_.Finalize(options_.max_condition_number);

@@ -50,7 +50,7 @@ class ImuReintegrationCallback(pyceres.IterationCallback):
             > self.options.reintegrate_angle_norm_thres
         ):
             return True
-        return (
+        return bool(
             np.linalg.norm(diff[3:]) * delta_t
             > self.options.reintegrate_vel_norm_thres
         )
@@ -340,7 +340,7 @@ def run() -> None:
     raw_imu_data = np.load(imu_data_path, allow_pickle=True)
     imu_measurements = pycolmap.ImuMeasurements()
     for row in raw_imu_data:
-        imu_measurements.append(
+        imu_measurements.insert(
             pycolmap.ImuMeasurement(
                 timestamp=int(row[0]),
                 accel=np.array(row[1:4]),
@@ -373,7 +373,7 @@ def run() -> None:
     for i in range(1, num_images - 1):
         t1, t2 = image_timestamps[i], image_timestamps[i + 1]
         # Timestamps are in nanoseconds (int64).
-        ms = pycolmap.get_measurements_contain_edge(imu_measurements, t1, t2)
+        ms = imu_measurements.extract_measurements_contain_edge(t1, t2)
         if len(ms) == 0:
             continue
         integrators[i] = pycolmap.ImuPreintegrator(options, imu_calib, t1, t2)
