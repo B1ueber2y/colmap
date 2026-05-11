@@ -14,6 +14,13 @@ import pycolmap.cost_functions
 import wget
 
 import pycolmap
+
+# pyceres 2.6 doesn't bind ProductManifold; use the one from pycolmap's C++
+# binding which chains sub-manifolds block-diagonally.
+if not hasattr(pyceres, "ProductManifold"):
+    from pycolmap._core.pyceres import ProductManifold as _PM
+    pyceres.ProductManifold = _PM
+    del _PM
 from pycolmap import logging
 
 

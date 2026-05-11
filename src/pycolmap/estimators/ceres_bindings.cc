@@ -4,12 +4,103 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 
+#include <Eigen/Core>
+#include <vector>
+
 // Some important ceres bindings for using crucial pycolmap features (e.g.
 // bundle adjustment) without pyceres.
 //
 // Branched from
 // https://github.com/cvg/pyceres/blob/main/_pyceres/core/types.h
 // https://github.com/cvg/pyceres/blob/main/_pyceres/core/solver.h
+
+// Type-erased product manifold: composes N sub-manifolds by chaining their
+// Plus/Minus/Jacobian operations block-diagonally. Registered globally (not
+// module-local) so pyceres::Problem::set_manifold can accept it.
+class PyProductManifold : public ceres::Manifold {
+ public:
+  explicit PyProductManifold(std::vector<py::object> objs)
+      : objs_(std::move(objs)), ambient_size_(0), tangent_size_(0) {
+    for (const auto& obj : objs_) {
+      ceres::Manifold* m = obj.cast<ceres::Manifold*>();
+      manifolds_.push_back(m);
+      ambient_size_ += m->AmbientSize();
+      tangent_size_ += m->TangentSize();
+    }
+  }
+
+  ~PyProductManifold() override {
+    py::gil_scoped_acquire gil;
+    objs_.clear();
+  }
+
+  int AmbientSize() const override { return ambient_size_; }
+  int TangentSize() const override { return tangent_size_; }
+
+  bool Plus(const double* x,
+            const double* delta,
+            double* x_plus_delta) const override {
+    int xa = 0, da = 0;
+    for (auto* m : manifolds_) {
+      if (!m->Plus(x + xa, delta + da, x_plus_delta + xa)) return false;
+      xa += m->AmbientSize();
+      da += m->TangentSize();
+    }
+    return true;
+  }
+
+  bool PlusJacobian(const double* x, double* jacobian) const override {
+    using RM =
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    Eigen::Map<RM> J(jacobian, ambient_size_, tangent_size_);
+    J.setZero();
+    int xa = 0, ta = 0;
+    for (auto* m : manifolds_) {
+      const int ns = m->AmbientSize(), ts = m->TangentSize();
+      RM Jb(ns, ts);
+      if (!m->PlusJacobian(x + xa, Jb.data())) return false;
+      J.block(xa, ta, ns, ts) = Jb;
+      xa += ns;
+      ta += ts;
+    }
+    return true;
+  }
+
+  bool Minus(const double* y,
+             const double* x,
+             double* y_minus_x) const override {
+    int xa = 0, ta = 0;
+    for (auto* m : manifolds_) {
+      if (!m->Minus(y + xa, x + xa, y_minus_x + ta)) return false;
+      xa += m->AmbientSize();
+      ta += m->TangentSize();
+    }
+    return true;
+  }
+
+  bool MinusJacobian(const double* x, double* jacobian) const override {
+    using RM =
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    Eigen::Map<RM> J(jacobian, tangent_size_, ambient_size_);
+    J.setZero();
+    int xa = 0, ta = 0;
+    for (auto* m : manifolds_) {
+      const int ns = m->AmbientSize(), ts = m->TangentSize();
+      RM Jb(ts, ns);
+      if (!m->MinusJacobian(x + xa, Jb.data())) return false;
+      J.block(ta, xa, ts, ns) = Jb;
+      xa += ns;
+      ta += ts;
+    }
+    return true;
+  }
+
+ private:
+  std::vector<py::object> objs_;       // keeps Python sub-manifolds alive
+  std::vector<ceres::Manifold*> manifolds_;  // raw pointers into objs_
+  int ambient_size_;
+  int tangent_size_;
+};
 void BindCeresTypes(py::module& m) {
   auto ownt = py::enum_<ceres::Ownership>(m, "Ownership", py::module_local())
                   .value("DO_NOT_TAKE_OWNERSHIP",
@@ -397,9 +488,28 @@ void BindCeresSolver(py::module& m) {
                     &IterSummary::cumulative_time_in_seconds);
 }
 
+void BindProductManifold(py::module& m) {
+  // Importing pyceres ensures ceres::Manifold is in the global pybind11 type
+  // registry so PyProductManifold can be registered as a subclass.
+  if (!IsPyceresAvailable()) return;
+
+  py::classh<PyProductManifold, ceres::Manifold>(m, "ProductManifold")
+      .def(py::init([](py::args args) {
+             std::vector<py::object> objs;
+             objs.reserve(args.size());
+             for (auto arg : args) {
+               objs.push_back(py::reinterpret_borrow<py::object>(arg));
+             }
+             return std::make_unique<PyProductManifold>(std::move(objs));
+           }),
+           "Compose N manifolds into a product manifold (block-diagonal "
+           "Jacobians). Usage: ProductManifold(m1, m2, ...)");
+}
+
 void BindCeres(py::module& m_parent) {
   py::module_ m = m_parent.def_submodule("pyceres");
 
   BindCeresTypes(m);
   BindCeresSolver(m);
+  BindProductManifold(m);
 }

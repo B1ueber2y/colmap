@@ -27,4 +27,4 @@ perl -i -pe's/(__hash__:? .*= None)$/\1  # type: ignore/g' $FILES
 perl -i -pe's/Mapping\[typing.Supports(Int|Float)/Mapping\[\L\1/g' $FILES
 
 COLMAP_DIR=$(dirname $( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd ))
-ruff format --config ${COLMAP_DIR}/ruff.toml ${FILES}
+$(dirname "$PYTHON_EXEC")/ruff format --config ${COLMAP_DIR}/ruff.toml ${FILES}
