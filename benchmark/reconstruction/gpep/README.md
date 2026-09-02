@@ -117,25 +117,46 @@ the difference is taken per seed before averaging. The results below are all
 
 ## Results
 
-All numbers below are **`--mapper incremental`**. The global pipeline is not
-measured here; see the note on it under Notes.
-
-Measured on one RTX 3080 at `--num-parallel-scenes 1`, five seeds, both arms
+Both mappers, measured on one RTX 3080 at `--num-parallel-scenes 1`, five seeds, both arms
 from one worktree at `af20f0fa` differing only in `kEnableFocalSolvers`.
 `nofocal` is the without-arm, `focal` is stock main, and `A - B` is
 `focal - nofocal`, so positive favours the solver.
 
 ### Runtime
 
-| incremental mapper | verification, without | verification, with | change |
-| --- | --- | --- | --- |
-| shared focal | 9.9 ms/pair | 95.7 ms/pair | +862% |
-| one-sided focal | 18.7 ms/pair | 46.8 ms/pair | +150% |
+| mapper | | verification, without | verification, with | change |
+| --- | --- | --- | --- | --- |
+| incremental | shared focal | 9.9 ms/pair | 95.7 ms/pair | +862% |
+| incremental | one-sided focal | 18.7 ms/pair | 46.8 ms/pair | +150% |
+| global | shared focal | 16.5 ms/pair | 97.9 ms/pair | +494% |
+| global | one-sided focal | 29.9 ms/pair | 56.2 ms/pair | +88% |
 
-One seed, reusing the accuracy run's workspaces. The denominator is the pairs
-verification ran on (those holding raw matches): 10662 and 15422. The figure
-is the matching phase total, which at `--quality high` also includes guided
-matching.
+The denominator is the pairs verification ran on, those holding raw matches:
+10662 and 15422 incremental, 7848 and 11670 global. The incremental figures
+are one seed reusing the accuracy run's workspaces; the global ones are the
+mean over all five seeds of their own runs, which varied by under 2%.
+
+The incremental figure is a matching-phase total that at `--quality high`
+also includes guided matching; the global pipeline disables guided matching,
+so its figure is verification alone.
+
+The two mappers' absolute values are not comparable, for two reasons that
+compound.
+
+Verification itself is slower under the global option set. Re-running one
+scene (`exhibition_hall`) from the same workspace with the same binary, so
+the pair set is identical and only the mapper's options differ, takes 35.6 s
+with the incremental options and 48.8 s with the global ones -- and the
+global run skips guided matching entirely, so the estimation-only gap is
+wider than that 37%. The likely driver is `max_error`, 4.0 px against 1.0 px:
+a tighter threshold lowers the inlier ratio, and RANSAC then needs more
+trials to reach the same confidence.
+
+The denominator also differs. `min_num_inliers` is 15 for incremental and 30
+for global, and a pair below it keeps no matches: the incremental workspaces
+hold 10662 pairs with matches of which 2814 have fewer than 30, and the
+global ones hold exactly the 7848 that remain. The dropped pairs are the
+weakest and cheapest, so removing them raises the mean.
 
 Isolating one scene (`kicker`, 465 pairs) gives 5.6 s without against 63.3 s
 with, for 276 against 263 verified pairs and 214k against 216k inliers, so
@@ -158,6 +179,8 @@ bridge                   110        1       0     1489
 ...
 (all 19 scenes: 1 camera, 0 priors, non-zero pairs)
 ```
+
+**Incremental mapper:**
 
 ```
 B = nofocal  (AUC mean ± std over 5 seeds)
@@ -213,6 +236,62 @@ terrace_2          5  +0.65± 1.16  +0.46± 0.73  +0.11± 0.15  +0.05± 0.08
 average            5  +0.24± 0.44  +0.45± 0.71  +0.61± 0.58  +0.46± 0.51
 ```
 
+**Global mapper**, same 19 scenes:
+
+```
+B = nofocal  (AUC mean ± std over 5 seeds)
+scene              N     @0.5         @1.0         @5.0        @10.0    
+------------------------------------------------------------------------
+botanical_garden   5  22.75± 3.22  44.50± 8.00  84.32± 4.42  91.47± 2.79
+boulders           5  24.71± 0.06  49.32± 0.15  87.73± 0.03  93.67± 0.02
+bridge             5  52.09± 0.03  74.83± 0.02  94.76± 0.01  97.37± 0.00
+delivery_area      5  27.44± 9.17  46.68±16.02  76.83±27.49  81.60±28.89
+door               5  61.11± 0.53  76.83± 0.34  91.56± 0.07  96.16± 0.07
+exhibition_hall    5   7.92± 0.08  26.80± 0.09  78.60± 0.02  88.23± 0.01
+kicker             5  30.04± 0.22  51.83± 0.21  82.31± 0.05  87.65± 0.03
+lecture_room       5  36.89± 0.79  56.31± 0.61  86.70± 0.13  92.82± 0.07
+living_room        5  42.12± 0.60  66.65± 0.42  92.11± 0.12  95.96± 0.06
+lounge             5  27.19± 1.31  36.82± 0.70  44.70± 0.14  45.68± 0.07
+meadow             5  20.75±11.05  40.07±19.88  69.48±29.24  74.80±30.55
+observatory        5  22.43± 0.12  42.33± 0.10  84.09± 0.02  91.85± 0.01
+office             5   9.86± 0.32  23.01± 0.43  67.85± 0.66  81.94± 0.42
+old_computer       5  15.17± 0.16  32.28± 0.21  78.65± 0.14  88.73± 0.08
+pipes              5  30.05± 0.22  55.79± 0.23  89.49± 0.07  94.74± 0.05
+relief             5  32.54± 0.07  60.10± 0.05  90.93± 0.01  95.46± 0.00
+relief_2           5  29.41± 0.07  59.24± 0.04  91.48± 0.00  95.74± 0.00
+statue             5  33.80± 0.01  62.95± 0.01  92.59± 0.00  96.30± 0.00
+terrace_2          5  71.41± 0.06  83.58± 0.04  96.37± 0.01  98.18± 0.00
+------------------------------------------------------------------------
+average            5  31.46± 1.00  52.10± 1.97  83.19± 3.02  88.86± 3.14
+```
+
+```
+A - B = focal - nofocal  (AUC mean ± std over 5 seeds, shared seeds -> paired)
+scene              N     @0.5         @1.0         @5.0        @10.0    
+------------------------------------------------------------------------
+botanical_garden   5  +0.39± 0.97  -0.74± 3.09  -1.56± 3.14  -1.06± 2.05
+boulders           5  +0.01± 0.12  +0.07± 0.12  +0.02± 0.02  +0.00± 0.02
+bridge             5  -0.03± 0.04  -0.02± 0.02  -0.00± 0.01  -0.00± 0.00
+delivery_area      5  -0.57±15.56  -1.45±27.98  -2.61±48.21  -2.79±50.75
+door               5  +0.18± 0.23  +0.07± 0.12  +0.22± 0.48  +0.02± 0.07
+exhibition_hall    5  +0.01± 0.08  +0.02± 0.09  +0.00± 0.02  +0.00± 0.01
+kicker             5  +0.07± 0.13  +0.04± 0.13  +0.01± 0.03  -0.00± 0.03
+lecture_room       5  +0.11± 0.40  +0.01± 0.38  -0.02± 0.15  -0.01± 0.08
+living_room        5  -0.59± 1.37  -0.37± 0.91  -0.11± 0.25  -0.06± 0.13
+lounge             5  -0.56± 1.52  -0.32± 0.80  -0.06± 0.16  -0.03± 0.08
+meadow             5  +0.44±11.52  -2.92±19.85  -4.97±31.80  -3.94±34.22
+observatory        5  -0.00± 0.02  +0.05± 0.06  +0.05± 0.06  +0.03± 0.03
+office             5  -0.48± 1.06  -1.14± 2.40  -4.89±10.74  -6.04±13.39
+old_computer       5  -0.03± 0.14  -0.00± 0.15  +0.01± 0.11  +0.00± 0.06
+pipes              5  +0.08± 0.64  +0.08± 0.66  +0.02± 0.16  +0.01± 0.10
+relief             5  +0.09± 0.03  +0.11± 0.06  +0.03± 0.02  +0.02± 0.01
+relief_2           5  +0.03± 0.11  +0.00± 0.05  -0.00± 0.01  -0.00± 0.00
+statue             5  -0.01± 0.01  -0.01± 0.01  -0.00± 0.00  -0.00± 0.00
+terrace_2          5  -0.07± 0.12  -0.04± 0.07  -0.01± 0.02  -0.00± 0.01
+------------------------------------------------------------------------
+average            5  -0.05± 1.42  -0.35± 2.70  -0.73± 4.80  -0.73± 5.16
+```
+
 ### bench_one_sided_focal.py
 
 Setup check -- `mixed` counts pairs with exactly one calibrated side, the
@@ -226,6 +305,8 @@ bridge                    110      55     1503      750    49.9%
 ...
 TOTAL                                     9324     4752    51.0%
 ```
+
+**Incremental mapper:**
 
 ```
 B = nofocal  (AUC mean ± std over 5 seeds)
@@ -293,6 +374,75 @@ terrains           5  -0.16± 3.23  -0.54± 3.15  -0.18± 0.83  -0.10± 0.41
 average            5  -0.03± 0.98  +0.12± 1.18  +0.32± 1.19  +0.38± 1.30
 ```
 
+**Global mapper**, same 25 scenes:
+
+
+```
+B = nofocal  (AUC mean ± std over 5 seeds)
+scene              N     @0.5         @1.0         @5.0        @10.0    
+------------------------------------------------------------------------
+botanical_garden   5  37.77± 9.20  59.08±15.62  83.40±16.72  87.92±14.72
+boulders           5  43.51± 4.35  66.63± 5.63  89.05± 6.62  92.24± 6.68
+bridge             5  59.02± 0.21  78.37± 0.19  95.40± 0.10  97.68± 0.08
+courtyard          5  33.02± 2.35  55.26± 3.62  87.30± 2.82  92.51± 2.80
+delivery_area      5  42.51± 0.21  63.43± 0.24  91.32± 0.07  95.62± 0.04
+door               5  25.93± 0.50  44.52± 0.48  79.86± 0.23  87.55± 0.11
+electro            5  31.40± 1.28  53.55± 1.57  83.67± 1.70  89.22± 1.91
+exhibition_hall    5  25.21± 0.13  49.31± 0.35  85.83± 1.10  91.75± 1.21
+facade             5  49.99± 0.19  69.70± 0.57  92.38± 1.95  95.67± 2.14
+kicker             5  33.35± 0.59  57.61± 0.78  84.52± 0.18  89.19± 0.19
+lecture_room       5  44.83± 6.33  62.35± 8.37  85.74± 8.59  90.02± 8.23
+living_room        5  55.04± 0.42  75.19± 0.31  94.52± 0.09  97.26± 0.05
+lounge             5  27.79± 3.68  35.59± 4.68  43.22± 3.67  44.81± 2.14
+meadow             5   4.20± 2.01   8.91± 5.66  23.50±11.51  33.06±13.45
+observatory        5  10.70± 0.12  29.94± 0.38  79.25± 0.19  89.42± 0.10
+office             5  17.33± 2.38  33.16± 3.19  74.35± 1.38  85.97± 1.10
+old_computer       5  24.19± 0.66  46.93± 0.98  86.51± 0.36  93.08± 0.20
+pipes              5  34.22± 3.41  60.95± 5.35  87.61± 7.31  90.95± 7.57
+playground         5  50.08± 3.25  71.20± 3.59  91.46± 4.36  94.17± 4.50
+relief             5  35.37± 1.23  57.95± 2.27  87.21± 3.27  92.23± 3.41
+relief_2           5  36.95± 1.80  58.64± 3.98  85.18± 6.79  89.41± 7.21
+statue             5  39.28± 0.07  59.59± 0.13  90.37± 0.08  95.18± 0.04
+terrace            5  52.06± 1.64  73.34± 2.59  93.22± 3.62  95.74± 3.76
+terrace_2          5  69.52± 0.09  81.98± 0.04  96.16± 0.01  98.08± 0.01
+terrains           5  41.10± 1.31  65.02± 1.99  90.13± 3.68  93.58± 3.95
+------------------------------------------------------------------------
+average            5  36.98± 0.81  56.73± 1.31  83.25± 1.58  88.09± 1.49
+```
+
+```
+A - B = focal - nofocal  (AUC mean ± std over 5 seeds, shared seeds -> paired)
+scene              N     @0.5         @1.0         @5.0        @10.0    
+------------------------------------------------------------------------
+botanical_garden   5  +4.14± 5.23  +4.43±15.32  +1.92±23.94  +2.35±20.10
+boulders           5  +3.69± 4.67  +3.60± 5.84  +3.28± 6.69  +3.16± 6.71
+bridge             5  -0.06± 0.38  -0.06± 0.36  -0.04± 0.19  -0.03± 0.15
+courtyard          5  +1.74± 2.31  +1.57± 2.97  +2.06± 2.69  +2.11± 2.77
+delivery_area      5  +0.11± 0.20  +0.05± 0.22  +0.02± 0.08  +0.01± 0.04
+door               5  -0.09± 0.28  -0.02± 0.09  -0.00± 0.02  -0.00± 0.01
+electro            5  -0.64± 1.53  -0.48± 2.43  +0.69± 3.79  +1.82± 3.27
+exhibition_hall    5  +0.08± 0.14  +0.16± 0.31  +0.50± 1.10  +0.55± 1.20
+facade             5  +0.10± 0.14  +0.31± 0.59  +0.89± 1.96  +0.97± 2.15
+kicker             5  +0.54± 1.19  +0.48± 1.02  +0.09± 0.22  -0.35± 0.18
+lecture_room       5  +1.18± 2.74  +1.32± 3.11  +1.67± 3.66  +1.73± 3.78
+living_room        5  +0.11± 0.30  +0.08± 0.22  +0.02± 0.07  +0.01± 0.04
+lounge             5  -0.12± 0.66  +0.04± 0.33  +0.01± 0.07  +0.00± 0.03
+meadow             5  -1.09± 3.69  -1.47±10.34  -0.49±22.57  -1.93±25.99
+observatory        5  -0.01± 0.11  -0.00± 0.25  +0.00± 0.13  +0.00± 0.07
+office             5  -1.45± 3.20  -2.15± 4.31  -2.57± 2.72  -2.43± 2.95
+old_computer       5  +0.26± 0.87  +0.19± 1.34  +0.09± 0.48  +0.04± 0.26
+pipes              5  +0.74± 3.09  +1.77± 4.55  +2.64± 6.01  +2.75± 6.20
+playground         5  +0.15± 6.94  -0.17± 8.40  -0.78± 9.57  -0.61± 9.24
+relief             5  +0.85± 1.22  +1.63± 2.31  +2.37± 3.29  +2.48± 3.41
+relief_2           5  +1.25± 1.53  +2.87± 3.14  +4.60± 4.73  +4.84± 4.96
+statue             5  +0.02± 0.05  -0.02± 0.08  -0.01± 0.03  -0.01± 0.02
+terrace            5  +0.27± 2.12  +0.15± 4.00  +0.03± 5.71  +0.01± 5.93
+terrace_2          5  -0.04± 0.12  -0.07± 0.11  -0.03± 0.04  -0.01± 0.02
+terrains           5  +0.71± 1.15  +1.34± 1.95  +2.50± 3.69  +2.67± 3.95
+------------------------------------------------------------------------
+average            5  +0.50± 0.45  +0.62± 1.16  +0.78± 1.95  +0.80± 1.86
+```
+
 ## Notes
 
 * `--threads-per-scene 1` is the default and should stay there: RANSAC seeds
@@ -307,16 +457,16 @@ average            5  -0.03± 0.98  +0.12± 1.18  +0.32± 1.19  +0.38± 1.30
   but the two-view geometries just cleared by `--overwrite` are never
   regenerated. The scripts abort rather than print a comparison when any
   scene has zero verified pairs.
-* `--mapper global` works but measures a different thing. The incremental
-  mapper consumes the focal these solvers estimate
-  (`incremental_mapper_impl.cc`, `info.camera1 = two_view_geometry.camera1`),
-  whereas view-graph calibration recomputes focals from the view graph and
-  then clears `tvg.camera1/camera2` so consumers use its own K. Under the
-  global mapper the solvers therefore only affect the pipeline indirectly,
-  through the F they produce and the inliers they keep. The global path also
-  disables guided matching and uses different two-view thresholds
-  (`max_error` 1.0, `min_num_inliers` 30, `min_inlier_ratio` 0.25), so its
-  runtime figure isolates the solver far better than the incremental one.
+* The two mappers measure different things. The incremental mapper consumes
+  the focal these solvers estimate (`incremental_mapper_impl.cc`,
+  `info.camera1 = two_view_geometry.camera1`), whereas view-graph calibration
+  recomputes focals from the view graph and then clears
+  `tvg.camera1/camera2` so consumers use its own K. Under the global mapper
+  the solvers therefore act only indirectly, through the F they produce and
+  the inliers they keep. Global also disables guided matching and uses
+  different two-view thresholds (`max_error` 1.0, `min_num_inliers` 30,
+  `min_inlier_ratio` 0.25). The raised `min_num_inliers` is why its pair
+  counts and baseline ms/pair differ from incremental's.
 * `--overwrite two_view_geometries` is the default: geometric verification
   does not rewrite raw matches, so both arms verify identical input without
   re-matching.
