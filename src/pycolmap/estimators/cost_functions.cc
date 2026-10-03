@@ -9,6 +9,9 @@
 #include "colmap/geometry/rigid3.h"
 
 #include "pycolmap/helpers.h"
+#include "pycolmap/pybind11_extension.h"
+
+#include <optional>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -402,10 +405,17 @@ void BindCostFunctions(py::module& m_parent) {
 
   m.def(
       "VisualCentricImuPreintegrationCost",
-      [](PreintegratedImuData& data) {
-        return VisualCentricImuPreintegrationCostFunctor::Create(&data);
+      [](PreintegratedImuData& data,
+         const std::optional<Eigen::Quaterniond>& q_iori_i,
+         const std::optional<Eigen::Quaterniond>& q_iori_j) {
+        return VisualCentricImuPreintegrationCostFunctor::Create(
+            &data,
+            q_iori_i.value_or(Eigen::Quaterniond::Identity()),
+            q_iori_j.value_or(Eigen::Quaterniond::Identity()));
       },
       "preintegrated_imu_data"_a,
+      "q_iori_i"_a = py::none(),
+      "q_iori_j"_a = py::none(),
       py::keep_alive<0, 1>(),
       "IMU preintegration cost function for post-hoc SfM refinement "
       "(7 parameter blocks: scale, gravity, extrinsics, poses, states). "
@@ -413,13 +423,121 @@ void BindCostFunctions(py::module& m_parent) {
 
   m.def(
       "AnalyticalVisualCentricImuPreintegrationCost",
-      [](PreintegratedImuData& data) {
+      [](PreintegratedImuData& data,
+         const std::optional<Eigen::Quaterniond>& q_iori_i,
+         const std::optional<Eigen::Quaterniond>& q_iori_j) {
         return std::unique_ptr<ceres::CostFunction>(
-            new AnalyticalVisualCentricImuPreintegrationCostFunction(&data));
+            new AnalyticalVisualCentricImuPreintegrationCostFunction(
+                &data,
+                q_iori_i.value_or(Eigen::Quaterniond::Identity()),
+                q_iori_j.value_or(Eigen::Quaterniond::Identity())));
       },
       "preintegrated_imu_data"_a,
+      "q_iori_i"_a = py::none(),
+      "q_iori_j"_a = py::none(),
       py::keep_alive<0, 1>(),
       "IMU preintegration cost function with analytical Jacobians for "
       "post-hoc SfM refinement (7 parameter blocks). "
       "The data object must outlive the cost function.");
+
+  m.def(
+      "InertialRotationCost",
+      [](PreintegratedImuData& data,
+         const Rigid3d& imu_from_cam,
+         const std::optional<Eigen::Quaterniond>& q_iori_i,
+         const std::optional<Eigen::Quaterniond>& q_iori_j) {
+        return InertialRotationCostFunctor::Create(
+            &data,
+            imu_from_cam,
+            q_iori_i.value_or(Eigen::Quaterniond::Identity()),
+            q_iori_j.value_or(Eigen::Quaterniond::Identity()));
+      },
+      "preintegrated_imu_data"_a,
+      "imu_from_cam"_a,
+      "q_iori_i"_a = py::none(),
+      "q_iori_j"_a = py::none(),
+      py::keep_alive<0, 1>(),
+      "Stage 1 (I-RA) 6D IMU preintegration rotation cost function "
+      "(4 parameter blocks: i_from_world_aa[3], i_imu_state[9], "
+      "j_from_world_aa[3], j_imu_state[9]). "
+      "The data object must outlive the cost function.");
+
+  m.def(
+      "InertialRotationCost",
+      [](PreintegratedImuData& data,
+         const Eigen::Quaterniond& imu_from_cam_q,
+         const std::optional<Eigen::Quaterniond>& q_iori_i,
+         const std::optional<Eigen::Quaterniond>& q_iori_j) {
+        return InertialRotationCostFunctor::Create(
+            &data,
+            imu_from_cam_q,
+            q_iori_i.value_or(Eigen::Quaterniond::Identity()),
+            q_iori_j.value_or(Eigen::Quaterniond::Identity()));
+      },
+      "preintegrated_imu_data"_a,
+      "imu_from_cam_q"_a,
+      "q_iori_i"_a = py::none(),
+      "q_iori_j"_a = py::none(),
+      py::keep_alive<0, 1>(),
+      "Stage 1 (I-RA) 6D IMU preintegration rotation cost function "
+      "(4 parameter blocks: i_from_world_aa[3], i_imu_state[9], "
+      "j_from_world_aa[3], j_imu_state[9]). "
+      "The data object must outlive the cost function.");
+
+  m.def(
+      "InertialGlobalPositioningCost",
+      [](PreintegratedImuData& data,
+         const Rigid3d& imu_from_cam,
+         const Eigen::Quaterniond& i_from_world_q,
+         const Eigen::Quaterniond& j_from_world_q,
+         const std::optional<Eigen::Quaterniond>& q_iori_i,
+         const std::optional<Eigen::Quaterniond>& q_iori_j) {
+        return InertialGlobalPositioningCostFunctor::Create(
+            &data,
+            imu_from_cam,
+            i_from_world_q,
+            j_from_world_q,
+            q_iori_i.value_or(Eigen::Quaterniond::Identity()),
+            q_iori_j.value_or(Eigen::Quaterniond::Identity()));
+      },
+      "preintegrated_imu_data"_a,
+      "imu_from_cam"_a,
+      "i_from_world_q"_a,
+      "j_from_world_q"_a,
+      "q_iori_i"_a = py::none(),
+      "q_iori_j"_a = py::none(),
+      py::keep_alive<0, 1>(),
+      "Stage 3 (I-GP) 9D IMU preintegration position/velocity cost function "
+      "(6 parameter blocks: log_scale[1], gravity_direction[3], "
+      "i_center[3], i_imu_state[9], j_center[3], j_imu_state[9]). "
+      "The data object must outlive the cost function.");
+
+  m.def(
+      "BiasPriorCost",
+      [](const Eigen::Vector3d& prior_bias, double stddev, int bias_offset) {
+        return BiasPriorCostFunctor::Create(prior_bias, stddev, bias_offset);
+      },
+      "prior_bias"_a,
+      "stddev"_a,
+      "bias_offset"_a = 3,
+      "3D Gaussian prior on bias (bias_offset=0 for 3D state, 3 for gyro, 6 "
+      "for accel).");
+
+  m.def(
+      "GyroBiasPriorCost",
+      [](const Eigen::Vector3d& prior_bias, double stddev) {
+        return BiasPriorCostFunctor::CreateGyro(prior_bias, stddev);
+      },
+      "prior_bias"_a,
+      "stddev"_a,
+      "3D Gaussian prior on gyro bias slice [3:6] of 9D IMU state.");
+
+  m.def(
+      "AccelBiasPriorCost",
+      [](const Eigen::Vector3d& prior_bias, double stddev) {
+        return BiasPriorCostFunctor::CreateAccel(prior_bias, stddev);
+      },
+      "prior_bias"_a,
+      "stddev"_a,
+      "3D Gaussian prior on accel bias slice [6:9] of 9D IMU state.");
 }

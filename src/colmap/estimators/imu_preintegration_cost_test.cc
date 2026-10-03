@@ -507,5 +507,469 @@ INSTANTIATE_TEST_SUITE_P(ImuPreintegrationCostFunctor,
                          ::testing::Values(ImuIntegrationMethod::MIDPOINT,
                                            ImuIntegrationMethod::RK4));
 
+TEST(AnalyticalVisualCentricImuPreintegrationCostFunction,
+     AnalyticalVersusAutoDiffWithQIori) {
+  const int N = 15;
+  const double dt = 0.005;
+  TrajectoryGT gt;
+  PreintegratedImuData data =
+      MakeConstantData(Eigen::Vector3d(1.0, -0.5, 9.81),
+                       Eigen::Vector3d(0.05, 0.1, -0.03),
+                       N,
+                       dt,
+                       &gt);
+
+  const Eigen::Quaterniond q_iori_i = Eigen::Quaterniond(
+      Eigen::AngleAxisd(0.05, Eigen::Vector3d(1, 2, 3).normalized()));
+  const Eigen::Quaterniond q_iori_j = Eigen::Quaterniond(
+      Eigen::AngleAxisd(-0.07, Eigen::Vector3d(2, -1, 1).normalized()));
+
+  auto analytical_cost =
+      std::make_unique<AnalyticalVisualCentricImuPreintegrationCostFunction>(
+          &data, q_iori_i, q_iori_j);
+  std::unique_ptr<ceres::CostFunction> autodiff_cost(
+      VisualCentricImuPreintegrationCostFunctor::Create(
+          &data, q_iori_i, q_iori_j));
+
+  gt.v_i += Eigen::Vector3d(0.01, -0.02, 0.005);
+
+  double log_scale[1] = {0.1};
+  double gravity_direction[3] = {0.1, -0.2, -0.97};
+  Eigen::Map<Eigen::Vector3d>(gravity_direction).normalize();
+  const Rigid3d imu_from_cam_rigid(
+      Eigen::Quaterniond(Eigen::AngleAxisd(0.12, Eigen::Vector3d(0, 1, 0))),
+      Eigen::Vector3d(0.02, -0.01, 0.03));
+  double imu_from_cam[7];
+  PackRigid3d(imu_from_cam_rigid, imu_from_cam);
+
+  const Eigen::Quaterniond q_CI = imu_from_cam_rigid.rotation().conjugate();
+  const Eigen::Vector3d p_CI = -(q_CI * imu_from_cam_rigid.translation());
+
+  const Eigen::Quaterniond q_CW_i =
+      (q_iori_i * q_CI * gt.body_from_world_i.rotation()).normalized();
+  const Eigen::Quaterniond q_CW_j =
+      (q_iori_j * q_CI * gt.body_from_world_j.rotation()).normalized();
+
+  const Eigen::Vector3d p_W_i = -(gt.body_from_world_i.rotation().conjugate() *
+                                  gt.body_from_world_i.translation());
+  const Eigen::Vector3d p_W_j = -(gt.body_from_world_j.rotation().conjugate() *
+                                  gt.body_from_world_j.translation());
+
+  const Eigen::Vector3d c_W_i = p_W_i - q_CW_i.conjugate() * (q_iori_i * p_CI);
+  const Eigen::Vector3d c_W_j = p_W_j - q_CW_j.conjugate() * (q_iori_j * p_CI);
+
+  const Rigid3d cam_from_world_i(q_CW_i, -(q_CW_i * c_W_i));
+  const Rigid3d cam_from_world_j(q_CW_j, -(q_CW_j * c_W_j));
+
+  double i_from_world[7], j_from_world[7];
+  double imu_state_i[9], imu_state_j[9];
+  PackRigid3d(cam_from_world_i, i_from_world);
+  PackRigid3d(cam_from_world_j, j_from_world);
+  PackImuState(gt.v_i,
+               Eigen::Vector3d(0.01, -0.005, 0.002),
+               Eigen::Vector3d(-0.02, 0.01, 0.03),
+               imu_state_i);
+  PackImuState(gt.v_j,
+               Eigen::Vector3d(0.01, -0.005, 0.002),
+               Eigen::Vector3d(-0.02, 0.01, 0.03),
+               imu_state_j);
+
+  std::vector<double*> params = {log_scale,
+                                 gravity_direction,
+                                 imu_from_cam,
+                                 i_from_world,
+                                 imu_state_i,
+                                 j_from_world,
+                                 imu_state_j};
+
+  double r1[15], r2[15];
+  EXPECT_TRUE(analytical_cost->Evaluate(params.data(), r1, nullptr));
+  EXPECT_TRUE(autodiff_cost->Evaluate(params.data(), r2, nullptr));
+  for (int i = 0; i < 15; ++i) {
+    EXPECT_NEAR(r1[i], r2[i], 1e-10) << "residual[" << i << "]";
+  }
+
+  const int block_sizes[7] = {1, 3, 7, 7, 9, 7, 9};
+  std::vector<std::vector<double>> aj(7), adj(7);
+  std::vector<double*> aj_ptrs(7), adj_ptrs(7);
+  for (int b = 0; b < 7; ++b) {
+    aj[b].resize(15 * block_sizes[b], 0.0);
+    adj[b].resize(15 * block_sizes[b], 0.0);
+    aj_ptrs[b] = aj[b].data();
+    adj_ptrs[b] = adj[b].data();
+  }
+
+  data.sqrt_information = Eigen::Matrix<double, 15, 15>::Identity();
+
+  EXPECT_TRUE(analytical_cost->Evaluate(params.data(), r1, aj_ptrs.data()));
+  EXPECT_TRUE(autodiff_cost->Evaluate(params.data(), r2, adj_ptrs.data()));
+
+  constexpr double kJacTol = 1e-8;
+  for (int b = 0; b < 7; ++b) {
+    for (int i = 0; i < 15 * block_sizes[b]; ++i) {
+      EXPECT_NEAR(aj[b][i], adj[b][i], kJacTol)
+          << "block=" << b << " element=" << i;
+    }
+  }
+}
+
+TEST(BiasPriorCostFunctor, ResidualAndJacobians) {
+  const Eigen::Vector3d prior_bias(0.05, -0.03, 0.02);
+  const double stddev = 0.01;
+  const double inv_sigma = 1.0 / stddev;
+
+  // Test Gyro bias prior (slice [3:6] of 9D state)
+  std::unique_ptr<ceres::CostFunction> gyro_prior(
+      BiasPriorCostFunctor::CreateGyro(prior_bias, stddev));
+  EXPECT_EQ(gyro_prior->num_residuals(), 3);
+  ASSERT_EQ(gyro_prior->parameter_block_sizes().size(), 1);
+  EXPECT_EQ(gyro_prior->parameter_block_sizes()[0], 9);
+
+  double state_at_prior[9] = {1.0, 2.0, 3.0, 0.05, -0.03, 0.02, 0.1, 0.2, 0.3};
+  double residuals[3];
+  double jacobian[27];
+  double* jacs[1] = {jacobian};
+  const double* param_ptrs[1] = {state_at_prior};
+  EXPECT_TRUE(gyro_prior->Evaluate(param_ptrs, residuals, jacs));
+  EXPECT_NEAR(residuals[0], 0.0, 1e-12);
+  EXPECT_NEAR(residuals[1], 0.0, 1e-12);
+  EXPECT_NEAR(residuals[2], 0.0, 1e-12);
+
+  for (int r = 0; r < 3; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      const double expected = (c == 3 + r) ? inv_sigma : 0.0;
+      EXPECT_NEAR(jacobian[r * 9 + c], expected, 1e-12);
+    }
+  }
+
+  // Test Accel bias prior (slice [6:9] of 9D state)
+  std::unique_ptr<ceres::CostFunction> accel_prior(
+      BiasPriorCostFunctor::CreateAccel(prior_bias, stddev));
+  double state_perturbed[9] = {1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.06, -0.02, 0.04};
+  const double* param_perturbed_ptrs[1] = {state_perturbed};
+  EXPECT_TRUE(accel_prior->Evaluate(param_perturbed_ptrs, residuals, jacs));
+  EXPECT_NEAR(residuals[0], (0.06 - 0.05) * inv_sigma, 1e-12);
+  EXPECT_NEAR(residuals[1], (-0.02 - (-0.03)) * inv_sigma, 1e-12);
+  EXPECT_NEAR(residuals[2], (0.04 - 0.02) * inv_sigma, 1e-12);
+  for (int r = 0; r < 3; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      const double expected = (c == 6 + r) ? inv_sigma : 0.0;
+      EXPECT_NEAR(jacobian[r * 9 + c], expected, 1e-12);
+    }
+  }
+}
+
+TEST(InertialRotationCostFunctor, FiniteDifferenceJacobianCheck) {
+  const int N = 10;
+  const double dt = 0.01;
+  TrajectoryGT gt;
+  PreintegratedImuData data =
+      MakeConstantData(Eigen::Vector3d(0.5, -0.3, 9.81),
+                       Eigen::Vector3d(0.1, -0.05, 0.02),
+                       N,
+                       dt,
+                       &gt);
+
+  const Rigid3d imu_from_cam(
+      Eigen::Quaterniond(Eigen::AngleAxisd(0.2, Eigen::Vector3d(1, 0, 0))),
+      Eigen::Vector3d(0.01, 0.02, -0.01));
+  const Eigen::Quaterniond q_iori_i(
+      Eigen::AngleAxisd(0.06, Eigen::Vector3d(0, 1, 0)));
+  const Eigen::Quaterniond q_iori_j(
+      Eigen::AngleAxisd(-0.04, Eigen::Vector3d(0, 0, 1)));
+
+  std::unique_ptr<ceres::CostFunction> cost(InertialRotationCostFunctor::Create(
+      &data, imu_from_cam, q_iori_i, q_iori_j));
+
+  // Parameter blocks: i_from_world_aa[3], i_state[9], j_from_world_aa[3],
+  // j_state[9]
+  Eigen::Vector3d aa_i(0.2, -0.1, 0.3);
+  Eigen::Vector3d aa_j(-0.1, 0.3, -0.2);
+  double state_i[9] = {1.0, 0.5, -0.2, 0.02, -0.01, 0.03, 0.1, -0.2, 0.3};
+  double state_j[9] = {1.2, 0.4, -0.1, 0.025, -0.008, 0.031, 0.11, -0.19, 0.32};
+
+  std::vector<double*> params = {aa_i.data(), state_i, aa_j.data(), state_j};
+  const int block_sizes[4] = {3, 9, 3, 9};
+
+  std::vector<std::vector<double>> ad_jacs(4);
+  std::vector<double*> ad_ptrs(4);
+  for (int b = 0; b < 4; ++b) {
+    ad_jacs[b].resize(6 * block_sizes[b]);
+    ad_ptrs[b] = ad_jacs[b].data();
+  }
+
+  double r0[6];
+  EXPECT_TRUE(cost->Evaluate(params.data(), r0, ad_ptrs.data()));
+
+  // Finite-difference verification
+  const double eps = 1e-7;
+  for (int b = 0; b < 4; ++b) {
+    for (int col = 0; col < block_sizes[b]; ++col) {
+      params[b][col] += eps;
+      double r_plus[6];
+      EXPECT_TRUE(cost->Evaluate(params.data(), r_plus, nullptr));
+
+      params[b][col] -= 2.0 * eps;
+      double r_minus[6];
+      EXPECT_TRUE(cost->Evaluate(params.data(), r_minus, nullptr));
+
+      params[b][col] += eps;  // Restore
+
+      for (int row = 0; row < 6; ++row) {
+        const double num_diff = (r_plus[row] - r_minus[row]) / (2.0 * eps);
+        const double ad_val = ad_jacs[b][row * block_sizes[b] + col];
+        EXPECT_NEAR(ad_val, num_diff, 1e-5)
+            << "block=" << b << " row=" << row << " col=" << col;
+      }
+    }
+  }
+}
+
+TEST(InertialGlobalPositioningCostFunctor, FiniteDifferenceJacobianCheck) {
+  const int N = 10;
+  const double dt = 0.01;
+  TrajectoryGT gt;
+  PreintegratedImuData data =
+      MakeConstantData(Eigen::Vector3d(0.5, -0.3, 9.81),
+                       Eigen::Vector3d(0.1, -0.05, 0.02),
+                       N,
+                       dt,
+                       &gt);
+
+  const Rigid3d imu_from_cam(
+      Eigen::Quaterniond(Eigen::AngleAxisd(0.2, Eigen::Vector3d(1, 0, 0))),
+      Eigen::Vector3d(0.01, 0.02, -0.01));
+  const Eigen::Quaterniond q_CW_i(
+      Eigen::AngleAxisd(0.3, Eigen::Vector3d(0, 1, 0)));
+  const Eigen::Quaterniond q_CW_j(
+      Eigen::AngleAxisd(-0.2, Eigen::Vector3d(0, 0, 1)));
+  const Eigen::Quaterniond q_iori_i(
+      Eigen::AngleAxisd(0.06, Eigen::Vector3d(1, 0, 0)));
+  const Eigen::Quaterniond q_iori_j(
+      Eigen::AngleAxisd(-0.04, Eigen::Vector3d(0, 1, 0)));
+
+  std::unique_ptr<ceres::CostFunction> cost(
+      InertialGlobalPositioningCostFunctor::Create(
+          &data, imu_from_cam, q_CW_i, q_CW_j, q_iori_i, q_iori_j));
+
+  double log_scale[1] = {0.05};
+  double gravity_direction[3] = {0.05, -0.1, -0.99};
+  Eigen::Map<Eigen::Vector3d>(gravity_direction).normalize();
+  double c_i[3] = {0.5, -0.2, 1.0};
+  double c_j[3] = {0.8, -0.1, 1.2};
+  double state_i[9] = {1.0, 0.5, -0.2, 0.0, 0.0, 0.0, 0.05, -0.03, 0.02};
+  double state_j[9] = {1.2, 0.4, -0.1, 0.0, 0.0, 0.0, 0.052, -0.028, 0.021};
+
+  std::vector<double*> params = {
+      log_scale, gravity_direction, c_i, state_i, c_j, state_j};
+  const int block_sizes[6] = {1, 3, 3, 9, 3, 9};
+
+  std::vector<std::vector<double>> ad_jacs(6);
+  std::vector<double*> ad_ptrs(6);
+  for (int b = 0; b < 6; ++b) {
+    ad_jacs[b].resize(9 * block_sizes[b]);
+    ad_ptrs[b] = ad_jacs[b].data();
+  }
+
+  double r0[9];
+  EXPECT_TRUE(cost->Evaluate(params.data(), r0, ad_ptrs.data()));
+
+  // Finite-difference verification
+  const double eps = 1e-7;
+  for (int b = 0; b < 6; ++b) {
+    for (int col = 0; col < block_sizes[b]; ++col) {
+      params[b][col] += eps;
+      double r_plus[9];
+      EXPECT_TRUE(cost->Evaluate(params.data(), r_plus, nullptr));
+
+      params[b][col] -= 2.0 * eps;
+      double r_minus[9];
+      EXPECT_TRUE(cost->Evaluate(params.data(), r_minus, nullptr));
+
+      params[b][col] += eps;  // Restore
+
+      for (int row = 0; row < 9; ++row) {
+        const double num_diff = (r_plus[row] - r_minus[row]) / (2.0 * eps);
+        const double ad_val = ad_jacs[b][row * block_sizes[b] + col];
+        EXPECT_NEAR(ad_val, num_diff, 1e-5)
+            << "block=" << b << " row=" << row << " col=" << col;
+      }
+    }
+  }
+}
+
+TEST(SyntheticTrajectoryWithSinusoidalQIori,
+     ExactZeroResidualAcrossAllFunctors) {
+  // Synthesize a motion segment with non-trivial sinusoidal HyperSmooth
+  // stabilization: q_iori(t) amplitude up to 8 degrees (~0.14 rad).
+  const int N = 20;
+  const double dt = 0.005;
+  const double T = N * dt;
+
+  ImuPreintegrationOptions options;
+  ImuCalibration calib;
+  calib.gravity_magnitude = 9.81;
+  const Eigen::Vector3d gravity_dir(0.0, 0.0, -1.0);
+  const Eigen::Vector3d gravity = gravity_dir * calib.gravity_magnitude;
+
+  const Eigen::Vector3d gyro(0.15, -0.08, 0.25);
+  const Eigen::Vector3d accel(0.8, -0.4, 9.81);
+
+  ImuPreintegrator integrator(
+      options, calib, TimestampFromSeconds(0.0), TimestampFromSeconds(T));
+  for (int i = 0; i <= N; ++i) {
+    integrator.Integrate(
+        ImuMeasurement(TimestampFromSeconds(i * dt), gyro, accel));
+  }
+  PreintegratedImuData data = integrator.Extract();
+  data.Finalize();
+
+  // Synthetic camera-IMU extrinsics:
+  const Rigid3d imu_from_cam(Eigen::Quaterniond(Eigen::AngleAxisd(
+                                 0.15, Eigen::Vector3d(1, 1, 0).normalized())),
+                             Eigen::Vector3d(-0.018, -0.005, -0.015));
+
+  // Sinusoidal q_iori stabilization up to 8 degrees (~0.139 rad):
+  // At t_i = 0.0:
+  const Eigen::Vector3d rotvec_i(
+      0.08 * std::sin(0.0), 0.12 * std::cos(0.0), 0.05 * std::sin(0.0));
+  Eigen::Quaterniond q_iori_i;
+  EigenQuaternionFromAngleAxis(rotvec_i.data(), q_iori_i.coeffs().data());
+  q_iori_i.normalize();
+  EXPECT_LE(rotvec_i.norm(), 0.14);
+
+  // At t_j = T:
+  const Eigen::Vector3d rotvec_j(0.08 * std::sin(15.0 * T),
+                                 0.12 * std::cos(15.0 * T),
+                                 0.05 * std::sin(20.0 * T));
+  Eigen::Quaterniond q_iori_j;
+  EigenQuaternionFromAngleAxis(rotvec_j.data(), q_iori_j.coeffs().data());
+  q_iori_j.normalize();
+  EXPECT_LE(rotvec_j.norm(), 0.14);
+
+  // Ground truth body pose in physical world:
+  const Eigen::Quaterniond q_WI_i(
+      Eigen::AngleAxisd(0.35, Eigen::Vector3d(0, 1, 0)));
+  const Eigen::Vector3d p_WI_i(1.2, -0.4, 2.5);
+  const Eigen::Vector3d v_WI_i(0.5, 0.2, -0.1);
+
+  // Propagate to frame j using preintegrated IMU data:
+  // delta_R = body_from_world_j * world_from_body_i = q_WI_j^{-1} * q_WI_i
+  // => q_WI_j = q_WI_i * delta_R^{-1}
+  const Eigen::Quaterniond q_WI_j = q_WI_i * data.delta_R.conjugate();
+  const Eigen::Vector3d v_WI_j = v_WI_i + gravity * T + q_WI_i * data.delta_v;
+  const Eigen::Vector3d p_WI_j =
+      p_WI_i + v_WI_i * T + 0.5 * gravity * T * T + q_WI_i * data.delta_p;
+
+  // Physical camera poses:
+  // q_WI = q_WC_unrot * q_CI => q_WC_unrot = q_WI * q_IC
+  // q_WC = q_WC_unrot * q_iori^T => q_CW = (q_WC)^T = q_iori * q_CI * q_IW
+  const Eigen::Quaterniond q_IW_i = q_WI_i.conjugate();
+  const Eigen::Quaterniond q_IW_j = q_WI_j.conjugate();
+
+  const Eigen::Quaterniond q_CI = imu_from_cam.rotation().conjugate();
+  const Eigen::Vector3d p_CI = -(q_CI * imu_from_cam.translation());
+
+  const Eigen::Quaterniond q_CW_i = (q_iori_i * q_CI * q_IW_i).normalized();
+  const Eigen::Quaterniond q_CW_j = (q_iori_j * q_CI * q_IW_j).normalized();
+
+  // Camera optical centers in world:
+  // p_WI = c_W + R_CW^T * q_iori * p_CI => c_W = p_WI - R_CW^T * q_iori * p_CI
+  const Eigen::Vector3d c_W_i = p_WI_i - q_CW_i.conjugate() * (q_iori_i * p_CI);
+  const Eigen::Vector3d c_W_j = p_WI_j - q_CW_j.conjugate() * (q_iori_j * p_CI);
+
+  const Eigen::Vector3d t_CW_i = -(q_CW_i * c_W_i);
+  const Eigen::Vector3d t_CW_j = -(q_CW_j * c_W_j);
+
+  const Rigid3d i_from_world(q_CW_i, t_CW_i);
+  const Rigid3d j_from_world(q_CW_j, t_CW_j);
+
+  // Metric scale = 1.0 (log_scale = 0.0)
+  double log_scale[1] = {0.0};
+  double grav_dir[3] = {gravity_dir.x(), gravity_dir.y(), gravity_dir.z()};
+  double imu_from_cam_params[7];
+  PackRigid3d(imu_from_cam, imu_from_cam_params);
+
+  double i_from_world_params[7], j_from_world_params[7];
+  PackRigid3d(i_from_world, i_from_world_params);
+  PackRigid3d(j_from_world, j_from_world_params);
+
+  double state_i[9], state_j[9];
+  PackImuState(
+      v_WI_i, Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero(), state_i);
+  PackImuState(
+      v_WI_j, Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero(), state_j);
+
+  // 1. VisualCentricImuPreintegrationCostFunctor (AutoDiff)
+  {
+    std::unique_ptr<ceres::CostFunction> cost(
+        VisualCentricImuPreintegrationCostFunctor::Create(
+            &data, q_iori_i, q_iori_j));
+    double r[15];
+    const double* params[7] = {log_scale,
+                               grav_dir,
+                               imu_from_cam_params,
+                               i_from_world_params,
+                               state_i,
+                               j_from_world_params,
+                               state_j};
+    EXPECT_TRUE(cost->Evaluate(params, r, nullptr));
+    for (int k = 0; k < 15; ++k) {
+      EXPECT_NEAR(r[k], 0.0, 1e-11) << "AutoDiff 15D residual[" << k << "]";
+    }
+  }
+
+  // 2. AnalyticalVisualCentricImuPreintegrationCostFunction
+  {
+    AnalyticalVisualCentricImuPreintegrationCostFunction cost(
+        &data, q_iori_i, q_iori_j);
+    double r[15];
+    const double* params[7] = {log_scale,
+                               grav_dir,
+                               imu_from_cam_params,
+                               i_from_world_params,
+                               state_i,
+                               j_from_world_params,
+                               state_j};
+    EXPECT_TRUE(cost.Evaluate(params, r, nullptr));
+    for (int k = 0; k < 15; ++k) {
+      EXPECT_NEAR(r[k], 0.0, 1e-11) << "Analytical 15D residual[" << k << "]";
+    }
+  }
+
+  // 3. InertialRotationCostFunctor (Stage 1 I-RA 6D)
+  {
+    std::unique_ptr<ceres::CostFunction> cost(
+        InertialRotationCostFunctor::Create(
+            &data, imu_from_cam, q_iori_i, q_iori_j));
+    Eigen::Vector3d aa_i, aa_j;
+    AngleAxisFromEigenQuaternion(q_CW_i.coeffs().data(), aa_i.data());
+    AngleAxisFromEigenQuaternion(q_CW_j.coeffs().data(), aa_j.data());
+
+    double r[6];
+    const double* params[4] = {aa_i.data(), state_i, aa_j.data(), state_j};
+    EXPECT_TRUE(cost->Evaluate(params, r, nullptr));
+    for (int k = 0; k < 6; ++k) {
+      EXPECT_NEAR(r[k], 0.0, 1e-11) << "I-RA 6D residual[" << k << "]";
+    }
+  }
+
+  // 4. InertialGlobalPositioningCostFunctor (Stage 3 I-GP 9D)
+  {
+    std::unique_ptr<ceres::CostFunction> cost(
+        InertialGlobalPositioningCostFunctor::Create(
+            &data, imu_from_cam, q_CW_i, q_CW_j, q_iori_i, q_iori_j));
+    double c_i[3] = {c_W_i.x(), c_W_i.y(), c_W_i.z()};
+    double c_j[3] = {c_W_j.x(), c_W_j.y(), c_W_j.z()};
+
+    double r[9];
+    const double* params[6] = {log_scale, grav_dir, c_i, state_i, c_j, state_j};
+    EXPECT_TRUE(cost->Evaluate(params, r, nullptr));
+    for (int k = 0; k < 9; ++k) {
+      EXPECT_NEAR(r[k], 0.0, 1e-11) << "I-GP 9D residual[" << k << "]";
+    }
+  }
+}
+
 }  // namespace
 }  // namespace colmap
